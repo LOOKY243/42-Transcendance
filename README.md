@@ -20,3 +20,17 @@
 | | | | 10/9.5 |
 
 <br>
+
+## Router
+
+| Route | Usage | Accessibility | Style |
+| :---: | :---: | :-----------: | :---: |
+| / | home page | &#10060; | &#10060; |
+| /register | register | &#10060; | &#10060; |
+| /login | sign in | &#10060; | &#10060; |
+| /profile | profile page | &#10060; | &#10060; |
+| /game | game home page | &#10060; | &#10060; |
+| /game/new | create new game | &#10060; | &#10060; |
+| /game/gameId | the game | &#10060; | &#10060; |
+
+<br>
