@@ -17,7 +17,8 @@
 | `Minor` | Accessibility                         | [Support on all devices] | 0.5 |
 | `Minor` | Accessibility                         | [Expanding Browser Compatibility] | 0.5 |
 | `Minor` | Accessibility                         | [Multiple language supports] | 0.5 |
-| | | | 10/9.5 |
+| `Major` | Graphics                         | [ Use of advanced 3D techniques] | 1 |
+| | | | 11/9.5 |
 
 <br>
 
