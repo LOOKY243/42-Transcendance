@@ -15,6 +15,8 @@ export class AComponent {
 	}
 
 	onInit() {
+		if (this.getCSSPath() && !document.querySelector(`link[href='${this.getCSSPath()}']`))
+			document.querySelector("head").innerHTML += `<link href='${this.getCSSPath()}' rel='stylesheet'>`;
 		this.isInit = true;
 	}
 
@@ -34,6 +36,7 @@ export class AComponent {
 			value.render();
 		});
 		this.onClick();
+		this.onChange();
 	}
 
 	getHtml() {
@@ -44,9 +47,18 @@ export class AComponent {
 		throw new Error("getChildComponent not implemented");
 	}
 
+	getCSSPath() {}
+
 	onClick() {
-		if (this.componentConfig)
+		if (this.componentConfig && this.componentConfig.onClick) {
 			document.querySelector(this.getSelector()).children[0].onclick = this.componentConfig.onClick;
+		}
+	}
+
+	onChange() {
+		if (this.componentConfig && this.componentConfig.onChange) {		
+			document.querySelector(this.getSelector()).children[0].addEventListener("change", this.componentConfig.onChange);
+		}
 	}
 
 	generateHtml(config) {
@@ -59,9 +71,24 @@ export class AComponent {
 			this.configObservable.mergeObservable(value, config[value]);
 		});
 		this.configObservable.subscribe((conf) => {
+			console.log(conf);	
+			Object.keys(conf).forEach((key) => {
+				conf[key] = this.escapeHtml(conf[key]);
+			});
+			console.log("after", conf);
 			this.generateHtml(conf);
 			if (this.isInit)
 				this.render();
 		});
+	}
+
+	escapeHtml(unsafe) {
+		console.log(unsafe);
+		return unsafe != null ? unsafe
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#039;") : undefined;
 	}
 }

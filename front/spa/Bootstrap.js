@@ -1,13 +1,16 @@
 import { Router } from "./Router.js";
 
 window.addEventListener("load", () => {
-	new Bootstrap();
+	if (!window.appLaunched) {
+		new Bootstrap();
+	}
 });
 
-class Bootstrap {
-	router = null;
+export const injector = {}; 
 
+class Bootstrap {
 	constructor() {
-		this.router = new Router();
+		window.appLaunched = true;
+		injector[Router] = new Router();
 	}
 }
