@@ -39,6 +39,7 @@
 ## SPA
 
 | Features | status |
+| :-------:| :----: |
 | Router | &#10060; |
 | Bootstrap | &#9989; |
 | observable | &#9989; |
