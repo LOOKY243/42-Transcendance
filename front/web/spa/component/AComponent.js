@@ -1,3 +1,5 @@
+import { TranslateService } from "../service/Translate.service.js";
+import { injector } from "../Bootstrap.js";
 import { MergedObservable } from "../utils/MergedObservable.js"
 import { Observable } from "../utils/Observable.js";
 
@@ -10,6 +12,7 @@ export class AComponent {
 	configObservable = new MergedObservable();
 	onChange = new Observable();
 	onClick = new Observable();
+	subComponent = {};
 	
 	constructor(parentSelector, componentSelector, componentConfig) {
 		this.parentSelector = parentSelector;
@@ -47,12 +50,16 @@ export class AComponent {
 		});
 	}
 
+	createSubComponent(aComponent) {
+		this.subComponent[aComponent.getComponentSelector()] = aComponent;
+	}
+
 	getHtml() {
 		return this.html;
 	}
 
 	getChildComponent() {
-		throw new Error("getChildComponent not implemented");
+		return Object.values(this.subComponent);
 	}
 
 	getCSSPath() {}
@@ -64,7 +71,11 @@ export class AComponent {
 	setConfig(config) {
 		let keys = Object.keys(config);
 		keys.forEach((value) => {
-			this.configObservable.mergeObservable(value, config[value]);
+			let obs = config[value];
+			if (obs.translate) {
+				obs = injector[TranslateService].translate(obs.value, true);
+			}
+			this.configObservable.mergeObservable(value, obs);
 		});
 		this.configObservable.subscribe((conf) => {
 			Object.keys(conf).forEach((key) => {
@@ -84,4 +95,9 @@ export class AComponent {
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#039;") : undefined;
 	}
+
+	translate(key) {
+		return injector[TranslateService].translate(key);
+	}
+
 }

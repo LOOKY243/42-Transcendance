@@ -1,5 +1,4 @@
 import { AComponent } from "../../../spa/component/AComponent.js"
-import { Observable } from "../../../spa/utils/Observable.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 
 export class ButtonComponent extends AComponent {
@@ -7,8 +6,18 @@ export class ButtonComponent extends AComponent {
 
 	initConfig() {
 		this.setConfig({
-			text: this.buttonText
+			text: {
+				value: this.buttonText,
+				translate: true
+			}
 		});
+	}
+
+	static create(value) {
+		let ret = new ButtonComponent(value.parentSelector, value.name);
+		ret.onClick.subscribe(value.func);
+		ret.buttonText.next(value.langKey);
+		return ret;
 	}
 
 	getCSSPath() {

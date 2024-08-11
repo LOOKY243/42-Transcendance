@@ -1,18 +1,13 @@
-import { HomeComponent } from "../app/component/Home/Home.component.js";
-import { NotFoundComponent } from "../app/component/NotFound/NotFound.component.js";
+import { initErrorPage, initRouter } from "../app/init.js";
+import { TranslateService } from "./service/Translate.service.js";
+import { injector } from "./Bootstrap.js";
 import { ReplayObservable } from "./utils/ReplayObservable.js";
 
 export class Router {
-	routes = [{
-		path: "/home",
-		selector: "home",
-		component: HomeComponent,
-	}];
-	errorPage = {
-		selector: "notFound",
-		component: NotFoundComponent,
-	};
+	routes = initRouter();
+	errorPage = initErrorPage();
 	windowPath = new ReplayObservable();
+	loadedPage = null;
 
 	constructor() {
 		this.windowPath.next(window.location.pathname);
@@ -31,10 +26,11 @@ export class Router {
 	}
 
 	loadPage(route) {
-		const component = new route.component("body", route.selector);
-		document.querySelector("body").innerHTML = `<div id='${component.getComponentSelector()}'></div>`;
-		component.onInit();
-		component.render();
+		injector[TranslateService].resetObservable();
+		this.loadedPage = new route.component("body", route.selector);
+		document.querySelector("body").innerHTML = `<div id='${this.loadedPage.getComponentSelector()}'></div>`;
+		this.loadedPage.onInit();
+		this.loadedPage.render();
 	}
 
 	navigate(path) {

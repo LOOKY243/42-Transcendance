@@ -1,19 +1,24 @@
-export class MergedObservable {
+import { ReplayObservable } from "./ReplayObservable.js";
+
+export class MergedObservable extends ReplayObservable {
 	func = [];
-	valueList = {};
+
+	constructor() {
+		super();
+		this.value = {};
+	}
 
 	mergeObservable(name, observable) {
 		observable.subscribe((value) => {
-			this.valueList[name] = value;
+			this.value[name] = value;
 			this.func.forEach((value) => {
-				value(this.valueList);
+				this.triggerFunc(value);
 			})
 		});
 		return this;
 	}
 
-	subscribe(newFunc) {
-		this.func.push(newFunc);
-		newFunc(this.valueList);
+	next() {
+		throw new Error("next not implemented");
 	}
 }

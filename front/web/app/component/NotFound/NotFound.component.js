@@ -8,10 +8,13 @@ export class NotFoundComponent extends AComponent {
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
+		this.setConfig({
+			notFoundText: this.translate("notFound.text")
+		});
 	}
 
 	generateHtml(config) {
-		this.html = "<h1 class='NotFound__title'>Error 404</h1><span>Page not found</span>";
+		this.html = `<h1 class='NotFound__title'>Error 404</h1><span>${config.notFoundText}</span>`;
 	}
 
 	getChildComponent() {
