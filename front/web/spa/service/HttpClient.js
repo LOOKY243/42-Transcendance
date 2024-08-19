@@ -1,5 +1,5 @@
 export class HttpClient {
-	baseUrl = "https://edcdf4b4-eabf-4e32-bdd8-9c348e3a6a10.mock.pstmn.io";
+	baseUrl = "";
 
 	getUrl(url) {
 		return this.baseUrl + "/" + url;

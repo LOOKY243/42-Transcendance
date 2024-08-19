@@ -28,11 +28,10 @@
 | :---: | :---: | :-----------: | :---: |
 | / | home page | &#10060; | &#10060; |
 | /register | register | &#10060; | &#10060; |
-| /login | sign in | &#10060; | &#10060; |
-| /profile | profile page | &#10060; | &#10060; |
-| /game | game home page | &#10060; | &#10060; |
+| /login | sign in or register | &#10060; | &#10060; |
 | /game/new | create new game | &#10060; | &#10060; |
 | /game/gameId | the game | &#10060; | &#10060; |
+| /result/gameId | game result | &#10060; | &#10060; |
 
 <br>
 
@@ -54,3 +53,9 @@
 | query parameters | &#10060; |
 
 <br>
+
+
+to start the front without nginx: 
+`npm install http-server`
+`cd front/web`
+`npx http-server --spa -P http://localhost:8080?`
