@@ -1,9 +1,11 @@
 export const fr = {
 	"home": {
-		"title": "Page d'Acceuil",
-		"button": "Page Utilisateur",
-		"langFrButton": "Français",
-		"langEnButton": "Anglais"
+		// "title": "Home Page",
+		// "button": "User Page",
+		"langFrButton": "French",
+		"langEnButton": "English",
+		"gameOne": "Pong",
+		"gameTwo": "Bataille Navale"
 	},
 	"notFound": {
 		"text": "Page introuvable"

@@ -4,7 +4,7 @@ import { TestService } from "./service/Test.service.js";
 
 export function initRouter() {
 	return [{
-		path: "/home",
+		path: "/",
 		selector: "home",
 		component: HomeComponent,
 	}];
