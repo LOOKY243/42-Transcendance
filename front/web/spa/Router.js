@@ -2,12 +2,10 @@ import { initErrorPage, initRouter } from "../app/init.js";
 import { TranslateService } from "./service/Translate.service.js";
 import { injector } from "./Bootstrap.js";
 import { ReplayObservable } from "./utils/ReplayObservable.js";
-import { NavBarComponent } from "../app/component/NavBar/NavBar.component.js";
 
 export class Router {
 	routes = initRouter();
 	errorPage = initErrorPage();
-	navBar = new NavBarComponent("body", "navbar");
 	windowPath = new ReplayObservable();
 	loadedPage = null;
 
@@ -31,12 +29,9 @@ export class Router {
 		injector[TranslateService].resetObservable();
 		this.loadedPage = new route.component("body", route.selector);
 		document.querySelector("body").innerHTML = 
-		`<nav id='${this.navBar.getComponentSelector()}' class="navbar navbar-expand-lg bg-body-tertiary fixed-top"></nav>
-		<div class="bg-halftone"></div>
+		`<div class="bg-halftone"></div>
 		<div id='${this.loadedPage.getComponentSelector()}'></div>`;
-		this.navBar.onInit();
 		this.loadedPage.onInit();
-		this.navBar.render();
 		this.loadedPage.render();
 	}
 

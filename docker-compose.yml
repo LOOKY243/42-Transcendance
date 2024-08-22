@@ -2,7 +2,7 @@ services:
   postgres:
     container_name: postgreSQL
     build:
-      context: postgreSQL/.
+      context: backend/postgreSQL/.
       dockerfile: Dockerfile
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
   django:
     container_name: django
     build:
-      context: django/.
+      context: backend/django/.
       dockerfile: Dockerfile
     env_file:
       - .env
@@ -34,8 +34,8 @@ services:
   nginx:
     container_name: nginx
     build:
-      context: nginx/.
-      dockerfile: Dockerfile
+      context: front
+      dockerfile: docker/nginx/Dockerfile
     env_file:
       - .env
     ports:
@@ -51,13 +51,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ../data/postgres
+      device: data/postgres
   django:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ../data/django
+      device: data/django
 
 networks:
   Transcendence:

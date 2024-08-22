@@ -1,5 +1,5 @@
 NAME = 42-transcendance
-COMPOSE = backend/docker-compose.yml
+COMPOSE = docker-compose.yml
 
 all: build up
 

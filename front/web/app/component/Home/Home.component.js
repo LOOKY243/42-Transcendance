@@ -6,6 +6,7 @@ import { InputTextComponent } from "../InputText/InputText.component.js"
 import { TranslateService } from "../../../spa/service/Translate.service.js"
 import { HttpClient } from "../../../spa/service/HttpClient.js"
 import { TestService } from "../../service/Test.service.js"
+import { NavBarComponent } from "../NavBar/NavBar.component.js"
 
 export class HomeComponent extends AComponent {
 	onInit() {
@@ -49,6 +50,8 @@ export class HomeComponent extends AComponent {
 
 		// this.createSubComponent(new InputTextComponent(this.getSelector(), "input"));
 
+		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+
 		this.setConfig({
 			langFrButton: this.translate("home.langFrButton"),
 			langEnButton: this.translate("home.langEnButton"),
@@ -63,8 +66,9 @@ export class HomeComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<div class="row d-flex align-item-center justify-content-center">
-				<div class="containerBlur m-5 row d-flex">
+		<div id="navbar"></div>
+			<div class="d-flex align-item-center justify-content-center">
+				<div class="container containerBlur m-5 row d-flex">
 					<div id="langFrButton"></div>
 					<div id="langEnButton"></div>
 					<div class="d-flex justify-content-around">
@@ -72,7 +76,7 @@ export class HomeComponent extends AComponent {
 						<p class="fs-1">${config.gameTwo}</p>
 					</div>
 					<div class="d-flex justify-content-center">
-						<p class="fs-1">Input</p>
+						<p class="fs-1 m-5">Input</p>
 					</div>
 					<div id="langFrButton"></div>
 				</div>

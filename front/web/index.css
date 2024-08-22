@@ -1,5 +1,9 @@
+* {
+	box-sizing: border-box;
+}
+
 body {
-	padding-top: 56px;
+	margin: 0;
 }
 
 .bg-halftone {
@@ -15,7 +19,7 @@ body {
 }
   
 .bg-halftone::after {
-	content: ' ';
+	content: '';
 	display: block;
 	position: absolute;
 	width: 100%;
@@ -26,11 +30,8 @@ body {
 }
 
 .containerBlur {
-	position: relative;
 	backdrop-filter: blur(8px);
 	background-color: #00000050;
-	padding: 20px;
-	width: fit-content;
 	border-radius: 8px;
 	border: 1px solid #fff;
 	box-shadow: 0 0 10px 0 #ffffff80;

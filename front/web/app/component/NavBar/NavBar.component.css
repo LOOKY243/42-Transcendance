@@ -1,6 +1,5 @@
 .navbar {
 	background: linear-gradient(-45deg, #ffffff, #443939, #ffffff, #1e1919);
-	/* background: linear-gradient(-45deg, #ffffff, #8bacde, #8bacde, #ffffff); */
     animation: gradient 30s infinite ;
     background-size: 400% 400%;
 }
@@ -9,11 +8,11 @@
     width: 100%;
 }
 
-.nav-img {
+.nav-item {
     transition: transform .1s;
 }
 
-.nav-img:hover {
+.nav-item:hover {
     transform: scale(1.15);
 }
 
