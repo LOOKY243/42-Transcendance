@@ -22,16 +22,40 @@
 
 <br>
 
-## Router
+## Pages
 
 | Route | Usage | Accessibility | Style |
 | :---: | :---: | :-----------: | :---: |
 | / | home page | &#10060; | &#10060; |
 | /register | register | &#10060; | &#10060; |
-| /login | sign in | &#10060; | &#10060; |
-| /profile | profile page | &#10060; | &#10060; |
-| /game | game home page | &#10060; | &#10060; |
+| /login | sign in or register | &#10060; | &#10060; |
 | /game/new | create new game | &#10060; | &#10060; |
 | /game/gameId | the game | &#10060; | &#10060; |
+| /result/gameId | game result | &#10060; | &#10060; |
 
 <br>
+
+## SPA
+
+| Features | status |
+| :-------:| :----: |
+| Router | &#10060; |
+| Bootstrap | &#9989; |
+| observable | &#9989; |
+| docker | &#9989; |
+| services | &#9989; |
+| client http | &#9989; |
+| templates | &#9989; |
+| style(css) | &#9989; |
+| composants | &#9989; |
+| protection XSS | &#9989; |
+| translate | &#9989; |
+| query parameters | &#10060; |
+
+<br>
+
+
+to start the front without nginx: 
+`npm install http-server`
+`cd front/web`
+`npx http-server --spa -P http://localhost:8080?`
