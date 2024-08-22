@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-+7_-gxz=$3t1c_^$%l1_oyty)m0=k-m6lp%_^cyw18vgrw7+6i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -78,8 +78,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Transcendence',
         'USER': 'chief',
-        'PASSWORD': '42Angouleme',
-        'HOST': 'localhost',
+        'PASSWORD': '29KezYvQmJ4wygF',
+        'HOST': 'postgres',
         'PORT': 5432,
     }
 }

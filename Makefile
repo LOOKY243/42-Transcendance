@@ -3,8 +3,8 @@ NAME = 42-transcendance
 all: build up
 
 build:
-	@mkdir -p ~/data/postgres
-	@mkdir -p ~/data/django
+	@mkdir -p /home/gmarre/data/postgres
+	@mkdir -p /home/gmarre/data/django
 	@docker compose -p $(NAME) build
 
 up:
@@ -14,8 +14,8 @@ down:
 	@docker compose -p $(NAME) down
 
 clean: down
-	@rm -rf ~/data/mariadb
-	@rm -rf ~/data/wordpress
+	@sudo rm -rf /home/gmarre/data/postgres
+	@sudo rm -rf /home/gmarre/data/django
 	@docker volume rm 42-transcendance_postgres
 	# @docker volume rm 42-transcendance_django
 	@docker rmi $$(docker images -a -q) -f

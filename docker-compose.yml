@@ -37,13 +37,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ~/data/postgres
+      device: /home/gmarre/data/postgres
   django:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ~/data/django
+      device: /home/gmarre/data/django
 
 networks:
   Transcendence:
