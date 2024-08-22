@@ -1,17 +1,18 @@
 NAME = 42-transcendance
+COMPOSE = backend/docker-compose.yml
 
 all: build up
 
 build:
 	@mkdir -p ~/data/postgres
 	@mkdir -p ~/data/django
-	@docker compose -p $(NAME) build
+	@docker compose -p $(NAME) -f $(COMPOSE) build
 
 up:
-	@docker compose -p $(NAME) up
+	@docker compose -p $(NAME) -f $(COMPOSE) up
 
 down:
-	@docker compose -p $(NAME) down
+	@docker compose -p $(NAME) -f $(COMPOSE) down
 
 clean: down
 	@sudo rm -rf ~/data/postgres
