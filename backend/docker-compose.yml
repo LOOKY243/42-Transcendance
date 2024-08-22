@@ -51,13 +51,13 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ~/data/postgres
+      device: ../data/postgres
   django:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ~/data/django
+      device: ../data/django
 
 networks:
   Transcendence:

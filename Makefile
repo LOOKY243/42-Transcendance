@@ -4,8 +4,8 @@ COMPOSE = backend/docker-compose.yml
 all: build up
 
 build:
-	@mkdir -p ~/data/postgres
-	@mkdir -p ~/data/django
+	@mkdir -p data/postgres
+	@mkdir -p data/django
 	@docker compose -p $(NAME) -f $(COMPOSE) build
 
 up:
@@ -15,10 +15,10 @@ down:
 	@docker compose -p $(NAME) -f $(COMPOSE) down
 
 clean: down
-	@sudo rm -rf ~/data/postgres
-	@sudo rm -rf ~/data/django
-	@docker volume rm 42-transcendance_postgres
-	# @docker volume rm 42-transcendance_django
+	@sudo rm -rf data/postgres
+	@sudo rm -rf data/django
+	@docker volume rm 42-transcendance_postgres || true
+	@docker volume rm 42-transcendance_django || true
 	@docker rmi $$(docker images -a -q) -f
 	@docker system prune -f -a --volumes
 
