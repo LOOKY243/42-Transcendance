@@ -1,7 +1,4 @@
 import { AComponent } from "../../../spa/component/AComponent.js"
-import { ButtonComponent } from "../Button/Button.component.js"
-import { injector } from "../../../spa/Bootstrap.js"
-import { TranslateService } from "../../../spa/service/Translate.service.js"
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
 import { BackgroundComponent } from "../Background/Background.component.js"
 
@@ -66,17 +63,17 @@ export class HomeComponent extends AComponent {
 		this.html = `
 		<div id="bgVideo"></div>
 		<div id="navbar"></div>
-			<div class="d-flex align-item-center justify-content-center">
-				<div class="container containerBlur py-5 my-5 row d-flex">
-					<div class="d-flex justify-content-around">
-						<p class="fs-1">${config.gameOne}</p>
-						<p class="fs-1">${config.gameTwo}</p>
-					</div>
-					<div class="d-flex justify-content-center">
-						<p class="fs-1 my-5">Input</p>
-					</div>
+		<div class="d-flex align-item-center justify-content-center">
+			<div class="container containerBlur py-5 my-5 row d-flex">
+				<div class="d-flex justify-content-around">
+					<p class="fs-1">${config.gameOne}</p>
+					<p class="fs-1">${config.gameTwo}</p>
 				</div>
-			</div>`;
+				<div class="d-flex justify-content-center">
+					<p class="fs-1 my-5">Input</p>
+				</div>
+			</div>
+		</div>`;
 	}
 
 }

@@ -19,17 +19,17 @@ export class NavBarComponent extends AComponent {
 					aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             		<span class="navbar-toggler-icon"></span>
         		</button>
+				<div class="navbarCollapse d-flex justify-content-between">
+					<a class="nav-item navbar-brand" href="/chat">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-chat-left-text" viewBox="0 0 16 16">
+							<path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+							<path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
+						</svg>
+					</a>
+				</div>
         		<div class="collapse navbar-collapse" id="navbarNavDropdown">
-					<div class="navbarCollapse d-flex justify-content-between">
-						<a class="nav-item navbar-brand" href="/chat">
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-chat-left-text" viewBox="0 0 16 16">
-								<path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-								<path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
-							</svg>
-						</a>
-					</div>
 					<div class="btn-group">
-						<div class="dropstart px-3">
+						<div class="dropdown pe-4">
 							<button class="btn nav-item dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-gear" viewBox="0 0 16 16">
 									<path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
@@ -65,7 +65,7 @@ export class NavBarComponent extends AComponent {
 							</div>
 							</ul>
 						</div>
-						<a class="navbar-brand nav-item" href="/profile">Profile</a>
+						<a class="navbar-brand nav-item me-5" href="/auth">Profile</a>
 					</div>
         		</div>
 			</div>
