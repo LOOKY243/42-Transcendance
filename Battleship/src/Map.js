@@ -1,0 +1,152 @@
+import * as THREE from "three"
+import { Cannon} from "./Cannon.js";
+import { Ball } from "./Ball.js";
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+const DEG2RAD = Math.PI / 180;
+
+const cube = new THREE.BoxGeometry(1, 1, 1);
+
+export class Map
+{
+    #game;
+    width = 10;
+    tiles = [];
+    loader;
+    fMapOffset = 5.5;
+    texture;
+    waterColor = 0xFFFFFF;
+    cannon;
+    ball;
+
+    constructor(_game)
+    {
+        this.loader = new FBXLoader();
+        this.#game = _game;
+        this.texture = new THREE.TextureLoader().load("./public/textures/halftone.jpg");
+        this.texture.wrapS = THREE.RepeatWrapping;
+        this.texture.wrapT = THREE.RepeatWrapping;
+        this.texture.repeat.set(0.5, 0.5);
+        this.GenerateMap();
+    }
+
+    Update()
+    {
+        this.cannon.Update();
+        this.ball.Update();
+    }
+
+    GenerateMap()
+    {
+        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.#game.cameraManager, this);
+        this.#GenerateAlly();
+        this.#GenerateShip("Whiite");
+        this.#GenerateEnemy();
+        this.ball = new Ball(this.#game.scene, this.#game.cameraManager);
+    }
+
+    ShootHere(_x, _y)
+    {
+        let tile = null;
+
+        for (let i = 0; i < this.tiles.length; i++)
+        {
+            const tmp = this.tiles[i];
+
+            if (tmp.userData.x == _x && tmp.userData.y == _y)
+                tile = this.tiles[i];
+        }
+
+        if (!tile)
+            return;
+
+        const start = tile.position.clone().add(new THREE.Vector3(0, 20, 0));
+        this.ball.Shoot(start, tile.position, tile, tile.userData.used);
+    }
+
+    #GenerateAlly()
+    {
+        for (let x = 0; x < this.width; x++)
+            for (let y = 0; y < this.width; y++)
+                this.#GenerateCube(x - this.width / 2 + 0.5, y - this.width / 2 + 0.5 + this.fMapOffset, x, y);
+    }
+
+    #GenerateCube(_x, _y, _indexX, _indexY)
+    {
+        const material = new THREE.MeshLambertMaterial({color: this.waterColor, map: this.texture.clone()});
+        const mesh = new THREE.Mesh(cube, material);
+        mesh.scale.set(0.9, 0.1, 0.9);
+        mesh.position.set(_x, 0, _y);
+        mesh.receiveShadow = true;
+        mesh.userData.x = _indexX;
+        mesh.userData.y = _indexY;
+        mesh.userData.ground = true;
+        this.tiles.push(mesh);
+        this.#game.scene.add(mesh);
+    }
+
+    #GenerateShip(_color)
+    {
+        const offset1 = new THREE.Vector3(0, 0.2, -0.1);
+        const offset2 = new THREE.Vector3(0, 0.2, 0.4);
+        const offset3 = new THREE.Vector3(0, 0.2, 0.2);
+        const basePosition = new THREE.Vector3(-6, 0, 4 + this.fMapOffset);
+        const baseRevPosition = new THREE.Vector3(6, 0, 4 + this.fMapOffset);
+        const baseRotation = new THREE.Vector3(0, Math.PI * 1, 0);
+        const baseScale = new THREE.Vector3(0.00055, 0.00055, 0.00055);
+        this.#GenerateObject(`../public/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`../public/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`../public/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.#GenerateObject(`../public/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`../public/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`../public/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+    }
+
+    #GenerateObject(_path, _position, _rotation, _scale, _offset, _size)
+    {
+        this.loader.load(_path, (object) => {
+            object.traverse(function (child) {
+                if (child.isMesh)
+                {
+                    const texture = new THREE.TextureLoader().load("../public/textures/MiniPiratesIsland.png");
+                    child.material.map = texture;
+                    child.material.needsUpdate = true;
+                    child.receiveShadow = true;
+                    child.castShadow = true;
+                    child.userData.canBeMove = true;
+                    child.userData.offset = _offset;
+                    child.userData.size = _size;
+                    child.userData.tile = null;
+                    child.scale.copy(_scale);
+                    child.position.copy(_position);
+                    child.rotation.set(_rotation.x, _rotation.y, _rotation.z);
+                }
+            });
+        
+            this.#game.scene.add(object);
+        });
+    }
+
+    #GenerateEnemy()
+    {
+        for (let x = 0; x < this.width; x++)
+            for (let y = 0; y < this.width; y++)
+                this.#GenerateEnemyCube(x - this.width / 2 + 0.5, y + 1.5, -this.width / 2 - 1.5 + this.fMapOffset, x, y);
+    }
+
+    #GenerateEnemyCube(_x, _y, _z, _indexX, _indexY)
+    {
+        const material = new THREE.MeshLambertMaterial({color: this.waterColor, map: this.texture.clone()});
+        const mesh = new THREE.Mesh(cube, material);
+        mesh.scale.set(0.9, 0.9, 0.1);
+        mesh.position.set(_x, _y, _z);
+        mesh.receiveShadow = true;
+        mesh.userData.canBeHighlight = true;
+        mesh.userData.hit = true;
+        mesh.userData.x = _indexX;
+        mesh.userData.y = this.width - 1 - _indexY;
+        mesh.userData.ground = false;
+        // this.tiles.push(mesh);
+        this.#game.scene.add(mesh);
+    }
+}
