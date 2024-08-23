@@ -29,8 +29,7 @@ export class Router {
 		injector[TranslateService].resetObservable();
 		this.loadedPage = new route.component("body", route.selector);
 		document.querySelector("body").innerHTML = 
-		`<div class="bg-halftone"></div>
-		<div id='${this.loadedPage.getComponentSelector()}'></div>`;
+		`<div id='${this.loadedPage.getComponentSelector()}'></div>`;
 		this.loadedPage.onInit();
 		this.loadedPage.render();
 	}
