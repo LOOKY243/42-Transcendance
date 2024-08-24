@@ -1,6 +1,5 @@
 import { AComponent } from "../../../spa/component/AComponent.js"
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
-import { BackgroundComponent } from "../Background/Background.component.js"
 
 export class HomeComponent extends AComponent {
 	onInit() {
@@ -44,14 +43,13 @@ export class HomeComponent extends AComponent {
 
 		// this.createSubComponent(new InputTextComponent(this.getSelector(), "input"));
 
-		this.createSubComponent(new BackgroundComponent(this.getSelector(), "bgVideo"));
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
 
 		this.setConfig({
 			// langFrButton: this.translate("home.langFrButton"),
 			// langEnButton: this.translate("home.langEnButton"),
-			gameOne: this.translate("home.gameOne"),
-			gameTwo: this.translate("home.gameTwo"),
+			// gameOne: this.translate("home.gameOne"),
+			// gameTwo: this.translate("home.gameTwo"),
 		});
 	}
 
@@ -61,17 +59,9 @@ export class HomeComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-		<div id="bgVideo"></div>
 		<div id="navbar"></div>
 		<div class="d-flex align-item-center justify-content-center">
 			<div class="container containerBlur py-5 my-5 row d-flex">
-				<div class="d-flex justify-content-around">
-					<p class="fs-1">${config.gameOne}</p>
-					<p class="fs-1">${config.gameTwo}</p>
-				</div>
-				<div class="d-flex justify-content-center">
-					<p class="fs-1 my-5">Input</p>
-				</div>
 			</div>
 		</div>`;
 	}

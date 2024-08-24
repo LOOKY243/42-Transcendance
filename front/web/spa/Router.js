@@ -2,12 +2,15 @@ import { initErrorPage, initRouter } from "../app/init.js";
 import { TranslateService } from "./service/Translate.service.js";
 import { injector } from "./Bootstrap.js";
 import { ReplayObservable } from "./utils/ReplayObservable.js";
+import { BackgroundComponent } from "../app/component/Background/Background.component.js";
 
 export class Router {
 	routes = initRouter();
 	errorPage = initErrorPage();
+	bgVideo = null;
 	windowPath = new ReplayObservable();
 	loadedPage = null;
+	routerSelector = "#router"
 
 	constructor() {
 		this.windowPath.next(window.location.pathname);
@@ -23,12 +26,15 @@ export class Router {
 		window.addEventListener("popstate", (event) => {
 			this.windowPath.next(window.location.pathname);
 		});
+		this.bgVideo = new BackgroundComponent("body", "bgVideo");
+		this.bgVideo.onInit();
+		this.bgVideo.render();
 	}
 
 	loadPage(route) {
 		injector[TranslateService].resetObservable();
-		this.loadedPage = new route.component("body", route.selector);
-		document.querySelector("body").innerHTML = 
+		this.loadedPage = new route.component(this.routerSelector, route.selector);
+		document.querySelector(this.routerSelector).innerHTML = 
 		`<div id='${this.loadedPage.getComponentSelector()}'></div>`;
 		this.loadedPage.onInit();
 		this.loadedPage.render();

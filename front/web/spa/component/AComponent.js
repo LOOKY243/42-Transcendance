@@ -88,6 +88,9 @@ export class AComponent {
 	}
 
 	escapeHtml(unsafe) {
+	if (typeof unsafe !== "string") {
+		return unsafe
+	}
 		return unsafe != null ? unsafe
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")

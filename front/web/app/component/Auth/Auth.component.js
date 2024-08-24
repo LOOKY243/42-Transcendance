@@ -1,5 +1,4 @@
 import { AComponent } from "../../../spa/component/AComponent.js";
-import { BackgroundComponent } from "../Background/Background.component.js"
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
 
 export class AuthComponent extends AComponent {
@@ -7,7 +6,6 @@ export class AuthComponent extends AComponent {
         super.onInit();
         this.generateHtml({});
 
-        this.createSubComponent(new BackgroundComponent(this.getSelector(), "bgVideo"));
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
     }
 
@@ -17,7 +15,6 @@ export class AuthComponent extends AComponent {
 
     generateHtml(config) {
         this.html = `
-        <div id="bgVideo"></div>
         <div id="navbar"></div>
         <div class="d-flex justify-content-center" >
             <div class="container containerBlur p-4 m-5">

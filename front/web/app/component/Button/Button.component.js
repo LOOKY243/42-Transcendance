@@ -25,6 +25,6 @@ export class ButtonComponent extends AComponent {
 	}
 
 	generateHtml(calculatedConfig) {
-		this.html = `<button class='atom__button'>${calculatedConfig.text}</button>`
+		this.html = `<button class='atom__button'>${calculatedConfig.text}</button>`;
 	}
 }

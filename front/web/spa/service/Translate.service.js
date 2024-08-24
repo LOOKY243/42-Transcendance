@@ -2,13 +2,15 @@ import { ReplayObservable } from "../utils/ReplayObservable.js";
 import { MergedObservable } from "../utils/MergedObservable.js";
 import { fr } from "../../app/assets/i18n/fr.js";
 import { en } from "../../app/assets/i18n/en.js";
+import { it } from "../../app/assets/i18n/it.js";
 
 export class TranslateService {
 	lang = new ReplayObservable();
 	current = null;
 	translateFile = {
 		"fr": fr,
-		"en": en
+		"en": en,
+		"it": it
 	};
 
 	constructor() {
