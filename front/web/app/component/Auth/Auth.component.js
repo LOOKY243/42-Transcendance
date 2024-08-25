@@ -1,4 +1,6 @@
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { IconComponent } from "../Icon/Icon.component.js";
+import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
 
 export class AuthComponent extends AComponent {
@@ -6,7 +8,57 @@ export class AuthComponent extends AComponent {
         super.onInit();
         this.generateHtml({});
 
-		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+        this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+
+        this.createSubComponent(IconComponent.create({
+            name: "arrowIcon",
+            parentSelector: this.getSelector(),
+            icon : "arrow"
+        }));
+        this.createSubComponent(IconComponent.create({
+            name: "arrowIcon2",
+            parentSelector: this.getSelector(),
+            icon : "arrow"
+        }));
+
+        this.createSubComponent(InputComponent.create({
+            name: "inputLogUser",
+            parentSelector: this.getSelector(),
+            inputType: "text",
+            placeholder: "Jean-Michel"
+        }));
+        this.createSubComponent(InputComponent.create({
+            name: "inputLogPass",
+            parentSelector: this.getSelector(),
+            inputType: "password",
+            placeholder: "********"
+        }));
+        this.createSubComponent(InputComponent.create({
+            name: "inputRegUser",
+            parentSelector: this.getSelector(),
+            inputType: "text",
+            placeholder: "Jean-Michel"
+        }));
+        this.createSubComponent(InputComponent.create({
+            name: "inputRegPass",
+            parentSelector: this.getSelector(),
+            inputType: "password",
+            placeholder: "********"
+        }));
+        this.createSubComponent(InputComponent.create({
+            name: "inputRegPassConfirm",
+            parentSelector: this.getSelector(),
+            inputType: "password",
+            placeholder: "********"
+        }));
+
+        this.setConfig({
+            login: this.translate("auth.login"),
+            register: this.translate("auth.register"),
+            username: this.translate("auth.username"),
+            password : this.translate("auth.password"),
+            confirm : this.translate("auth.confirm")
+        })
     }
 
     getCSSPath() {
@@ -16,45 +68,43 @@ export class AuthComponent extends AComponent {
     generateHtml(config) {
         this.html = `
         <div id="navbar"></div>
-        <div class="d-flex justify-content-center" >
-            <div class="container containerBlur p-4 m-5">
-                <p class="fs-3 fw-bold text-light text-center">Log in</p>
-                <div class="mt-4 mb-4">
-                    <p class="fs-5 text-light">Username</p>
-                    <input type="text" class="form-control authInput mt-2 my-3" placeholder="Jean-Michel">
-                </div>
-                <div class="mb-4">
-                    <p class="fs-5 text-light">Password</p>
-                    <input type="text" class="form-control authInput mt-2 my-3" placeholder="*******">
-                </div>
-                <div class="d-flex justify-content-end me-3">
-                    <button type="button" class="btn btn-outline-success">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="container containerBlur p-4 m-5">
-                <p class="fs-3 fw-bold text-light text-center">Register</p>
-                <div class="mt-4 mb-4">
-                    <p class="fs-5 text-light">Username</p>
-                    <input type="text" class="form-control authInput mt-2 my-3" placeholder="Jean-Michel">
-                </div>
-                <div class="mb-4">
-                    <p class="fs-5 text-light">Password</p>
-                    <input type="text" class="form-control authInput mt-2 my-3" placeholder="*******">
-                </div>
-                <div class="mb-4">
-                    <p class="fs-5 text-light">Confirm</p>
-                    <input type="text" class="form-control authInput mt-2 my-3" placeholder="*******">
-                </div>
-                <div class="d-flex justify-content-end me-3">
-                    <button type="button" class="btn btn-outline-success">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
-                        </svg>
-                    </button>
+            <div class="container">
+                <div class="row" >
+                    <div class="container col-md-4 offset-md-1 mt-5">
+                        <div class="containerBlur p-3">
+                            <p class="fs-3 fw-bold text-light text-center">${config.login}</p>
+                            <div class="mt-4 mb-4">
+                                <p class="fs-5 text-light">${config.username}</p>
+                                <div id="inputLogUser" class="mx-2"></div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="fs-5 text-light">${config.password}</p>
+                                <div id="inputLogPass" class="mx-2"></div>
+                            </div>
+                            <div class="d-flex justify-content-end me-3">
+                                <button id="arrowIcon" type="button" class="btn btn-outline-success"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container col-md-4 offset-md-1 mt-5">
+                        <div class="containerBlur p-3">
+                            <p class="fs-3 fw-bold text-light text-center">${config.register}</p>
+                            <div class="mt-4 mb-4">
+                                <p class="fs-5 text-light">${config.username}</p>
+                                <div id="inputRegUser" class="mx-2"></div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="fs-5 text-light">${config.password}</p>
+                                <div id="inputRegPass" class="mx-2"></div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="fs-5 text-light">${config.confirm}</p>
+                                <div id="inputRegPassConfirm" class="mx-2"></div>
+                            </div>
+                            <div class="d-flex justify-content-end me-3">
+                                <button id="arrowIcon2" type="button" class="btn btn-outline-success"></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

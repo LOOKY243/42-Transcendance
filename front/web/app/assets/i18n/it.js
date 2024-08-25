@@ -7,5 +7,12 @@ export const it = {
 	"navbar": {
 		"home": "Casa",
 		"profile": "profilo"
-	}
+	},
+	"auth": {
+		"login": "Accedi",
+		"register": "Registrati",
+		"username": "Nome utente",
+		"password": "Parola d'ordine",
+		"confirm": "Confermare"
+	},
 }

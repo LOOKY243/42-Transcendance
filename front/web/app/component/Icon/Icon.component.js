@@ -13,7 +13,8 @@ export class IconComponent extends AComponent {
 		"italian": "ItalyFlag.svg",
 		"pause": "bi-pause.svg",
 		"play": "bi-play.svg",
-		"playFill": "bi-play-fill.svg"
+		"playFill": "bi-play-fill.svg",
+		"arrow": "arrow.svg",
 	}
 
 	initConfig() {
