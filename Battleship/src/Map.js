@@ -87,19 +87,19 @@ export class Map
 
     #GenerateShip(_color)
     {
-        const offset1 = new THREE.Vector3(0, 0.2, -0.1);
-        const offset2 = new THREE.Vector3(0, 0.2, 0.4);
+        const offset1 = new THREE.Vector3(0, 0.3, -0.1);
+        const offset2 = new THREE.Vector3(0, 0.3, 0.4);
         const offset3 = new THREE.Vector3(0, 0.2, 0.2);
         const basePosition = new THREE.Vector3(-6, 0, 4 + this.fMapOffset);
         const baseRevPosition = new THREE.Vector3(6, 0, 4 + this.fMapOffset);
         const baseRotation = new THREE.Vector3(0, Math.PI * 1, 0);
         const baseScale = new THREE.Vector3(0.00055, 0.00055, 0.00055);
-        this.#GenerateObject(`../public/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`../public/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`../public/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
-        this.#GenerateObject(`../public/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`../public/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`../public/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.#GenerateObject(`./public/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`./public/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`./public/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.#GenerateObject(`./public/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`./public/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`./public/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
     }
 
     #GenerateObject(_path, _position, _rotation, _scale, _offset, _size)
@@ -108,7 +108,7 @@ export class Map
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load("../public/textures/MiniPiratesIsland.png");
+                    const texture = new THREE.TextureLoader().load("./public/textures/MiniPiratesIsland.png");
                     child.material.map = texture;
                     child.material.needsUpdate = true;
                     child.receiveShadow = true;

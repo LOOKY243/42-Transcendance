@@ -37,10 +37,17 @@ export class Cannon
         if (event.key != 'E' && event.key != 'e')
             return;
 
+        if (event.repeat)
+            return;
+
         if (!this.objectInHand)
             return;
 
         this.objectInHand.rotation.y += Math.PI / 2;
+
+        if (this.objectInHand.rotation.y == Math.PI * 2)
+            this.objectInHand.rotation.y = 0;
+
         this.#ModifiyOffset();
     }
 
@@ -315,11 +322,11 @@ export class Cannon
 
     #GeneratePhysics(_scene, _offset)
     {
-        this.loader.load("../public/models/Cannon.fbx", (object) => {
+        this.loader.load("./public/models/Cannon.fbx", (object) => {
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load("../public/textures/MiniPiratesIsland.png");
+                    const texture = new THREE.TextureLoader().load("./public/textures/MiniPiratesIsland.png");
                     child.material.map = texture;
                     child.material.needsUpdate = true;
                     child.receiveShadow = true;
@@ -339,7 +346,7 @@ export class Cannon
 
     #GenerateBase(_scene, _offset)
     {
-        const texture = new THREE.TextureLoader().load("../public/textures/halftone.jpg");
+        const texture = new THREE.TextureLoader().load("./public/textures/halftone.jpg");
         texture.repeat.set(0.5, 0.5);
         const geometry = new THREE.CylinderGeometry(0.8, 0.8, 0.1);
         const material = new THREE.MeshLambertMaterial({color: 0x9f8b84, map: texture});
