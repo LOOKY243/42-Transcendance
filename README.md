@@ -65,3 +65,12 @@ to start the front without nginx: <br>
 `npm install http-server` <br>
 `cd front/web` <br>
 `npx http-server --spa -P http://localhost:8080?`
+
+<br>
+
+## API REQUEST
+
+| route | parameters | response |
+exemple :
+
+/login -> {username, password} -> response from back (responde code + value)
