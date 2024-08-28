@@ -20,6 +20,7 @@ export class IconComponent extends AComponent {
 	initConfig() {
 		this.setConfig({
 			icon: this.icon,
+			clickable: this.clickable
 		});
 	}
 
@@ -39,7 +40,7 @@ export class IconComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<img style="cursor:${this.clickable ? "pointer" : "inherit"};" src="app/assets/icon/${this.iconList[config.icon]}">
+			<img style="cursor:${config.clickable ? "pointer" : "inherit"};" src="app/assets/icon/${this.iconList[config.icon]}">
 		`
 	}
 }

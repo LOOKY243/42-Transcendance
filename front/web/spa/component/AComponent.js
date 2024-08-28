@@ -88,15 +88,17 @@ export class AComponent {
 	}
 
 	escapeHtml(unsafe) {
-	if (typeof unsafe !== "string") {
-		return unsafe
-	}
-		return unsafe != null ? unsafe
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;")
-			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&#039;") : undefined;
+		if (typeof unsafe !== "string") {
+			return unsafe
+		}
+		const map = {
+			"&": "&amp;",
+			"<": "&lt;",
+			">": "&gt;",
+			"\"": "&quot;",
+			"'": "&#39;"
+		};
+		return unsafe != null ? unsafe.replace(/[&<>"']/g, (match) => map[match]) : undefined;
 	}
 
 	translate(key) {

@@ -2,6 +2,7 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
+import { DropButtonIconComponent } from "../DropButtonIcon/DropButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { TextButtonComponent } from "../textButton/TextButton.component.js";
 
@@ -35,38 +36,39 @@ export class NavBarComponent extends AComponent {
 			onclick: () => injector[Router].navigate("/auth")
 		}));
 
-		this.createSubComponent(IconComponent.create({
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "frenchIcon",
 			parentSelector: this.getSelector(),
 			icon: "french",
 			onclick: () => injector[TranslateService].setLang("fr")
 		}));
-		this.createSubComponent(IconComponent.create({
+
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "englishIcon",
 			parentSelector: this.getSelector(),
 			icon: "english",
 			onclick: () => injector[TranslateService].setLang("en")
 		}));
-		this.createSubComponent(IconComponent.create({
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "italianIcon",
 			parentSelector: this.getSelector(),
 			icon: "italian",
 			onclick: () => injector[TranslateService].setLang("it")
 		}));
 
-		this.createSubComponent(IconComponent.create({
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "pause",
 			parentSelector: this.getSelector(),
 			icon: "pause",
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(0)
 		}));
-		this.createSubComponent(IconComponent.create({
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "play",
 			parentSelector: this.getSelector(),
 			icon: "play",
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(0.75)
 		}));
-		this.createSubComponent(IconComponent.create({
+		this.createSubComponent(DropButtonIconComponent.create({
 			name: "playFill",
 			parentSelector: this.getSelector(),
 			icon: "playFill",
@@ -97,16 +99,16 @@ export class NavBarComponent extends AComponent {
 							<ul class="dropdown-menu dropdown-menu-dark"> 	
 							<div class="text-center fs-6">Lang</div>
 							<div class="d-flex justify-content-center">
-								<li><a id="frenchIcon" class="dropdown-item"></a></li>
-								<li><a id="englishIcon" class="dropdown-item"></a></li>
-								<li><a id="italianIcon" class="dropdown-item"></a></li>
+								<li id="frenchIcon"></li>
+								<li id="englishIcon"></li>
+								<li id="italianIcon"></li>
 							</div>
 							<div class="line my-2"></div>
 							<div class="text-center fs-6">Background Speed</div>
 							<div class="d-flex justify-content-center">
-								<li><a id="pause" class="dropdown-item"></a></li>
-								<li><a id="play" class="dropdown-item"></a></li>
-								<li><a id="playFill" class="dropdown-item"></a></li>
+								<li id="pause"></li>
+								<li id="play"></li>
+								<li id="playFill"></li>
 							</div>
 							</ul>
 						</div>

@@ -24,14 +24,18 @@
 
 ## Pages
 
-| Route | Usage | Accessibility | Style |
+| Route | Usage | static | fonctional |
 | :---: | :---: | :-----------: | :---: |
 | / | home page | &#10060; | &#10060; |
-| /register | register | &#10060; | &#10060; |
-| /login | sign in or register | &#10060; | &#10060; |
-| /game/new | create new game | &#10060; | &#10060; |
-| /game/gameId | the game | &#10060; | &#10060; |
-| /result/gameId | game result | &#10060; | &#10060; |
+| /[all] | navbar | &#9989; | &#9989; |
+| /[notFound] | error 404 | &#9989; | &#9989; |
+| /auth | sign in or register | &#9989; | &#10060; |
+| /pong/new | create new game | &#10060; | &#10060; |
+| /naval/new | create new game | &#10060; | &#10060; |
+| /pong/gameId | the game | &#10060; | &#10060; |
+| /naval/gameId | the game | &#10060; | &#10060; |
+| /pongResult/gameId | game result | &#10060; | &#10060; |
+| /navalResult/gameId | game result | &#10060; | &#10060; |
 
 <br>
 
@@ -54,8 +58,10 @@
 
 <br>
 
+Common error from console: <br>
+`/front/errorLog.txt`
 
-to start the front without nginx: 
-`npm install http-server`
-`cd front/web`
+to start the front without nginx: <br>
+`npm install http-server` <br>
+`cd front/web` <br>
 `npx http-server --spa -P http://localhost:8080?`

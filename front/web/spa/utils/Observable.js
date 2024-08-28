@@ -22,7 +22,7 @@ export class Observable {
 	}
 
 	triggerFunc(func) {
-		let ret = this.value;
+		let ret = JSON.parse(JSON.stringify(this.value)) ;
 		if (this.mappingFunc)
 			ret = this.mappingFunc(this.value);
 		func(ret);
