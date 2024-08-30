@@ -5,12 +5,16 @@ export class InputComponent extends AComponent {
 	inputType = new ReplayObservable();
 	placeholder = new ReplayObservable();
 	autocomplete = new ReplayObservable();
+	error = new ReplayObservable();
+	errorText = new ReplayObservable();
 
 	initConfig() {
 		this.setConfig({
 			inputType: this.inputType,
 			placeholder: this.placeholder,
 			autocomplete: this.autocomplete,
+			error: this.error,
+			errorText: {value: this.errorText, translate: true}
 		});
 	}
 
@@ -24,6 +28,8 @@ export class InputComponent extends AComponent {
 			ret.autocomplete.next("");
 		}
 		ret.onChange.subscribe(value.onchange);
+		ret.error.next(false);
+		ret.errorText.next("");
 		return ret;
 	}
 
@@ -33,7 +39,8 @@ export class InputComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<input type="${config.inputType}" class="form-control input" ${config.autocomplete} placeholder="${config.placeholder}">
+			<input type="${config.inputType}" class="form-control input ${config.error ? "inputError" : ""}" ${config.autocomplete} placeholder="${config.placeholder}" value="${this.onChangeValue}">
+			${config.error ? `<span class="errorText ms-2 fs-6">${config.errorText}</span>` : ""}
 		`;
 	}
 }

@@ -13,6 +13,7 @@ export const en = {
 		"register": "Register",
 		"username": "Username",
 		"password": "Password",
-		"confirm": "Confirm"
+		"confirm": "Confirm",
+		"errorText": "passwords are not the same"
 	},
 }

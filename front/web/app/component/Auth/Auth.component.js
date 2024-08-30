@@ -8,6 +8,7 @@ import { NavBarComponent } from "../NavBar/NavBar.component.js"
 export class AuthComponent extends AComponent {
     username = "";
     password = "";
+    passwordConfirm = "";
 
     onInit() {
         super.onInit();
@@ -20,7 +21,7 @@ export class AuthComponent extends AComponent {
             parentSelector: this.getSelector(),
             inputType: "text",
             placeholder: "Jean-Michel",
-            onchange: (value) => this.username = value
+            onchange: (value) => {this.username = value; this.logCheck()}
             }));
         this.createSubComponent(InputComponent.create({
             name: "inputLogPass",
@@ -28,7 +29,7 @@ export class AuthComponent extends AComponent {
             inputType: "password",
             placeholder: "********",
             autocomplete: `autocomplete="current-password"`,
-            onchange: (value) => this.password = value
+            onchange: (value) => {this.password = value, this.logCheck()}
         }));
         this.createSubComponent(InputComponent.create({
             name: "inputRegUser",
@@ -43,14 +44,21 @@ export class AuthComponent extends AComponent {
             inputType: "password",
             placeholder: "********",
             autocomplete: `autocomplete="new-password"`,
-            onchange: (value) => this.password = value
+            onchange: (value) => {
+                this.password = value;
+                this.passwordCheck();
+            }
         }));
         this.createSubComponent(InputComponent.create({
             name: "inputRegPassConfirm",
             parentSelector: this.getSelector(),
             inputType: "password",
             placeholder: "********",
-            autocomplete: `autocomplete="new-password"`
+            autocomplete: `autocomplete="new-password"`,
+            onchange: (value) => {
+                this.passwordConfirm = value;
+                this.passwordCheck();
+            }
         }));
 
         this.createSubComponent(ButtonIconComponent.create({
@@ -72,9 +80,38 @@ export class AuthComponent extends AComponent {
             login: this.translate("auth.login"),
             register: this.translate("auth.register"),
             username: this.translate("auth.username"),
-            password : this.translate("auth.password"),
-            confirm : this.translate("auth.confirm")
+            password: this.translate("auth.password"),
+            confirm: this.translate("auth.confirm")
         })
+        this.logCheck();
+        this.regCheck();
+    }
+
+    passwordCheck() {
+        if (this.password !== this.passwordConfirm) {
+            this.subComponent["inputRegPassConfirm"].error.next(true);
+            this.subComponent["inputRegPassConfirm"].errorText.next("auth.errorText");
+            this.subComponent["registerButton"].disabled.next(true);
+        } else {
+            this.subComponent["inputRegPassConfirm"].error.next(false);
+            this.regCheck();
+        }
+    }
+
+    logCheck() {
+        if (this.username === "" || this.password === "") {
+            this.subComponent["loginButton"].disabled.next(true);
+        } else {
+            this.subComponent["loginButton"].disabled.next(false);
+        }
+    }
+
+    regCheck() {
+        if (this.username === "" || this.password === "" || this.passwordConfirm === "") {
+            this.subComponent["registerButton"].disabled.next(true);
+        } else {
+            this.subComponent["registerButton"].disabled.next(false);
+        }
     }
 
     getCSSPath() {

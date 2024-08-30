@@ -13,6 +13,7 @@ export const it = {
 		"register": "Registrati",
 		"username": "Nome utente",
 		"password": "Parola d'ordine",
-		"confirm": "Confermare"
+		"confirm": "Confermare",
+		"errorText": "le password non sono le stesse"
 	},
 }

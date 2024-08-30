@@ -5,6 +5,10 @@
 	border-radius: 12px;
 }
 
+.inputError {
+	border: 1px solid rgba(255, 0, 0, 0.7);
+}
+
 .input:hover, .input:focus {
     background-color: transparent;
     color: white;
@@ -13,6 +17,10 @@
 
 .input::placeholder {
     color: rgba(255, 255, 255, 0.3);
+}
+
+.errorText {
+	color: rgba(255, 0, 0, 0.7);
 }
 
 @Keyframes pulse {

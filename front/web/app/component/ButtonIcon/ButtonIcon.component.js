@@ -4,10 +4,12 @@ import { IconComponent } from "../Icon/Icon.component.js";
 
 export class ButtonIconComponent extends AComponent {
 	style = new ReplayObservable();
+	disabled = new ReplayObservable();
 
 	initConfig() {
 		this.setConfig({
-			style: this.style
+			style: this.style,
+			disabled: this.disabled
 		});
 	}
 
@@ -22,12 +24,13 @@ export class ButtonIconComponent extends AComponent {
 			icon: value.icon
 		}));
 		ret.style.next(value.style);
+		ret.disabled.next(false);
 		return ret
 	}
 	
 	generateHtml(config) {
 		this.html = `
-			<button id="icon" type="button" class="${config.style}"></button>
+			<button id="icon" type="button" class="${config.style}" ${config.disabled ? "disabled" : ""}></button>
 		`;
 	}
 }

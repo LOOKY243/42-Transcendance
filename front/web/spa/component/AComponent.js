@@ -2,13 +2,15 @@ import { TranslateService } from "../service/Translate.service.js";
 import { injector } from "../Bootstrap.js";
 import { MergedObservable } from "../utils/MergedObservable.js"
 import { Observable } from "../utils/Observable.js";
+import { ReplayObservable } from "../utils/ReplayObservable.js";
 
 export class AComponent {
 	parentSelector = "";
 	componentSelector = "";
+	html = "";
+	onChangeValue = "";
 	componentConfig = null;
 	isInit = false;
-	html = "";
 	configObservable = new MergedObservable();
 	onChange = new Observable();
 	onClick = new Observable();
@@ -46,6 +48,7 @@ export class AComponent {
 		});
 		document.querySelector(this.getSelector()).children[0].onclick = () => this.onClick.next({});
 		document.querySelector(this.getSelector()).children[0].addEventListener("change", (event) => {
+			this.onChangeValue = event.target.value;
 			this.onChange.next(event.target.value);
 		});
 	}
