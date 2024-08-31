@@ -1,5 +1,13 @@
 export const it = {
 	"home": {
+		"searchGame": "Unisciti a una partita esistente",
+		"pongTitle": "Pong",
+		"battleTitle": "Battaglia navale",
+		"pongContent": "giocatore remoto, 3D, tornei",
+		"pongContentBis": "personalizzazione del gioco",
+		"battleContent": "giocatore remoto, 3D",
+		"battleContentBis": "1v1",
+		"errorText": "L'ID deve essere positivo"
 	},
 	"notFound": {
 		"text": "Pagina non trovata"

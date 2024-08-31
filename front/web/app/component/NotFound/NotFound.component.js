@@ -1,23 +1,34 @@
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { NavBarComponent } from "../NavBar/NavBar.component.js";
 
 export class NotFoundComponent extends AComponent {
-	getCSSPath() {
-		return "app/component/NotFound/NotFound.component.css";
-	}
 	
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
+
+		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+
 		this.setConfig({
 			notFoundText: this.translate("notFound.text")
 		});
 	}
 
-	generateHtml(config) {
-		this.html = `<h1 class='NotFound__title'>Error 404</h1><span>${config.notFoundText}</span>`;
+	getCSSPath() {
+		return "app/component/NotFound/NotFound.component.css";
 	}
 
-	getChildComponent() {
-		return [];
+	generateHtml(config) {
+		this.html = `
+			<div id="navbar"></div>
+			<div class="container">
+				<div class="containerBlur mt-5">
+					<div class="text-center my-5">
+						<span class="fs-1 fw-bold text-danger">404</span>
+						<p class="fs-3 text-danger">${config.notFoundText}</p>
+					</div>
+				</div>
+			</div>
+		`;
 	}
 }

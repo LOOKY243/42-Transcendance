@@ -27,7 +27,7 @@ export class ButtonComponent extends AComponent {
 	
 	generateHtml(config) {
 		this.html = `
-			<button" type="button" class="${config.style}" ${config.disabled ? "disabled" : ""}>${config.content}</button>
+			<button type="button" class="${config.style}" ${config.disabled ? "disabled" : ""}>${config.content}</button>
 		`;
 	}
 }
