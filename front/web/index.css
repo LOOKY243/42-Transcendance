@@ -17,3 +17,12 @@ html, body {
 	border: 1px solid #fff;
 	box-shadow: 0 0 10px 0 #ffffff80;
 }
+
+.line {
+    position: relative;
+    width: 70%;
+    left: 15%;
+    height: 1px;
+    background-color: white;
+	box-shadow: 0 0 10px 0 #ffffff80;
+}
