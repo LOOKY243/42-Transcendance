@@ -40,7 +40,7 @@ export class InputComponent extends AComponent {
 	generateHtml(config) {
 		this.html = `
 			<input type="${config.inputType}" class="form-control input ${config.error ? "inputError" : ""}" ${config.autocomplete} placeholder="${config.placeholder}" value="${this.onChangeValue}">
-			${config.error ? `<span class="errorText ms-2 fs-6">${config.errorText}</span>` : ""}
+			${config.error ? `<div class="errorText ms-2 fs-6">${config.errorText}</div>` : ""}
 		`;
 	}
 }

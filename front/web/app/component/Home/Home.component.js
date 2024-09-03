@@ -19,7 +19,7 @@ export class HomeComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			style: "btn btn-outline-success",
 			content: "PLAY",
-			onclick: () => injector[Router].navigate("/pong/create")
+			onclick: () => injector[Router].navigate("/pong/new")
 		}));
 		this.createSubComponent(ButtonComponent.create({
 			name: "battleButton",

@@ -5,6 +5,17 @@
 	border-radius: 12px;
 }
 
+.inputContainer {
+	--width: 20%;
+	width: var(--width);
+}
+
+@media (max-width: 992px) {
+	.inputContainer {
+		--width: 30%;
+	}
+}
+
 .inputError {
 	border: 1px solid rgba(255, 0, 0, 0.7);
 }

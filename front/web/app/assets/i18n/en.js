@@ -24,4 +24,8 @@ export const en = {
 		"confirm": "Confirm",
 		"errorText": "passwords are not the same"
 	},
+	"pongNew": {
+		"pongTitle": "Pong",
+		"inputError": "must be positive"
+	}
 }

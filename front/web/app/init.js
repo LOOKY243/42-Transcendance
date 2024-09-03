@@ -1,6 +1,7 @@
 import { AuthComponent } from "./component/Auth/Auth.component.js";
 import { HomeComponent } from "./component/Home/Home.component.js";
 import { NotFoundComponent } from "./component/NotFound/NotFound.component.js";
+import { PongNewComponent } from "./component/PongNew/PongNew.component.js";
 import { TestService } from "./service/Test.service.js";
 import { UserService } from "./service/User.service.js";
 
@@ -13,6 +14,10 @@ export function initRouter() {
 		path: "/auth",
 		selector: "auth",
 		component: AuthComponent
+	}, {
+		path: "/pong/new",
+		selector: "pongNew",
+		component: PongNewComponent
 	}];
 }
 
