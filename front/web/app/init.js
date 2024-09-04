@@ -2,6 +2,7 @@ import { AuthComponent } from "./component/Auth/Auth.component.js";
 import { HomeComponent } from "./component/Home/Home.component.js";
 import { NotFoundComponent } from "./component/NotFound/NotFound.component.js";
 import { PongNewComponent } from "./component/PongNew/PongNew.component.js";
+import { GameService } from "./service/Game.service.js";
 import { TestService } from "./service/Test.service.js";
 import { UserService } from "./service/User.service.js";
 
@@ -32,5 +33,6 @@ export function initBootstrap() {
 	let appInjector = {};
 	appInjector[TestService] = new TestService();
 	appInjector[UserService] = new UserService();
+	appInjector[GameService] = new GameService(); 
 	return appInjector;
 }

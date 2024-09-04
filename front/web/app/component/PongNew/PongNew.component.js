@@ -1,6 +1,7 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
+import { GameService } from "../../service/Game.service.js";
 import { ButtonComponent } from "../Button/Button.component.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
@@ -45,14 +46,14 @@ export class PongNewComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "arrow",
 			style: "btn btn-outline-info",
-			onclick: () => injector[Router].navigate("/pong/<id>")
+			onclick: () => injector[GameService].pongParams(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme)
 		}));
 
 		this.createSubComponent(new RadioComponent(this.getSelector(), "ballRadio"));
 		this.subComponent["ballRadio"].radioSelect.subscribe((value) => {this.ballSpeed = value; this.params.ball = true; this.checkParams()});
 
 		this.createSubComponent(new RadioImgComponent(this.getSelector(), "themeRadio"));
-		this.subComponent["themeRadio"].radioSelect.subscribe((value) => {this.theme = value; this.params.theme = true; console.log(this.theme);this.checkParams()});
+		this.subComponent["themeRadio"].radioSelect.subscribe((value) => {this.theme = value; this.params.theme = true; this.checkParams()});
 
 		this.setConfig({
 			pongTitle: this.translate("pongNew.pongTitle"),
