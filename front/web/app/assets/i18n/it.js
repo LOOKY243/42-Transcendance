@@ -24,4 +24,11 @@ export const it = {
 		"confirm": "Confermare",
 		"errorText": "le password non sono le stesse"
 	},
+	"pongNew": {
+		"pongTitle": "Pong",
+		"inputError": "deve essere positivo",
+		"players": "Giocatori :",
+		"ball": "Velocità della palla",
+		"points": "Punti per vincere :",
+	},
 }

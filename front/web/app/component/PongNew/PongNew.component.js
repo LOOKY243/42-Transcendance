@@ -2,20 +2,23 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { ButtonComponent } from "../Button/Button.component.js";
+import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
+import { RadioComponent } from "../Radio/Radio.component.js";
+import { RadioImgComponent } from "../RadioImg/RadioImg.component.js";
 
 export class PongNewComponent extends AComponent {
 	inputPlayers = "";
 	inputPoints = "";
+	ballSpeed = "";
+	theme = "";
 	params = {
 		"players": false,
 		"points": false,
-		"theme": true,
-		"ball": true
+		"theme": false,
+		"ball": false
 	};
-	ballSpeed = 1;
-	theme = 1;
 
 	onInit() {
 		super.onInit();
@@ -37,22 +40,25 @@ export class PongNewComponent extends AComponent {
 			placeholder: "5",
 			onchange: (value) => {this.inputPoints = value; this.checkInputPoint(); this.checkParams()}
 		}));
-		this.createSubComponent(ButtonComponent.create({
+		this.createSubComponent(ButtonIconComponent.create({
 			name: "startButton",
 			parentSelector: this.getSelector(),
+			icon: "arrow",
 			style: "btn btn-outline-info",
-			content: "Start ➡",
 			onclick: () => injector[Router].navigate("/pong/<id>")
 		}));
-		this.createSubComponent(ButtonComponent.create({
-			name: "slowButton",
-			parentSelector: this.getSelector(),
-			style: "btn btn-outline-success",
-			content: "Slow"
-		}));
+
+		this.createSubComponent(new RadioComponent(this.getSelector(), "ballRadio"));
+		this.subComponent["ballRadio"].radioSelect.subscribe((value) => {this.ballSpeed = value; this.params.ball = true; this.checkParams()});
+
+		this.createSubComponent(new RadioImgComponent(this.getSelector(), "themeRadio"));
+		this.subComponent["themeRadio"].radioSelect.subscribe((value) => {this.theme = value; this.params.theme = true; console.log(this.theme);this.checkParams()});
 
 		this.setConfig({
 			pongTitle: this.translate("pongNew.pongTitle"),
+			players: this.translate("pongNew.players"),
+			ball: this.translate("pongNew.ball"),
+			points: this.translate("pongNew.points"),
 		});
 
 		this.checkParams();
@@ -110,34 +116,27 @@ export class PongNewComponent extends AComponent {
 					<div class="row">
 						<div class="col-md-4 text-center my-5">
 							<div class="fs-4 fw-semibold text-light">
-								<div> Players :</div>
+								<div>${config.players}</div>
 								<div class="d-flex justify-content-center m-2">
 									<div id="playerInput" class="inputContainer"></div>
 								</div>
 							</div>
 							<div class="my-5">
-								<div class="fs-4 fw-semibold text-light m-1"> Ball Speed :</div>
-								<input type="radio" class="btn-check" name="ballSpeedRadio" id="slow" autocomplete="off">
-								<label for="slow" class="btn btn-outline-success"><div id="slowButton"></div></label>
-
-								<input type="radio" class="btn-check" name="ballSpeedRadio" id="normal" autocomplete="off">
-								<label class="btn btn-outline-success" for="normal">NORMAL</label>
-
-								<input type="radio" class="btn-check" name="ballSpeedRadio" id="fast" autocomplete="off">
-								<label class="btn btn-outline-success" for="fast">FAST</label>
+								<div class="fs-4 fw-semibold text-light my-2">${config.ball}</div>
+								<div id="ballRadio"></div>
 							</div>
 						</div>
 						<div class="col-md-4 text-center my-5">
-							<div>THEME</div>
+							<div id="themeRadio" class="row d-flex justify-content-center"></div>
 						</div>
 						<div class="col-md-4 text-center my-5">
 							<div class="fs-4 fw-semibold text-light">
-								<div> Points to Win :</div>
+								<div>${config.points}</div>
 								<div class="d-flex justify-content-center m-2">
 									<div id="pointInput" class="inputContainer"></div>
 								</div>
 							</div>
-							<div class="mt-5">
+							<div class="mt-5 pt-4">
 								<div id="startButton"></div
 							</div>
 						</div>

@@ -26,6 +26,9 @@ export const en = {
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
-		"inputError": "must be positive"
+		"inputError": "must be positive",
+		"players": "Players :",
+		"ball": "Ball Speed :",
+		"points": "Points to Win :",
 	}
 }
