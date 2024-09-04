@@ -30,6 +30,7 @@ export class Player
         this.fCap = _fCap;
         this.#CreatePhysics(_scene, _position, _rotation);
         this.#UpdateHP();
+        this.#GenerateScore();
     }
 
     #CreatePhysics(_scene, _position, _rotation)
@@ -128,6 +129,7 @@ export class Player
     {
         this.iHP--;
         this.#UpdateHP();
+        this.#UpdateScore();
 
         if (this.iHP <= 0)
             this.bCanPlay = false;
@@ -201,5 +203,91 @@ export class Player
         else
             this.nextPosition = new THREE.Vector3(this.mesh.position.x, this.mesh.position.y, ballPos.z + velocity.z * _ball.fSpeed * 0.8);
         this.ballSpeed = _ball.fSpeed;
+    }
+
+    #GenerateScore()
+    {
+        const list = document.getElementById("score-list");
+        const elem = document.createElement("ul");
+        const content = `${this.name} - ${this.iHP}`;
+        elem.append(content);
+
+        // if (localPlayer)
+        //     elem.id = "active";
+
+        elem.setAttribute("data-id", this.name);
+        elem.setAttribute("data-score", this.iHP);
+        list.appendChild(elem);
+    }
+
+    #UpdateScore()
+    {
+        const list = document.getElementById("score-list");
+        const elems = list.getElementsByTagName("ul");
+
+        for (let i = 0; i < elems.length; i++)
+        {
+            const elem = elems[i];
+            const id = elem.getAttribute("data-id");
+
+            if (id != this.name)
+                continue;
+
+            if (this.iHP <= 0)
+                elem.id = "invisible";
+
+            elem.setAttribute("data-score", this.iHP);
+            elem.textContent = `${this.name} - ${this.iHP}`;
+            break;
+        }
+
+        this.#SortScore();
+    }
+
+    #SortScore()
+    {
+        const max = 4;
+        let list = document.getElementById("score-list");
+        let switching = true;
+
+        while (switching)
+        {
+            switching = false;
+            const elems = Array.from(list.getElementsByTagName("ul"));
+
+            for (let i = 0; i < elems.length - 1; i++)
+            {
+                const currentScore = parseInt(elems[i].getAttribute("data-score"), 10);
+                const nextScore = parseInt(elems[i + 1].getAttribute("data-score"), 10);
+
+                if (currentScore < nextScore)
+                {
+                    list.insertBefore(elems[i + 1], elems[i]);
+                    switching = true;
+                    break;
+                }
+            }
+        }
+
+        const elems = Array.from(list.getElementsByTagName("ul"));
+
+        if (elems.length <= max)
+            return;
+
+        for (let i = 0; i < elems.length; i++)
+        {
+            const elem = elems[i];
+
+            if (i < max)
+                continue;
+
+            // if (elem.getAttribute("data-id") == this.name && localPlayer)
+            // {
+            //     elem.id = "active";
+            //     elems[3] = "invisible";
+            // }
+            // else
+                elem.id = "invisible";
+        }
     }
 }

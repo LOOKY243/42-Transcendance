@@ -28,7 +28,7 @@ export class Map
         this.iPlayers = _iPlayers;
         this.#game = _game;
         this.textureLoader = new THREE.TextureLoader();
-        this.texture = this.textureLoader.load("../public/textures/halftone.jpg");
+        this.texture = this.textureLoader.load("./public/textures/halftone.jpg");
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
         this.GenerateMap();
