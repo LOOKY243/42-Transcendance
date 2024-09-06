@@ -1,12 +1,15 @@
 export class HttpClient {
 	baseUrl = "";
+	authHeader = {
+		"token": "123456"
+	}
 
 	getUrl(url) {
 		return this.baseUrl + "/" + url;
 	}
 
 	get(url) {
-		return fetch(this.getUrl(url)).then(response => {
+		return fetch(this.getUrl(url, {"headers": this.authHeader})).then(response => {
 			if (!response.ok)
 				throw new Error(response.status);
 			return response.json();

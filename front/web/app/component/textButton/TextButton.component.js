@@ -2,21 +2,26 @@ import { AComponent } from "../../../spa/component/AComponent.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 
 export class TextButtonComponent extends AComponent {
-	buttonText = new ReplayObservable();
-
+	translateText = new ReplayObservable();
+	observableText = new ReplayObservable();
+	
 	initConfig() {
 		this.setConfig({
 			text: {
-				value: this.buttonText,
+				value: this.translateText,
 				translate: true
-			}
+			},
+			observableText: this.observableText
 		});
 	}
 
 	static create(value) {
 		let ret = new TextButtonComponent(value.parentSelector, value.name);
 		ret.onClick.subscribe(value.onclick);
-		ret.buttonText.next(value.langKey);
+		if (value.text) {
+			ret.observableText = value.text;
+		}
+		ret.translateText.next(value.langKey);
 		return ret;
 	}
 
@@ -26,7 +31,7 @@ export class TextButtonComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<span class="buttonText">${config.text}</span>
+			<span class="buttonText">${config.observableText ? config.observableText : config.text}</span>
 		`;
 	}
 }

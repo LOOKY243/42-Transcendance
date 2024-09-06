@@ -15,6 +15,8 @@ export class IconComponent extends AComponent {
 		"play": "bi-play.svg",
 		"playFill": "bi-play-fill.svg",
 		"arrow": "arrow.svg",
+		"defaultProfilePicture": "defaultPP.svg",
+		"modifier": "modifier.svg"
 	}
 
 	initConfig() {
@@ -32,10 +34,6 @@ export class IconComponent extends AComponent {
 		}
 		ret.icon.next(value.icon);
 		return ret;
-	}
-
-	getCSSPath() {
-		return "app/component/Icon.component.css";
 	}
 
 	generateHtml(config) {

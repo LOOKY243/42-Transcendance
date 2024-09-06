@@ -41,6 +41,9 @@ export class Router {
 	}
 
 	navigate(path) {
+		if (path === window.location.pathname) {
+			return ;
+		}
 		window.history.pushState({}, "", path);
 		this.windowPath.next(path);
 	}

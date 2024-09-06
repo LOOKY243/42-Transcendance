@@ -30,5 +30,10 @@ export const en = {
 		"players": "Players :",
 		"ball": "Ball Speed :",
 		"points": "Points to Win :",
+	},
+	"tables": {
+		"score": "Score",
+		"opponent": "Opponent",
+		"date": "Date"
 	}
 }

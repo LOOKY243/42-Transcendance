@@ -1,0 +1,13 @@
+.tablesContainer {
+	width: 85%;
+}
+
+.win {
+	background: rgb(5,139,40);
+	background: linear-gradient(142deg, rgba(5,139,40,0) 3%, rgba(5,139,40,0.80015756302521) 20%, rgba(5,139,40,0) 60%);
+}
+
+.loose {
+	background: rgb(142,15,15);
+	background: linear-gradient(325deg, rgba(142,15,15,0) 3%, rgba(142,15,15,1) 20%, rgba(142,15,15,0) 60%);
+}

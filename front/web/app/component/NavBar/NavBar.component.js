@@ -2,11 +2,14 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
+import { UserService } from "../../service/User.service.js";
 import { DropButtonIconComponent } from "../DropButtonIcon/DropButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { TextButtonComponent } from "../textButton/TextButton.component.js";
 
 export class NavBarComponent extends AComponent {
+	username = injector[UserService].username;
+
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
@@ -33,6 +36,7 @@ export class NavBarComponent extends AComponent {
 			name: "profileButton",
 			parentSelector: this.getSelector(),
 			langKey: "navbar.profile",
+			text: this.username,
 			onclick: () => injector[Router].navigate("/auth")
 		}));
 
@@ -74,6 +78,8 @@ export class NavBarComponent extends AComponent {
 			icon: "playFill",
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(2)
 		}));
+
+		injector[UserService].getCurrentUser();
 	}
 
 	getCSSPath() {
