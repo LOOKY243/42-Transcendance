@@ -1,11 +1,15 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
+import { UserService } from "../../service/User.service.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
 import { TablesComponent } from "../Tables/Tables.component.js";
 
 export class ProfileComponent extends AComponent {
+	username = injector[UserService].username;
+	history = injector[UserService].history;
+
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
@@ -26,8 +30,15 @@ export class ProfileComponent extends AComponent {
 
 		this.createSubComponent(TablesComponent.create({
 			name: "history",
-			parentSelector: this.getSelector()
+			parentSelector: this.getSelector(),
+			// history: this.history
 		}));
+
+		injector[UserService].getUserInformation();
+
+		this.setConfig({
+			username: this.username,
+		});
 	}
 
 	getCSSPath() {
@@ -47,7 +58,7 @@ export class ProfileComponent extends AComponent {
 							<div id="profilePicture"></div>
 						</div>
 						<div class="col-md-2 d-flex align-items-center justify-content-center">
-							<div class="fs-3 text-light p-3">Username</div>
+							<div class="fs-3 text-light p-3">${config.username ? config.username : "username"}</div>
 						</div>
 						<div class="col-md-4 offset-md-4 d-flex align-items-center justify-content-center">
 							<div id="profileSettings" class="p-3"></div>

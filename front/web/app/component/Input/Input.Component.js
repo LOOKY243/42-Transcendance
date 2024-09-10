@@ -34,7 +34,7 @@ export class InputComponent extends AComponent {
 	}
 
 	getCSSPath() {
-		return "app/component/input/Input.component.css";
+		return "app/component/Input/Input.component.css";
 	}
 
 	generateHtml(config) {
