@@ -31,4 +31,7 @@ export const fr = {
 		"ball": "vitesse de la balle :",
 		"points": "Points pour gagner :",
 	},
+	"profileSettings": {
+		"lang": "langue par default"
+	},
 }

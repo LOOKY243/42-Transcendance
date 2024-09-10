@@ -31,4 +31,7 @@ export const it = {
 		"ball": "Velocità della palla",
 		"points": "Punti per vincere :",
 	},
+	"profileSettings": {
+		"lang": "lingua predefinita"
+	},
 }
