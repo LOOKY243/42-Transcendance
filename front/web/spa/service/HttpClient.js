@@ -1,5 +1,5 @@
 export class HttpClient {
-	baseUrl = "";
+	baseUrl = "http://localhost:8080";
 	authHeader = {
 		"token": "123456"
 	}
