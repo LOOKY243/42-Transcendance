@@ -198,10 +198,12 @@ export class Player
         const position = this.basePosition.clone();
         const ballPos = _ball.mesh.position.clone();
         const point = ballPos.clone().add(velocity.clone());
+
         if (_ball.mesh.visible == false)
             this.nextPosition = position;
         else
             this.nextPosition = new THREE.Vector3(this.mesh.position.x, this.mesh.position.y, ballPos.z + velocity.z * _ball.fSpeed * 0.8);
+
         this.ballSpeed = _ball.fSpeed;
     }
 
@@ -212,8 +214,8 @@ export class Player
         const content = `${this.name} - ${this.iHP}`;
         elem.append(content);
 
-        // if (localPlayer)
-        //     elem.id = "active";
+        if (this.#IsLocalPlayer())
+            elem.id = "active";
 
         elem.setAttribute("data-id", this.name);
         elem.setAttribute("data-score", this.iHP);
@@ -234,7 +236,25 @@ export class Player
                 continue;
 
             if (this.iHP <= 0)
+            {
                 elem.id = "invisible";
+
+                if (this.#IsLocalPlayer())
+                {
+                    const text = document.getElementById("render-text");
+                    text.id -= "invisible";
+                    text.id += "red-bg";
+                    text.textContent = "You Lost";
+                }
+            }
+
+            if (elems.length == 1 && this.#IsLocalPlayer())
+            {
+                const text = document.getElementById("render-text");
+                text.id -= "invisible";
+                text.id += "green-bg";
+                text.textContent = "You Won";
+            }
 
             elem.setAttribute("data-score", this.iHP);
             elem.textContent = `${this.name} - ${this.iHP}`;
@@ -281,13 +301,20 @@ export class Player
             if (i < max)
                 continue;
 
-            // if (elem.getAttribute("data-id") == this.name && localPlayer)
-            // {
-            //     elem.id = "active";
-            //     elems[3] = "invisible";
-            // }
-            // else
+            if (elem.getAttribute("data-id") == this.name && this.#IsLocalPlayer())
+            {
+                elem.id = "active";
+                elems[3] = "invisible";
+            }
+            else
                 elem.id = "invisible";
         }
+    }
+
+    #IsLocalPlayer()
+    {
+        // TODO Implement
+
+        return false;
     }
 }

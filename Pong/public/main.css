@@ -52,6 +52,45 @@ ul {
     background-position: 0% 50%;
 }
 
+#red-bg {
+    background:
+        linear-gradient(rgba(128, 0, 0, 0.5), rgba(128, 0, 0, 0.5)),
+        url('./textures/halftone.jpg');
+    background-size: 100% 100%;
+    background-position: 0% 50%;
+}
+
+#green-bg {
+    background:
+        linear-gradient(rgba(0, 128, 0, 0.5), rgba(0, 128, 0, 0.5)),
+        url('./textures/halftone.jpg');
+    background-size: 100% 100%;
+    background-position: 0% 50%;
+}
+
 #invisible {
     display: none;
+}
+
+#render-text {
+    border: 1px solid white;
+    box-shadow: 0px 0px 5px white;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('./textures/halftone.jpg');
+    background-size: 100% 100%;
+    background-position: 0% 50%;
+    width: 10%;
+    height: fit-content;
+    position: absolute;
+    top: 50%;
+    bottom: 50%;
+    right: 50%;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 3em;
+    text-shadow: 0px 0px 10px white;
 }
