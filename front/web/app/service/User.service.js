@@ -7,14 +7,14 @@ export class UserService {
 	history = new ReplayObservable();
 
 	register(username, password) {
-		injector[HttpClient].put("/register", {
+		injector[HttpClient].post("/auth/register", {
 			username: username,
 			password: password
 		});
 	}
 
 	login(username, password) {
-		injector[HttpClient].post("/login", {
+		injector[HttpClient].put("/auth/login", {
 			username: username,
 			password: password
 		});
