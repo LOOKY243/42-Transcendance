@@ -15,11 +15,10 @@ down:
 	@docker compose -p $(NAME) -f $(COMPOSE) down
 
 clean: down
-	sudo rm -rf data/postgres
-	sudo rm -rf data/django
+	rm -rf data/postgres
+	rm -rf data/django
 	@docker volume rm 42-transcendance_postgres || true
 	@docker volume rm 42-transcendance_django || true
-	@docker system prune -f -a --volumes
 
 re: clean all
 

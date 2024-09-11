@@ -6,22 +6,27 @@ export class UserService {
 	username = new ReplayObservable();
 	history = new ReplayObservable();
 
-	register(username, password) {
-		injector[HttpClient].post("/auth/register", {
+	register(username, password, passwordConfirm) {
+		injector[HttpClient].put("register/", {
 			username: username,
-			password: password
+			password: password,
+			password_confirm: passwordConfirm
+		}).then(response => {
+			this.username.next(response.username)
+		}).catch(error => {
+			console.log("error: error while trying to sign in")
 		});
 	}
 
 	login(username, password) {
-		injector[HttpClient].put("/auth/login", {
+		injector[HttpClient].post("login/", {
 			username: username,
 			password: password
 		});
 	}
 
 	getCurrentUser() {
-		injector[HttpClient].get("/getCurrentUser").then(response => {
+		injector[HttpClient].get("getCurrentUser").then(response => {
 			this.username.next(response.username);
 		}).catch(error => {
 			this.username.next(null);
@@ -29,7 +34,7 @@ export class UserService {
 	}
 
 	getUserInformation() {
-		injector[HttpClient].get("/getUserInformation").then(response => {
+		injector[HttpClient].get("getUserInformation").then(response => {
 			this.username.next(response.username);
 			this.history.next(response.history);
 		}).catch(error => {

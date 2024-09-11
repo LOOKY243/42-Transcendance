@@ -66,7 +66,7 @@ export class AuthComponent extends AComponent {
             parentSelector: this.getSelector(),
             icon: "arrow",
             style: "btn btn-outline-success",
-            onclick: () => injector[UserService].register(this.username, this.password)
+            onclick: () => injector[UserService].register(this.username, this.password, this.passwordConfirm)
         }));
         this.createSubComponent(ButtonIconComponent.create({
             name: "loginButton",

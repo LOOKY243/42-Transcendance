@@ -79,7 +79,7 @@ export class NavBarComponent extends AComponent {
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(2)
 		}));
 
-		injector[UserService].getCurrentUser();
+		// injector[UserService].getCurrentUser();
 	}
 
 	getCSSPath() {

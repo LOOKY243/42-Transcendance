@@ -1,5 +1,7 @@
 FROM python:3.12
 
+EXPOSE 8000
+
 RUN apt-get update -y && apt-get upgrade -y
 
 RUN apt-get install -y \
@@ -10,8 +12,8 @@ RUN apt-get install -y \
 RUN mkdir transcendence
 WORKDIR /transcendence
 
-COPY requirements.txt /transcendence/.
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements /transcendence/.
+RUN pip install --no-cache-dir -r requirements
 
 COPY workspace/ .
 COPY script.sh .
@@ -19,4 +21,3 @@ COPY script.sh .
 RUN chmod +x script.sh
 
 CMD ["bash", "/transcendence/script.sh"]
-
