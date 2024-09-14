@@ -35,5 +35,8 @@ export const en = {
 		"score": "Score",
 		"opponent": "Opponent",
 		"date": "Date"
-	}
+	},
+	"profileSettings": {
+		"lang": "default language"
+	},
 }
