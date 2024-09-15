@@ -3,6 +3,7 @@ import { TranslateService } from "./service/Translate.service.js";
 import { injector } from "./Bootstrap.js";
 import { ReplayObservable } from "./utils/ReplayObservable.js";
 import { BackgroundComponent } from "../app/component/Background/Background.component.js";
+import { UserService } from "../app/service/User.service.js";
 
 export class Router {
 	routes = initRouter();
@@ -40,11 +41,16 @@ export class Router {
 		this.loadedPage.render();
 	}
 
-	navigate(path) {
+	async navigate(path, isToken = false, redirection = "") {
+		if (isToken && !await injector[UserService].isAuth()) {
+			path = redirection
+		}
 		if (path === window.location.pathname) {
 			return ;
 		}
+
 		window.history.pushState({}, "", path);
 		this.windowPath.next(path);
 	}
+
 }

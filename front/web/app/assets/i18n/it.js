@@ -34,4 +34,11 @@ export const it = {
 	"profileSettings": {
 		"lang": "lingua predefinita"
 	},
+	"pop": {
+		"loginSuccess": "Accesso riuscito",
+		"registerSuccess": "Registrazione riuscita",
+		"loginDanger": "Accesso fallito: credenziali non valide",
+		"registerDanger": "Registrazione fallita: credenziali non valide"
+	}
+
 }

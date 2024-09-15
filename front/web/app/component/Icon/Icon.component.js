@@ -16,7 +16,8 @@ export class IconComponent extends AComponent {
 		"playFill": "bi-play-fill.svg",
 		"arrow": "arrow.svg",
 		"defaultProfilePicture": "defaultPP.svg",
-		"modifier": "modifier.svg"
+		"modifier": "modifier.svg",
+		"logout": "logout.svg",
 	}
 
 	initConfig() {

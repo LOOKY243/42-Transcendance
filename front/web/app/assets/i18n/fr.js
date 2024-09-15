@@ -4,13 +4,13 @@ export const fr = {
 		"pongTitle": "Pong",
 		"battleTitle": "Bataille navale",
 		"pongContent": "joueur distant, 3D, tournois",
-		"pongContentBis": "personnalisation de jeu",
+		"pongContentBis": "jeu personnalisé",
 		"battleContent": "joueur distant, 3D",
 		"battleContentBis": "1v1",
-		"errorText": "L'ID doit être positif"
+		"errorText": "L'id doit être positif"
 	},
 	"notFound": {
-		"text": "Page introuvable"
+		"text": "Page non trouvée"
 	},
 	"navbar": {
 		"home": "Accueil",
@@ -18,20 +18,33 @@ export const fr = {
 	},
 	"auth": {
 		"login": "Connexion",
-		"register": "Inscription",
+		"register": "S'inscrire",
 		"username": "Nom d'utilisateur",
 		"password": "Mot de passe",
 		"confirm": "Confirmer",
-		"errorText": "les mots de passe ne sont pas identique"
+		"errorText": "Les mots de passe ne correspondent pas",
+		"errorUsername": "Ce nom d'utilisateur est déjà utilisé"
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
 		"inputError": "doit être positif",
 		"players": "Joueurs :",
-		"ball": "vitesse de la balle :",
+		"ball": "Vitesse de la balle :",
 		"points": "Points pour gagner :",
 	},
-	"profileSettings": {
-		"lang": "langue par default"
+	"tables": {
+		"score": "Score",
+		"opponent": "Adversaire",
+		"date": "Date"
 	},
+	"profileSettings": {
+		"lang": "Langue par défaut"
+	},
+	"pop": {
+		"loginSuccess": "Connexion réussie",
+		"loginDanger": "Échec de la connexion : identifiants invalides",
+		"registerDanger": "Échec de l'inscription : identifiants invalides",
+		"registerUsernameDanger": "Échec de l'inscription : nom d'utilisateur déjà utilisé",
+		"logout": "Déconnexion réussie"
+	}
 }

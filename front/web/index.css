@@ -27,6 +27,14 @@ html, body {
 	box-shadow: 0 0 10px 0 #ffffff80;
 }
 
+.popUp {
+	position: fixed;
+	top: 20px;
+	left: 50%;
+	transform: translate(-50%);
+	text-wrap: nowrap;
+}
+
 @keyframes shine {
 	0% {
 		background-position: 0% 50%;

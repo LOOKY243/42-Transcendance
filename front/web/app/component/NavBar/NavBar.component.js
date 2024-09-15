@@ -37,7 +37,14 @@ export class NavBarComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			langKey: "navbar.profile",
 			text: this.username,
-			onclick: () => injector[Router].navigate("/auth")
+			onclick: () => injector[Router].navigate("/profile", true, "/auth")
+		}));
+	
+		this.createSubComponent(IconComponent.create({
+			name: "logoutButton",
+			parentSelector: this.getSelector(),
+			icon: "logout",
+			onclick: () => injector[UserService].logout()
 		}));
 
 		this.createSubComponent(DropButtonIconComponent.create({
@@ -119,6 +126,7 @@ export class NavBarComponent extends AComponent {
 							</ul>
 						</div>
 						<a id="profileButton" class="navbar-brand nav-item me-5"></a>
+						<a id="logoutButton" class="navbar-brand nav-item me-5"></a>
 					</div>
         		</div>
 			</div>

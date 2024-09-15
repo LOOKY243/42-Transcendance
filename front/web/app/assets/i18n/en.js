@@ -22,7 +22,8 @@ export const en = {
 		"username": "Username",
 		"password": "Password",
 		"confirm": "Confirm",
-		"errorText": "passwords are not the same"
+		"errorText": "Passwords are not the same",
+		"errorUsername": "This username is already in use"
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
@@ -39,4 +40,11 @@ export const en = {
 	"profileSettings": {
 		"lang": "default language"
 	},
+	"pop": {
+		"loginSuccess": "Successfuly login",
+		"loginDanger": "Failed to login: invalid credentials",
+		"registerDanger": "Failed to register: invalid credentials",
+		"registerUsernameDanger": "Failed to register: Username already in use",
+		"logout": "successfully logout"
+	}
 }

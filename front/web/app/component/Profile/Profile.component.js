@@ -34,8 +34,6 @@ export class ProfileComponent extends AComponent {
 			// history: this.history
 		}));
 
-		injector[UserService].getUserInformation();
-
 		this.setConfig({
 			username: this.username,
 		});

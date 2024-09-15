@@ -5,6 +5,7 @@ import { PongNewComponent } from "./component/PongNew/PongNew.component.js";
 import { ProfileComponent } from "./component/Profile/Profile.component.js";
 import { ProfileSettingsComponent } from "./component/ProfileSettings/ProfileSettings.component.js";
 import { GameService } from "./service/Game.service.js";
+import { PopService } from "./service/Pop.service.js";
 import { TestService } from "./service/Test.service.js";
 import { UserService } from "./service/User.service.js";
 
@@ -43,6 +44,7 @@ export function initBootstrap() {
 	let appInjector = {};
 	appInjector[TestService] = new TestService();
 	appInjector[UserService] = new UserService();
-	appInjector[GameService] = new GameService(); 
+	appInjector[GameService] = new GameService();
+	appInjector[PopService] = new PopService();
 	return appInjector;
 }
