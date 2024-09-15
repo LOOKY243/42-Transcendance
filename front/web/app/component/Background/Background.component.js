@@ -14,6 +14,8 @@ export class BackgroundComponent extends AComponent {
                 document.querySelector(this.getSelector() + " video").playbackRate = value
             }
         });
+
+        return true;
     }
 
     getCSSPath() {

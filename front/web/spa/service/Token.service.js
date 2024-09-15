@@ -1,7 +1,12 @@
 import { injector } from "../Bootstrap.js";
+import { AInjectable } from "./AInjectable.js";
 import { HttpClient } from "./HttpClient.js";
 
-export class TokenService {
+export class TokenService extends AInjectable {
+	constructor() {
+		super();
+	}
+
 	getCookie(name) {
 		const value = `; ${document.cookie}`;
 		const parts = value.split(`; ${name}=`);
@@ -19,8 +24,8 @@ export class TokenService {
 	}
 
 	deleteCookie() {
-		document.cookie = 'accessToken' + '=; Max-Age=0; path=/; SameSite=Lax;';
-		document.cookie = 'refreshToken' + '=; Max-Age=0; path=/; SameSite=Lax;';
+		document.cookie = 'accessToken=; Max-Age=0; path=/; SameSite=Lax;';
+		document.cookie = 'refreshToken=; Max-Age=0; path=/; SameSite=Lax;';
 	}
 
 	async getRefreshedToken() {

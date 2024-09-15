@@ -1,9 +1,13 @@
 import { injector } from "../Bootstrap.js";
-import { Router } from "../Router.js";
+import { AInjectable } from "./AInjectable.js";
 import { TokenService } from "./Token.service.js";
 
-export class HttpClient {
+export class HttpClient extends AInjectable {
 	baseUrl = "http://localhost:8000/api";
+
+	constructor() {
+		super();
+	}
 
 	getUrl(url) {
 		return this.baseUrl + "/" + url;

@@ -7,6 +7,8 @@ export class RadioImgComponent extends AComponent {
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
+
+		return true;
 	}
 
 	render() {

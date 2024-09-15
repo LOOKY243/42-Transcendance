@@ -8,9 +8,13 @@ import { TablesComponent } from "../Tables/Tables.component.js";
 
 export class ProfileComponent extends AComponent {
 	username = injector[UserService].username;
-	history = injector[UserService].history;
+	// history = injector[UserService].history;
 
 	onInit() {
+		if (injector[UserService].username.isEmpty()) {
+            injector[Router].navigate("/auth");
+			return false;
+        }
 		super.onInit();
 		this.generateHtml({});
 
@@ -37,6 +41,8 @@ export class ProfileComponent extends AComponent {
 		this.setConfig({
 			username: this.username,
 		});
+
+		return true;
 	}
 
 	getCSSPath() {

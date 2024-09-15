@@ -32,6 +32,8 @@ export class RadioIconComponent extends AComponent {
             icon: "italian",
             onclick: () => injector[TranslateService].setLang("it")
         }));
+
+        return true;
     }
 
     render() {

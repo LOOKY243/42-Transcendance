@@ -1,6 +1,11 @@
+import { AInjectable } from "../../spa/service/AInjectable.js";
 import { PopComponent } from "../component/Pop/Pop.component.js";
 
-export class PopService {
+export class PopService extends AInjectable {
+	constructor() {
+		super();
+	}
+
 	renderPop(containerStyle, langKey) {
 		document.querySelector("#pop").innerHTML = ``;
 		document.getElementById("pop").style.display = "";

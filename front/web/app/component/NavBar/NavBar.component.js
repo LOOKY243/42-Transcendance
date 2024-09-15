@@ -2,6 +2,7 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
+import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 import { UserService } from "../../service/User.service.js";
 import { DropButtonIconComponent } from "../DropButtonIcon/DropButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
@@ -37,15 +38,17 @@ export class NavBarComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			langKey: "navbar.profile",
 			text: this.username,
-			onclick: () => injector[Router].navigate("/profile", true, "/auth")
+			onclick: () => injector[Router].navigate(injector[UserService].username.isEmpty() ? "/auth" : "/profile"),
 		}));
 	
-		this.createSubComponent(IconComponent.create({
-			name: "logoutButton",
-			parentSelector: this.getSelector(),
-			icon: "logout",
-			onclick: () => injector[UserService].logout()
-		}));
+		if (!injector[UserService].username.isEmpty()) {
+			this.createSubComponent(IconComponent.create({
+				name: "logoutButton",
+				parentSelector: this.getSelector(),
+				icon: "logout",
+				onclick: () => injector[UserService].logout()
+			}));
+		}
 
 		this.createSubComponent(DropButtonIconComponent.create({
 			name: "frenchIcon",
@@ -86,7 +89,7 @@ export class NavBarComponent extends AComponent {
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(2)
 		}));
 
-		// injector[UserService].getCurrentUser();
+		return true;
 	}
 
 	getCSSPath() {

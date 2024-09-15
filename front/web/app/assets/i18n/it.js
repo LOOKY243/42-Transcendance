@@ -4,41 +4,47 @@ export const it = {
 		"pongTitle": "Pong",
 		"battleTitle": "Battaglia navale",
 		"pongContent": "giocatore remoto, 3D, tornei",
-		"pongContentBis": "personalizzazione del gioco",
+		"pongContentBis": "gioco personalizzato",
 		"battleContent": "giocatore remoto, 3D",
 		"battleContentBis": "1v1",
-		"errorText": "L'ID deve essere positivo"
+		"errorText": "L'id deve essere positivo"
 	},
 	"notFound": {
 		"text": "Pagina non trovata"
 	},
 	"navbar": {
-		"home": "Casa",
-		"profile": "profilo"
+		"home": "Home",
+		"profile": "Profilo"
 	},
 	"auth": {
 		"login": "Accedi",
 		"register": "Registrati",
 		"username": "Nome utente",
-		"password": "Parola d'ordine",
-		"confirm": "Confermare",
-		"errorText": "le password non sono le stesse"
+		"password": "Password",
+		"confirm": "Conferma",
+		"errorText": "Le password non corrispondono",
+		"errorUsername": "Questo nome utente è già in uso"
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
 		"inputError": "deve essere positivo",
 		"players": "Giocatori :",
-		"ball": "Velocità della palla",
+		"ball": "Velocità della palla :",
 		"points": "Punti per vincere :",
 	},
+	"tables": {
+		"score": "Punteggio",
+		"opponent": "Avversario",
+		"date": "Data"
+	},
 	"profileSettings": {
-		"lang": "lingua predefinita"
+		"lang": "Lingua predefinita"
 	},
 	"pop": {
 		"loginSuccess": "Accesso riuscito",
-		"registerSuccess": "Registrazione riuscita",
 		"loginDanger": "Accesso fallito: credenziali non valide",
-		"registerDanger": "Registrazione fallita: credenziali non valide"
+		"registerDanger": "Registrazione fallita: credenziali non valide",
+		"registerUsernameDanger": "Registrazione fallita: Nome utente già in uso",
+		"logout": "Disconnessione riuscita"
 	}
-
 }

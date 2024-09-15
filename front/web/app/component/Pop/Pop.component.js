@@ -19,7 +19,9 @@ export class PopComponent extends AComponent {
 
 		setTimeout(function() {
 			document.getElementById("pop").style.display = "none";
-		}, 5000);	  
+		}, 5000);
+		
+		return true;
 	}
 
 	static create(value) {

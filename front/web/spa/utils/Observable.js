@@ -27,4 +27,8 @@ export class Observable {
 			ret = this.mappingFunc(this.value);
 		func(ret);
 	}
+
+	isEmpty() {
+		return !this.value;
+	}
 }

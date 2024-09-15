@@ -1,5 +1,6 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { Router } from "../../../spa/Router.js";
 import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
@@ -11,6 +12,10 @@ export class AuthComponent extends AComponent {
     passwordConfirm = "";
 
     onInit() {
+        if (!injector[UserService].username.isEmpty()) {
+            injector[Router].navigate("/profile");
+            return false;
+        }
         super.onInit();
         this.generateHtml({});
 
@@ -85,6 +90,8 @@ export class AuthComponent extends AComponent {
         })
         this.logCheck();
         this.regCheck();
+
+        return true;
     }
 
     passwordCheck() {

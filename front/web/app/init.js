@@ -6,7 +6,6 @@ import { ProfileComponent } from "./component/Profile/Profile.component.js";
 import { ProfileSettingsComponent } from "./component/ProfileSettings/ProfileSettings.component.js";
 import { GameService } from "./service/Game.service.js";
 import { PopService } from "./service/Pop.service.js";
-import { TestService } from "./service/Test.service.js";
 import { UserService } from "./service/User.service.js";
 
 export function initRouter() {
@@ -42,9 +41,8 @@ export function initErrorPage() {
 
 export function initBootstrap() {
 	let appInjector = {};
-	appInjector[TestService] = new TestService();
-	appInjector[UserService] = new UserService();
-	appInjector[GameService] = new GameService();
-	appInjector[PopService] = new PopService();
+	appInjector[UserService] = new UserService().init();
+	appInjector[GameService] = new GameService().init();
+	appInjector[PopService] = new PopService().init();
 	return appInjector;
 }

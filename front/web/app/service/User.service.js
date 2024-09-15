@@ -1,13 +1,23 @@
 import { injector } from "../../spa/Bootstrap.js";
 import { Router } from "../../spa/Router.js";
+import { AInjectable } from "../../spa/service/AInjectable.js";
 import { HttpClient } from "../../spa/service/HttpClient.js";
 import { TokenService } from "../../spa/service/Token.service.js";
 import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
 import { PopService } from "./Pop.service.js";
 
-export class UserService {
+export class UserService extends AInjectable {
 	username = new ReplayObservable();
-	history = new ReplayObservable();
+
+	constructor() {
+		super();
+		this.getUser();
+	}
+
+	init() {
+		this.isReady.next(false);
+		return this
+	}
 
 	register(username, password, passwordConfirm) {
 			injector[HttpClient].put("register/", {
@@ -37,6 +47,7 @@ export class UserService {
         		injector[TokenService].setCookie('refreshToken', response.refresh, 7);
 				injector[Router].navigate("/");
 				injector[PopService].renderPop(true, "pop.loginSuccess");
+				this.getUser();
 			} else {
 				injector[PopService].renderPop(false, "pop.loginDanger");
 			}
@@ -49,16 +60,18 @@ export class UserService {
 		injector[HttpClient].post("logout/", {}, true).then(response => {
 			injector[TokenService].deleteCookie();
 			injector[Router].navigate("/");
-			injector[PopService].renderPop(true, "pop.logout")
+			injector[PopService].renderPop(true, "pop.logout");
+			this.username.next(null);
 		});
 	}
 
-	isAuth() {
-		return injector[HttpClient].get("isAuth/", true).then(response => {
-			return response ? response.ok : undefined;
-		}).catch(error => {
-            console.error('Error during authentication check:', error);
-            return false;
-        });
+	getUser() {
+		if (injector[TokenService].getCookie('accessToken')) {
+			injector[HttpClient].get("getUser/", {}, true).then(response => {
+				this.username.next(response.username);
+				this.isReady.next(true);
+			});
+		}
 	}
+
 }

@@ -12,6 +12,8 @@ export class NotFoundComponent extends AComponent {
 		this.setConfig({
 			notFoundText: this.translate("notFound.text")
 		});
+
+		return true;
 	}
 
 	getCSSPath() {

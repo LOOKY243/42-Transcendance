@@ -63,6 +63,8 @@ export class PongNewComponent extends AComponent {
 		});
 
 		this.checkParams();
+
+		return true;
 	}
 
 	checkParams() {

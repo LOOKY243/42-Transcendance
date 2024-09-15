@@ -3,9 +3,9 @@ import { TranslateService } from "./service/Translate.service.js";
 import { injector } from "./Bootstrap.js";
 import { ReplayObservable } from "./utils/ReplayObservable.js";
 import { BackgroundComponent } from "../app/component/Background/Background.component.js";
-import { UserService } from "../app/service/User.service.js";
+import { AInjectable } from "./service/AInjectable.js";
 
-export class Router {
+export class Router extends AInjectable {
 	routes = initRouter();
 	errorPage = initErrorPage();
 	bgVideo = null;
@@ -13,7 +13,7 @@ export class Router {
 	loadedPage = null;
 	routerSelector = "#router"
 
-	constructor() {
+	start() {
 		this.windowPath.next(window.location.pathname);
 		this.windowPath.subscribe((path) => {
 				const route = this.routes.find((value) => {
@@ -37,14 +37,12 @@ export class Router {
 		this.loadedPage = new route.component(this.routerSelector, route.selector);
 		document.querySelector(this.routerSelector).innerHTML = 
 		`<div id='${this.loadedPage.getComponentSelector()}'></div>`;
-		this.loadedPage.onInit();
-		this.loadedPage.render();
+		if(this.loadedPage.onInit()) {
+			this.loadedPage.render();
+		}
 	}
 
-	async navigate(path, isToken = false, redirection = "") {
-		if (isToken && !await injector[UserService].isAuth()) {
-			path = redirection
-		}
+	async navigate(path) {
 		if (path === window.location.pathname) {
 			return ;
 		}

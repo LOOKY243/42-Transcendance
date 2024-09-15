@@ -7,6 +7,8 @@ export class PageLayoutComponent extends AComponent {
 		this.generateHtml({});
 	
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+
+		return true;
 	}
 	
 	generateHtml(config) {

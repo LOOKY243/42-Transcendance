@@ -55,6 +55,8 @@ export class HomeComponent extends AComponent {
 		});
 
 		this.checkInput();
+
+		return true;
 	}
 
 	checkInput() {

@@ -73,6 +73,8 @@ export class ProfileSettingsComponent extends AComponent {
 			username: this.username,
 			lang: this.translate("profileSettings.lang"),
 		});
+
+		return true;
 	}
 
 	generateHtml(config) {
