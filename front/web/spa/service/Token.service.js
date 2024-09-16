@@ -1,6 +1,7 @@
 import { injector } from "../Bootstrap.js";
 import { AInjectable } from "./AInjectable.js";
 import { HttpClient } from "./HttpClient.js";
+import { TokenError} from "../error/TokenError.js"
 
 export class TokenService extends AInjectable {
 	constructor() {
@@ -29,46 +30,37 @@ export class TokenService extends AInjectable {
 	}
 
 	async getRefreshedToken() {
-		try {
-			const refreshToken = getCookie('refreshToken');
-		
-			if (!refreshToken) {
-				throw new Error(`Erreur Token: no refresh token`);
-			}
-			const response = injector[HttpClient].fetchAndParseStream('token/refresh/', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ refresh: refreshToken }),
-				credentials: 'include',
-			});
+		const refreshToken = this.getCookie('refreshToken');
+	
+		if (!refreshToken) {
+			throw new TokenError(`Erreur Token: no refresh token`);
+		}
+		let response = await fetch('http://localhost:8000/api/token/refresh/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ refresh: refreshToken }),
+			credentials: 'include',
+		});
 
-			if (!response.ok) {
-				throw new Error(`Erreur Token: failed to refresh token`);
-			}
-			if (response.access) {
-				setCookie('accessToken', data.access, 1);
-				return response.access;
-			} else {
-				throw new Error(`Erreur Token: no refresh token in response`);
-			}
-		} catch(error) {
-			console.error(error);
+		if (!response.ok) {
+			throw new TokenError(`Erreur Token: failed to refresh token`);
+		}
+		response = await injector[HttpClient].responseDecoder(response);
+		if (response.access) {
+			return response.access;
+		} else {
+			throw new TokenError(`Erreur Token: no refresh token in response`);
 		}
 	}
 
-	async refreshToken(url, options) {
-		let accessToken = await getRefreshedToken();
-		if (accessToken) {
-			options.headers['Authorization'] = `Bearer ${accessToken}`;
-			response = await fetch(url, options);
-			if (!response.ok) {
-				throw new Error(`Erreur HTTP: fetch error`);
-			}
-			return response;
-		} else {
-			throw new Error(`Erreur JWT: can't refresh token`);
+	async refreshToken() {
+		try {
+			const accessToken = await this.getRefreshedToken();
+			this.setCookie(`accessToken`, accessToken, 1);
+		} catch (error) {
+			throw error;
 		}
 	}
 

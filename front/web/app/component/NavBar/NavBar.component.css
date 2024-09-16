@@ -23,3 +23,9 @@
 	border: 1px solid #fff;
 	box-shadow: 0 0 10px 0 #ffffff80;
 }
+
+.navText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}

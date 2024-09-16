@@ -14,7 +14,7 @@ export const en = {
 	},
 	"navbar": {
 		"home": "Home",
-		"profile": "Profile"
+		"profile": "Login"
 	},
 	"auth": {
 		"login": "Log in",

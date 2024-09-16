@@ -41,14 +41,12 @@ export class NavBarComponent extends AComponent {
 			onclick: () => injector[Router].navigate(injector[UserService].username.isEmpty() ? "/auth" : "/profile"),
 		}));
 	
-		if (!injector[UserService].username.isEmpty()) {
-			this.createSubComponent(IconComponent.create({
-				name: "logoutButton",
-				parentSelector: this.getSelector(),
-				icon: "logout",
-				onclick: () => injector[UserService].logout()
-			}));
-		}
+		this.createSubComponent(IconComponent.create({
+			name: "logoutButton",
+			parentSelector: this.getSelector(),
+			icon: "logout",
+			onclick: () => injector[UserService].logout()
+		}));
 
 		this.createSubComponent(DropButtonIconComponent.create({
 			name: "frenchIcon",
@@ -89,6 +87,10 @@ export class NavBarComponent extends AComponent {
 			onclick: () => injector[Router].bgVideo.videoSpeed.next(2)
 		}));
 
+		this.setConfig({
+			auth: this.username
+		});
+
 		return true;
 	}
 
@@ -128,8 +130,8 @@ export class NavBarComponent extends AComponent {
 							</div>
 							</ul>
 						</div>
-						<a id="profileButton" class="navbar-brand nav-item me-5"></a>
-						<a id="logoutButton" class="navbar-brand nav-item me-5"></a>
+						<a id="profileButton" class="navbar-brand navText nav-item me-5" ${config.auth ? `title="${config.auth}"` : `` }></a>
+						<a id="logoutButton" class="navbar-brand nav-item me-5" style="${config.auth ? `` : `display: none;`};"></a>
 					</div>
         		</div>
 			</div>

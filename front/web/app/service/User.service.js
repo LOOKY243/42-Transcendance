@@ -4,6 +4,7 @@ import { AInjectable } from "../../spa/service/AInjectable.js";
 import { HttpClient } from "../../spa/service/HttpClient.js";
 import { TokenService } from "../../spa/service/Token.service.js";
 import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
+import { TokenError} from "../../spa/error/TokenError.js"
 import { PopService } from "./Pop.service.js";
 
 export class UserService extends AInjectable {
@@ -66,10 +67,14 @@ export class UserService extends AInjectable {
 	}
 
 	getUser() {
-		if (injector[TokenService].getCookie('accessToken')) {
+		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
 				this.username.next(response.username);
 				this.isReady.next(true);
+			}).catch(error => {
+				if (error instanceof TokenError) {
+					injector[TokenService].deleteCookie();
+				}
 			});
 		}
 	}

@@ -66,28 +66,33 @@ export class HttpClient extends AInjectable {
 	}
 
 	async fetchAndParseStream(url, options = {}, token = false) {
-			if (!token) {
-				const response = await fetch(url, options);
-				return this.responseDecoder(response)
-			} else {
-				let accessToken = injector[TokenService].getCookie('accessToken');
-				if (accessToken) {
-					options.headers = {
-						...options.headers,
-						'Authorization': `Bearer ${accessToken}`
-					};
-				}
-				options.credentials = 'include';
-
-				let response = await fetch(url, options);
-				response = await this.responseDecoder(response);
-
-				if (response.token_refresh_required) {
-					return await this.responseDecoder(injector[TokenService].refreshToken(url, options));
-				} else {
-					return response;
-				}
+		if (!token) {
+			const response = await fetch(url, options);
+			return await this.responseDecoder(response)
+		} else {
+			let accessToken = injector[TokenService].getCookie('accessToken');
+			if (accessToken) {
+				options.headers = {
+					...options.headers,
+					'Authorization': `Bearer ${accessToken}`
+				};
 			}
+			options.credentials = 'include';
+
+			let response = await fetch(url, options);
+
+			if (response.status === 401) {
+				try { 
+					await injector[TokenService].refreshToken();
+					return this.fetchAndParseStream(url, options, true);
+				} catch (error) {
+					throw error;
+				}
+			} else {
+				response = await this.responseDecoder(response);
+				return response;
+			}
+		}
 	}
 
 	async responseDecoder(response) {

@@ -14,7 +14,7 @@ export const fr = {
 	},
 	"navbar": {
 		"home": "Accueil",
-		"profile": "Profil"
+		"profile": "Connexion"
 	},
 	"auth": {
 		"login": "Connexion",

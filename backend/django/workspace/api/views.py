@@ -9,7 +9,30 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from .utils import check_token_status
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            response = super().post(request, *args, **kwargs)
+
+            refresh_token = request.data.get('refresh')
+
+            if refresh_token:
+                refresh_token_obj = RefreshToken(refresh_token)
+                
+                user_id = refresh_token_obj['user_id']
+                
+                user = User.objects.filter(id=user_id).first()
+                if user is None:
+                    return JsonResponse({'error': 'User does not exist'}, status=401)
+
+            return response
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=401)
 
 class RegisterView(APIView):
     def put(self, request):
@@ -50,16 +73,6 @@ class LoginView(APIView):
         else:
             return JsonResponse({"ok": False})
 
-# class CheckAuthView(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             return JsonResponse({"ok": True})
-#         else:
-#             return JsonResponse({"ok": False})
-
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
@@ -75,4 +88,4 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
-        return JsonResponse({"username": user.username})
+        return JsonResponse({"ok": True,"username": user.username})

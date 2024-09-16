@@ -14,7 +14,7 @@ export const it = {
 	},
 	"navbar": {
 		"home": "Home",
-		"profile": "Profilo"
+		"profile": "Connessione"
 	},
 	"auth": {
 		"login": "Accedi",
