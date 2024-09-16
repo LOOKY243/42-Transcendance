@@ -95,3 +95,18 @@ class GetUserView(APIView):
             "username": user.username,
             "lang": user.language
         })
+
+class UpdateLanguageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        new_language = request.data.get('lang')
+
+        if not new_language:
+            return JsonResponse({"ok": False, "error": "No language provided"})
+
+        user.language = new_language
+        user.save()
+
+        return JsonResponse({"ok": True})

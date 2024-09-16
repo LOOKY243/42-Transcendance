@@ -2,6 +2,7 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
+import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
@@ -76,7 +77,7 @@ export class ProfileSettingsComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "modifier",
 			style: "btn",
-			onclick: () => console.log("lang modifier")
+			onclick: () => injector[UserService].patchDefaultLang(this.defaultLang)
 		}));
 
 		this.username.next("Username");

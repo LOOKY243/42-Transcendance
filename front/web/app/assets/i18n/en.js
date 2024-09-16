@@ -46,6 +46,7 @@ export const en = {
 		"loginDanger": "Failed to login: invalid credentials",
 		"registerDanger": "Failed to register: invalid credentials",
 		"registerUsernameDanger": "Failed to register: Username already in use",
-		"logout": "successfully logout"
+		"logout": "successfully logout",
+		"reconnect": "Please reconnect,"
 	}
 }

@@ -1,3 +1,4 @@
+import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 import { UserService } from "../../service/User.service.js";
@@ -12,7 +13,7 @@ export class RadioIconComponent extends AComponent {
         super.onInit();
         this.generateHtml({});
 
-        this.changeCheckLang("en");
+        this.changeCheckLang(injector[UserService].user.defaultLang);
         this.setConfig({
             fr: this.fr,
             en: this.en,

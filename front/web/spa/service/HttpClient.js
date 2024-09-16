@@ -17,14 +17,14 @@ export class HttpClient extends AInjectable {
 		return this.fetchAndParseStream(this.getUrl(url), {}, token);
 	}
 
-	post(url, data) {
+	post(url, data, token = false) {
 		return this.fetchAndParseStream(this.getUrl(url), {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify(data) 
-		});
+		}, token);
 	}
 
 	put(url, data) {
@@ -51,18 +51,14 @@ export class HttpClient extends AInjectable {
 		})
 	}
 
-	patch(url, data) {
+	patch(url, data, token = false) {
 		return this.fetchAndParseStream(this.getUrl(url), {
 			method: "PATCH",
 			headers: {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify(data) 
-		}).then(response => {
-			if (!response.ok)
-				throw new Error(response.status)
-			return response.json();
-		})
+		}, token)
 	}
 
 	async fetchAndParseStream(url, options = {}, token = false) {

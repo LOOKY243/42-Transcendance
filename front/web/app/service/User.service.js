@@ -10,16 +10,27 @@ import { TranslateService } from "../../spa/service/Translate.service.js";
 
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
-	defaultLang = new ReplayObservable()
+	defaultLang = new ReplayObservable();
+	user = {
+		username: undefined,
+		defaultLang: "en"
+	}
 
 	constructor() {
 		super();
-		this.getUser();
+		this.username.subscribe(value => {
+			if (value) {
+				this.user.username = value;
+			}
+		})
 		this.defaultLang.subscribe(value => {
 			if (value) {
+				this.user.defaultLang = value
 				injector[TranslateService].setLang(value);
 			}
 		});
+
+		this.getUser();
 	}
 
 	init() {
@@ -67,10 +78,10 @@ export class UserService extends AInjectable {
 
 	logout() {
 		injector[HttpClient].post("logout/", {}, true).then(response => {
+			this.username.next(null);
 			injector[TokenService].deleteCookie();
 			injector[Router].navigate("/");
 			injector[PopService].renderPop(true, "pop.logout");
-			this.username.next(null);
 		});
 	}
 
@@ -86,6 +97,21 @@ export class UserService extends AInjectable {
 				}
 			});
 		}
+	}
+
+	patchDefaultLang(newDefaultLang) {
+		injector[HttpClient].patch("updateLanguage/", {
+			lang: newDefaultLang
+		}, true).then(response => {
+			this.defaultLang.next(newDefaultLang);
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.username.next(null);
+				injector[TokenError].deleteCookie();
+				injector[Router].navigate("/auth");
+				injector[PopService].renderPop(false, "pop.reconnect");
+			}
+		})
 	}
 
 }
