@@ -21,7 +21,11 @@ export class InputComponent extends AComponent {
 	static create(value) {
 		let ret = new InputComponent(value.parentSelector, value.name);
 		ret.inputType.next(value.inputType);
-		ret.placeholder.next(value.placeholder);
+		if (value.placeholder) {
+			ret.placeholder.next(value.placeholder);
+		} else {
+			ret.placeholder.next("");
+		}
 		if (value.autocomplete) {
 			ret.autocomplete.next(value.autocomplete);
 		} else {

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +12,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+
+User = get_user_model() 
 
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
@@ -88,4 +90,8 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
-        return JsonResponse({"ok": True,"username": user.username})
+        return JsonResponse({
+            "ok": True,
+            "username": user.username,
+            "lang": user.language
+        })

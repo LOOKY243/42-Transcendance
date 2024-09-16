@@ -6,13 +6,20 @@ import { TokenService } from "../../spa/service/Token.service.js";
 import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
 import { TokenError} from "../../spa/error/TokenError.js"
 import { PopService } from "./Pop.service.js";
+import { TranslateService } from "../../spa/service/Translate.service.js";
 
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
+	defaultLang = new ReplayObservable()
 
 	constructor() {
 		super();
 		this.getUser();
+		this.defaultLang.subscribe(value => {
+			if (value) {
+				injector[TranslateService].setLang(value);
+			}
+		});
 	}
 
 	init() {
@@ -24,7 +31,8 @@ export class UserService extends AInjectable {
 			injector[HttpClient].put("register/", {
 			username: username,
 			password: password,
-			password_confirm: passwordConfirm
+			password_confirm: passwordConfirm,
+			lang: injector[TranslateService].current
 		}).then(response => {
 			if (response.ok) {
 				this.login(username, password);
@@ -69,6 +77,7 @@ export class UserService extends AInjectable {
 	getUser() {
 		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
+				this.defaultLang.next(response.lang);
 				this.username.next(response.username);
 				this.isReady.next(true);
 			}).catch(error => {

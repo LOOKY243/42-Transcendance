@@ -38,7 +38,8 @@ export const en = {
 		"date": "Date"
 	},
 	"profileSettings": {
-		"lang": "default language"
+		"lang": "default language",
+		"password": "Password",
 	},
 	"pop": {
 		"loginSuccess": "Successfuly login",
