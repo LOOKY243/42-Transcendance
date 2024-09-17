@@ -79,16 +79,6 @@ class LoginView(APIView):
         else:
             return JsonResponse({"ok": False})
 
-# class CheckAuthView(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             return JsonResponse({"ok": True})
-#         else:
-#             return JsonResponse({"ok": False})
-
 class LogoutView(APIView):
     def post(self, request):
         logout(request)

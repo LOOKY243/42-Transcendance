@@ -1,6 +1,9 @@
+import random
+import string
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.http import JsonResponse
+from django.core.mail import send_mail
 
 def check_token_status(request):
 	access_token = request.COOKIES.get('accessToken')
@@ -21,10 +24,6 @@ def check_token_status(request):
 			except TokenError:
 				return False
 		return False
-
-import random
-import string
-from django.core.mail import send_mail
 
 def generate_verification_code(length=6):
     return ''.join(random.choices(string.digits, k=length))
