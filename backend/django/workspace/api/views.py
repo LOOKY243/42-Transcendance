@@ -3,11 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, login, logout
-<<<<<<< HEAD
 from .models import CustomUser
-=======
 from django.contrib.auth import get_user_model
->>>>>>> origin/user
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -23,11 +20,7 @@ from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-<<<<<<< HEAD
-User = CustomUser
-=======
 User = get_user_model() 
->>>>>>> origin/user
 
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
@@ -104,8 +97,11 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
-<<<<<<< HEAD
-        return JsonResponse({"ok": True,"username": user.username})
+        return JsonResponse({
+            "ok": True,
+            "username": user.username,
+            "lang": user.lang
+        })
 
 # class UpdateEmailView(LoginRequiredMixin, UpdateView):
 #     model = CustomUser
@@ -159,25 +155,18 @@ class GetUserView(APIView):
 #             return JsonResponse({'ok': False, 'error': 'Code expired'})
         
 #         return JsonResponse({'ok': True})
-=======
-        return JsonResponse({
-            "ok": True,
-            "username": user.username,
-            "lang": user.language
-        })
 
 class UpdateLanguageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
         user = request.user
-        new_language = request.data.get('lang')
+        new_lang = request.data.get('lang')
 
-        if not new_language:
+        if not new_lang:
             return JsonResponse({"ok": False, "error": "No language provided"})
 
-        user.language = new_language
+        user.lang = new_lang
         user.save()
 
         return JsonResponse({"ok": True})
->>>>>>> origin/user
