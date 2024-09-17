@@ -31,8 +31,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api'
-    'two_factor'
-    'django_otp'
+    # 'two_factor'
+    # 'django_otp'
 ]
 
 REST_FRAMEWORK = {
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django_otp.middleware.OTPMiddleware',
+    # 'django_otp.middleware.OTPMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [

@@ -15,6 +15,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        
         user = CustomUser(
             username=validated_data['username'],
             email=validated_data.get('email', ''),

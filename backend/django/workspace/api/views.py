@@ -19,6 +19,8 @@ from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+User = CustomUser
+
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         try:
@@ -96,55 +98,55 @@ class GetUserView(APIView):
         user = request.user
         return JsonResponse({"ok": True,"username": user.username})
 
-class UpdateEmailView(LoginRequiredMixin, UpdateView):
-    model = CustomUser
-    fields = ['email']
-    success_url = '/'
+# class UpdateEmailView(LoginRequiredMixin, UpdateView):
+#     model = CustomUser
+#     fields = ['email']
+#     success_url = '/'
 
-class TwoFactorSetupView(APIView):
-    def put(self, request):
-        username = request.data.get('username')
-        user = CustomUser.objects.filter(username=username).first()
+# class TwoFactorSetupView(APIView):
+#     def put(self, request):
+#         username = request.data.get('username')
+#         user = CustomUser.objects.filter(username=username).first()
 
-        if not user:
-            return JsonResponse({'ok': False})
-        if not user.email:
-            return JsonResponse({'ok': False})
+#         if not user:
+#             return JsonResponse({'ok': False})
+#         if not user.email:
+#             return JsonResponse({'ok': False})
     
-        verification_code = get_random_string(length=6, allowed_chars='0123456789')
+#         verification_code = get_random_string(length=6, allowed_chars='0123456789')
 
-        subject = 'Your Two-Factor Authentication Verification Code'
-        message = f'Your verification code is: {verification_code}'
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = [user.email]
+#         subject = 'Your Two-Factor Authentication Verification Code'
+#         message = f'Your verification code is: {verification_code}'
+#         from_email = settings.DEFAULT_FROM_EMAIL
+#         recipient_list = [user.email]
 
-        try:
-            send_mail(subject, message, from_email, recipient_list)
-            user.verification_code = verification_code
-            user.verification_code_created_at = timezone.now()
-            user.save()
-            return JsonResponse({'ok': True})
-        except Exception as e:
-            return JsonResponse({'ok': False, 'error': str(e)})
+#         try:
+#             send_mail(subject, message, from_email, recipient_list)
+#             user.verification_code = verification_code
+#             user.verification_code_created_at = timezone.now()
+#             user.save()
+#             return JsonResponse({'ok': True})
+#         except Exception as e:
+#             return JsonResponse({'ok': False, 'error': str(e)})
         
-class TwoFactorVerifyView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        code = request.data.get('code')
+# class TwoFactorVerifyView(APIView):
+#     def post(self, request):
+#         username = request.data.get('username')
+#         code = request.data.get('code')
         
-        user = CustomUser.objects.filter(username=username).first()
+#         user = CustomUser.objects.filter(username=username).first()
         
-        if not user:
-            return JsonResponse({'ok': False, 'error': 'User not found'})
+#         if not user:
+#             return JsonResponse({'ok': False, 'error': 'User not found'})
         
-        if user.verification_code != code:
-            return JsonResponse({'ok': False, 'error': 'Invalid code'})
+#         if user.verification_code != code:
+#             return JsonResponse({'ok': False, 'error': 'Invalid code'})
         
-        expiration_time = user.verification_code_created_at + timedelta(minutes=5)
-        if timezone.now() > expiration_time:
-            user.verification_code = None
-            user.verification_code_created_at = None
-            user.save()
-            return JsonResponse({'ok': False, 'error': 'Code expired'})
+#         expiration_time = user.verification_code_created_at + timedelta(minutes=5)
+#         if timezone.now() > expiration_time:
+#             user.verification_code = None
+#             user.verification_code_created_at = None
+#             user.save()
+#             return JsonResponse({'ok': False, 'error': 'Code expired'})
         
-        return JsonResponse({'ok': True})
+#         return JsonResponse({'ok': True})
