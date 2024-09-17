@@ -9,12 +9,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.views.generic.edit import UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
+from datetime import timedelta
+from .utils import generate_verification_code
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
 class RegisterView(APIView):
@@ -28,7 +30,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             return JsonResponse({"ok": True, "username": user.username})
-        return JsonResponse({"ok": False})
+        return JsonResponse({"ok": False}, status=400)
 
 
 class LoginView(APIView):
@@ -54,7 +56,7 @@ class LoginView(APIView):
             )
             return response
         else:
-            return JsonResponse({"ok": False})
+            return JsonResponse({"ok": False}, status=404)
         
 
 class LogoutView(APIView):
@@ -74,10 +76,48 @@ class GetUserView(APIView):
         user = request.user
         return JsonResponse({"username": user.username})
 
-class UpdateEmailView(LoginRequiredMixin, UpdateView):
-    model = CustomUser
-    fields = ['email']
-    success_url = '/'
+class UpdateEmailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        new_email = request.data.get('new_email')
+
+        if not new_email:
+            return JsonResponse({"ok": False, "error": "Email is required"}, status=400)
+
+        try:
+            validate_email(new_email)
+        except ValidationError:
+            return JsonResponse({"ok": False, "error": "Invalid email address"}, status=400)
+
+        user = request.user
+        user.email = new_email
+        user.save()
+
+        return JsonResponse({"ok": True, "message": "Email updated successfully"})
+    
+
+class TwoFactorActivateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        email = request.data.get('email')
+
+        if not email:
+            return JsonResponse({"ok": False, "error": "Email is required"}, status=400)
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({"ok": False, "error": "Invalid email address"}, status=400)
+
+        user = request.user
+        user.email = email
+        user.tfa = True
+        user.save()
+
+        return JsonResponse({"ok": True, "message": "Email updated successfully"})
+    
 
 class TwoFactorSetupView(APIView):
     def put(self, request):
@@ -85,15 +125,15 @@ class TwoFactorSetupView(APIView):
         user = CustomUser.objects.filter(username=username).first()
 
         if not user:
-            return JsonResponse({'ok': False})
+            return JsonResponse({'ok': False}, status=400)
         if not user.email:
-            return JsonResponse({'ok': False})
+            return JsonResponse({'ok': False, 'error': 'no email'}, status=400)
     
-        verification_code = get_random_string(length=6, allowed_chars='0123456789')
+        verification_code = generate_verification_code()
 
         subject = 'Your Two-Factor Authentication Verification Code'
         message = f'Your verification code is: {verification_code}'
-        from_email = settings.DEFAULT_FROM_EMAIL
+        from_email = settings.EMAIL_HOST_USER
         recipient_list = [user.email]
 
         try:
@@ -103,7 +143,7 @@ class TwoFactorSetupView(APIView):
             user.save()
             return JsonResponse({'ok': True})
         except Exception as e:
-            return JsonResponse({'ok': False, 'error': str(e)})
+            return JsonResponse({'ok': False, 'error': str(e), 'from email': from_email}, status=500)
         
 class TwoFactorVerifyView(APIView):
     def post(self, request):
@@ -114,7 +154,6 @@ class TwoFactorVerifyView(APIView):
         
         if not user:
             return JsonResponse({'ok': False, 'error': 'User not found'})
-        
         if user.verification_code != code:
             return JsonResponse({'ok': False, 'error': 'Invalid code'})
         
@@ -124,5 +163,7 @@ class TwoFactorVerifyView(APIView):
             user.verification_code_created_at = None
             user.save()
             return JsonResponse({'ok': False, 'error': 'Code expired'})
-        
+        user.verification_code = None
+        user.verification_code_created_at = None
+        user.save()
         return JsonResponse({'ok': True})

@@ -30,9 +30,9 @@ INSTALLED_APPS = [
 
     'corsheaders',
     'rest_framework',
-    'api'
-    'two_factor'
-    'django_otp'
+    'api',
+    # 'two_factor',
+    'django_otp',
 ]
 
 REST_FRAMEWORK = {
@@ -143,6 +143,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.CustomUser'
 
-TWO_FACTOR_EMAIL = {
-    'FROM_EMAIL': '42hess@gmail.com',
-}
+# Email Backend Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'       # Correct SMTP server address for Gmail
+EMAIL_PORT = 587                    # Port for TLS
+EMAIL_USE_TLS = True               # Use TLS for secure email sending
+EMAIL_HOST_USER = 'gad.marre@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'mubk xuxu jegj gxjl'       # Your Gmail password (make sure to use quotes)

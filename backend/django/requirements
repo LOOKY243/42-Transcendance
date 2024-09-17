@@ -7,3 +7,4 @@ django-cors-headers==4.4.0
 djangorestframework-simplejwt
 Pillow==9.0.1
 django-two-factor-auth==1.17.0
+django_otp==1.5.2

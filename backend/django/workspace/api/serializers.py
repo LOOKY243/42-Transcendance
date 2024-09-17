@@ -7,7 +7,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'password', 'password_confirm', 'email', 'phoneNumber', 'tfa', 'pfp']
+        fields = ['username', 'password', 'password_confirm', 'email', 'tfa', 'pfp', 'verification_code', 'verification_code_created_at', 'language']
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -18,9 +18,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = CustomUser(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
-            phoneNumber=validated_data.get('phoneNumber', ''),
             tfa=validated_data.get('tfa', False),
-            pfp=validated_data.get('pfp', None)
+            pfp=validated_data.get('pfp', None),
+            verification_code=validated_data.get('verification_code', None),
+            verification_code_created_at=validated_data.get('verification_code_created_at', None),
+            language=validated_data.get('language', ''),
         )
         user.set_password(validated_data['password'])
         user.save()
