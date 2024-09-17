@@ -38,7 +38,8 @@ export const it = {
 		"date": "Data"
 	},
 	"profileSettings": {
-		"lang": "Lingua predefinita"
+		"lang": "Lingua predefinita",
+		"password": "Password",
 	},
 	"pop": {
 		"loginSuccess": "Accesso riuscito",

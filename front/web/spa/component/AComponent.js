@@ -2,7 +2,6 @@ import { TranslateService } from "../service/Translate.service.js";
 import { injector } from "../Bootstrap.js";
 import { MergedObservable } from "../utils/MergedObservable.js"
 import { Observable } from "../utils/Observable.js";
-import { ReplayObservable } from "../utils/ReplayObservable.js";
 
 export class AComponent {
 	parentSelector = "";

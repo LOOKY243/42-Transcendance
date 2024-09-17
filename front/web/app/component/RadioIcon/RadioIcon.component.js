@@ -1,37 +1,24 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
-import { TranslateService } from "../../../spa/service/Translate.service.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
-import { DropButtonIconComponent } from "../DropButtonIcon/DropButtonIcon.component.js";
+import { UserService } from "../../service/User.service.js";
 
 export class RadioIconComponent extends AComponent {
     radioSelect = new ReplayObservable();
+    fr = new ReplayObservable();
+    en = new ReplayObservable();
+    it = new ReplayObservable();
 
     onInit() {
         super.onInit();
         this.generateHtml({});
 
-        this.radioSelect.next("en");
-
-        this.createSubComponent(DropButtonIconComponent.create({
-            name: "frIcon",
-            parentSelector: this.getSelector(),
-            icon: "french",
-            onclick: () => injector[TranslateService].setLang("fr"),
-
-        }));
-        this.createSubComponent(DropButtonIconComponent.create({
-            name: "enIcon",
-            parentSelector: this.getSelector(),
-            icon: "english",
-            onclick: () => injector[TranslateService].setLang("en")
-        }));
-        this.createSubComponent(DropButtonIconComponent.create({
-            name: "itIcon",
-            parentSelector: this.getSelector(),
-            icon: "italian",
-            onclick: () => injector[TranslateService].setLang("it")
-        }));
+        this.changeCheckLang(injector[UserService].user.defaultLang);
+        this.setConfig({
+            fr: this.fr,
+            en: this.en,
+            it: this.it
+        });
 
         return true;
     }
@@ -41,6 +28,7 @@ export class RadioIconComponent extends AComponent {
         document.getElementsByName("langRadio").forEach(element => {
             element.addEventListener("change", () => {
                 this.radioSelect.next(element.id);
+                this.changeCheckLang(element.id)
             });
         });
     }
@@ -49,18 +37,46 @@ export class RadioIconComponent extends AComponent {
 		return "app/component/RadioIcon/RadioIcon.component.css";
 	}
 
+    changeCheckLang(value) {
+        switch (value) {
+            case 'fr':
+                this.fr.next(true)
+                this.en.next(false)
+                this.it.next(false)
+                break;
+            case 'en':
+                this.fr.next(false)
+                this.en.next(true)
+                this.it.next(false)
+                break;
+            case 'it':
+                this.fr.next(false)
+                this.en.next(false)
+                this.it.next(true)
+                break;
+            default :
+            this.changeCheckLang("en");
+        }
+    }
+
     generateHtml(config) {
         this.html = `
-            <div class="radioIconDiv">
-                <input type="radio" class="btn-check radioIconInput" name="langRadio" id="fr" autocomplete="off">
-                <label for="fr" id="frIcon" class="btn radioIconLabel"></label>
+            <div class="d-flex">
+                <div class="radioIconDiv">
+                    <input type="radio" class="btn-check radioIconInput" name="langRadio" id="fr" autocomplete="off" ${config.fr ? "checked" : ""}>
+                    <label class="btn radioIconLabel" for="fr"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/FrenchFlag.svg"></label>
+                </div>
 
-                <input type="radio" class="btn-check radioIconInput" name="langRadio" id="en" autocomplete="off" checked>
-                <label for="en" id="enIcon" class="btn radioIconLabel"></label>
+                <div class="radioIconDiv">
+                    <input type="radio" class="btn-check radioIconInput" name="langRadio" id="en" autocomplete="off" ${config.en ? "checked" : ""}>
+                    <label class="btn radioIconLabel" for="en"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/UKingdomFlag.svg"></label>
+                </div>
 
-                <input type="radio" class="btn-check radioIconInput" name="langRadio" id="it" autocomplete="off">
-                <label for="it" id="itIcon" class="btn radioIconLabel"></label>
-            </div>        
+                <div class="radioIconDiv">
+                    <input type="radio" class="btn-check radioIconInput" name="langRadio" id="it" autocomplete="off" ${config.it ? "checked" : ""}>
+                    <label class="btn radioIconLabel" for="it"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/ItalyFlag.svg"></label>
+                </div>    
+            </div>    
         `;
     }
 }

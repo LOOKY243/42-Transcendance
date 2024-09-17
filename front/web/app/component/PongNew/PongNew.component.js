@@ -1,8 +1,6 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
-import { Router } from "../../../spa/Router.js";
 import { GameService } from "../../service/Game.service.js";
-import { ButtonComponent } from "../Button/Button.component.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";

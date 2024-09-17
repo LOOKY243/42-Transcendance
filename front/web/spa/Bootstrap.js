@@ -15,8 +15,8 @@ export let injector = {};
 
 class Bootstrap {
 	constructor() {
-		let allReady = new MergedObservable();
 		window.appLaunched = true;
+		let allReady = new MergedObservable();
 		injector[TranslateService] = new TranslateService().init();
 		injector[HttpClient] = new HttpClient().init();
 		injector[TokenService] = new TokenService().init();
