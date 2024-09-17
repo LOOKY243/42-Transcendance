@@ -14,7 +14,7 @@ export const en = {
 	},
 	"navbar": {
 		"home": "Home",
-		"profile": "Profile"
+		"profile": "Login"
 	},
 	"auth": {
 		"login": "Log in",
@@ -38,13 +38,15 @@ export const en = {
 		"date": "Date"
 	},
 	"profileSettings": {
-		"lang": "default language"
+		"lang": "default language",
+		"password": "Password",
 	},
 	"pop": {
 		"loginSuccess": "Successfuly login",
 		"loginDanger": "Failed to login: invalid credentials",
 		"registerDanger": "Failed to register: invalid credentials",
 		"registerUsernameDanger": "Failed to register: Username already in use",
-		"logout": "successfully logout"
+		"logout": "successfully logout",
+		"reconnect": "Please reconnect,"
 	}
 }

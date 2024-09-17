@@ -4,6 +4,7 @@ from rest_framework import status
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, login, logout
 from .models import CustomUser
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -17,7 +18,32 @@ from datetime import timedelta
 from .utils import generate_verification_code
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from .utils import check_token_status
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 
+User = get_user_model() 
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        try:
+            response = super().post(request, *args, **kwargs)
+
+            refresh_token = request.data.get('refresh')
+
+            if refresh_token:
+                refresh_token_obj = RefreshToken(refresh_token)
+                
+                user_id = refresh_token_obj['user_id']
+                
+                user = User.objects.filter(id=user_id).first()
+                if user is None:
+                    return JsonResponse({'error': 'User does not exist'}, status=401)
+
+            return response
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=401)
 
 class RegisterView(APIView):
     def put(self, request):
@@ -74,7 +100,11 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
-        return JsonResponse({"username": user.username})
+        return JsonResponse({
+            "ok": True,
+            "username": user.username,
+            "lang": user.lang
+        })
 
 class UpdateEmailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -126,8 +156,8 @@ class TwoFactorSetupView(APIView):
 
         if not user:
             return JsonResponse({'ok': False}, status=400)
-        if not user.email:
-            return JsonResponse({'ok': False, 'error': 'no email'}, status=400)
+        if not user.tfa:
+            return JsonResponse({'ok': False, 'error': '2fa not active'}, status=404)
     
         verification_code = generate_verification_code()
 
@@ -167,3 +197,18 @@ class TwoFactorVerifyView(APIView):
         user.verification_code_created_at = None
         user.save()
         return JsonResponse({'ok': True})
+
+class UpdateLanguageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        new_lang = request.data.get('lang')
+
+        if not new_lang:
+            return JsonResponse({"ok": False, "error": "No language provided"})
+
+        user.lang = new_lang
+        user.save()
+
+        return JsonResponse({"ok": True})

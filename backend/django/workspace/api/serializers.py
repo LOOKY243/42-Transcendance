@@ -1,13 +1,20 @@
 from rest_framework import serializers
 from .models import CustomUser
+from django.contrib.auth.models import User
+from rest_framework.validators import UniqueValidator
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, required=True, min_length=8)
+    lang = serializers.CharField(required=False, allow_blank=True, default='en')
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'password', 'password_confirm', 'email', 'tfa', 'pfp', 'verification_code', 'verification_code_created_at', 'language']
+        fields = ['username', 'password', 'password_confirm', 'email', 'tfa', 'pfp', 'verification_code', 'verification_code_created_at', 'lang']
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -15,15 +22,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data):
-        user = CustomUser(
+        validated_data.pop('password_confirm')
+        
+        user = User(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             tfa=validated_data.get('tfa', False),
             pfp=validated_data.get('pfp', None),
             verification_code=validated_data.get('verification_code', None),
             verification_code_created_at=validated_data.get('verification_code_created_at', None),
-            language=validated_data.get('language', ''),
+            lang=validated_data.pop('language', 'en')
         )
         user.set_password(validated_data['password'])
         user.save()
+        
         return user

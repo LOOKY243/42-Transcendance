@@ -14,7 +14,7 @@ export const fr = {
 	},
 	"navbar": {
 		"home": "Accueil",
-		"profile": "Profil"
+		"profile": "Connexion"
 	},
 	"auth": {
 		"login": "Connexion",
@@ -38,7 +38,8 @@ export const fr = {
 		"date": "Date"
 	},
 	"profileSettings": {
-		"lang": "Langue par défaut"
+		"lang": "Langue par défaut",
+		"password": "Mot de passe",
 	},
 	"pop": {
 		"loginSuccess": "Connexion réussie",

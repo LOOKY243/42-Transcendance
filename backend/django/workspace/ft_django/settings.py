@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api',
-    # 'two_factor',
     'django_otp',
 ]
 
@@ -43,7 +42,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30), 
 }
 
 MIDDLEWARE = [
@@ -55,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django_otp.middleware.OTPMiddleware',
+    # 'django_otp.middleware.OTPMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -118,6 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -145,8 +145,8 @@ AUTH_USER_MODEL = 'api.CustomUser'
 
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'       # Correct SMTP server address for Gmail
-EMAIL_PORT = 587                    # Port for TLS
-EMAIL_USE_TLS = True               # Use TLS for secure email sending
-EMAIL_HOST_USER = 'gad.marre@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'mubk xuxu jegj gxjl'       # Your Gmail password (make sure to use quotes)
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '--------------'  # Gmail address
+EMAIL_HOST_PASSWORD = '----------------' # Gmail password (Application password)

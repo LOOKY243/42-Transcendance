@@ -14,7 +14,7 @@ export const it = {
 	},
 	"navbar": {
 		"home": "Home",
-		"profile": "Profilo"
+		"profile": "Connessione"
 	},
 	"auth": {
 		"login": "Accedi",
@@ -38,7 +38,8 @@ export const it = {
 		"date": "Data"
 	},
 	"profileSettings": {
-		"lang": "Lingua predefinita"
+		"lang": "Lingua predefinita",
+		"password": "Password",
 	},
 	"pop": {
 		"loginSuccess": "Accesso riuscito",

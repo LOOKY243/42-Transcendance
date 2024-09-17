@@ -1,6 +1,8 @@
+import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
-import { Observable } from "../../../spa/utils/Observable.js";
+import { TranslateService } from "../../../spa/service/Translate.service.js";
 import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
+import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
@@ -9,8 +11,8 @@ import { RadioIconComponent } from "../RadioIcon/RadioIcon.component.js";
 
 export class ProfileSettingsComponent extends AComponent {
 	username = new ReplayObservable();
-	newUsername = "";
 	password = new ReplayObservable();
+	newUsername = "";
 	newPassword = "";
 	defaultLang = "";
 
@@ -37,7 +39,6 @@ export class ProfileSettingsComponent extends AComponent {
 			name: "usernameInput",
 			parentSelector: this.getSelector(),
 			inputType: "text",
-			placeholder: "New Username",
 			onchange: (value) => this.newUsername = value
 		}));
 
@@ -52,7 +53,6 @@ export class ProfileSettingsComponent extends AComponent {
 			name: "passwordInput",
 			parentSelector: this.getSelector(),
 			inputType: "password",
-			placeholder: "New Password",
 			autocomplete: `autocomplete="new-password"`,
 			onchange: (value) => this.newPassword = value
 		}));
@@ -66,11 +66,24 @@ export class ProfileSettingsComponent extends AComponent {
 		}));
 
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
-		this.subComponent["langageRadio"].radioSelect.subscribe((value) => this.defaultLang = value);
+		this.subComponent["langageRadio"].radioSelect.subscribe((value) => {
+			this.defaultLang = value;
+			if (value) {
+				injector[TranslateService].setLang(value);
+			}	
+		});
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "defaultLangModifier",
+			parentSelector: this.getSelector(),
+			icon: "modifier",
+			style: "btn",
+			onclick: () => injector[UserService].patchDefaultLang(this.defaultLang)
+		}));
 
 		this.username.next("Username");
 		this.setConfig({
 			username: this.username,
+			password: this.translate("profileSettings.password"),
 			lang: this.translate("profileSettings.lang"),
 		});
 
@@ -104,7 +117,7 @@ export class ProfileSettingsComponent extends AComponent {
 					<div class="line my-4"></div>
 					<div class="row m-3">
 						<div>
-							<div class="fs-3 text-light text-center">Password</div>
+							<div class="fs-3 text-light text-center">${config.password}</div>
 							<div class="d-flex justify-content-center m-3">
 								<div id="passwordInput" class="inputContainer"></div>
 								<div id="passwordModifier"></div>
@@ -117,6 +130,9 @@ export class ProfileSettingsComponent extends AComponent {
 								<div class="fs-3 text-light text-center">${config.lang}</div>
 								<div class="d-flex justify-content-center m-3">
 									<div id="langageRadio"></div>
+								</div>
+								<div class="d-flex justify-content-center m-3">
+									<div id="defaultLangModifier"></div>
 								</div>
 							</div>
 						</div>
