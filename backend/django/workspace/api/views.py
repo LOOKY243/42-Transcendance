@@ -3,19 +3,25 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from .models import CustomUser
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.views.generic.edit import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
 
 
 class RegisterView(APIView):
     def put(self, request):
         username = request.data.get('username')
         
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             return JsonResponse({"ok": False, "error": "usernameError"})
 
         serializer = RegisterSerializer(data=request.data)
@@ -49,16 +55,7 @@ class LoginView(APIView):
             return response
         else:
             return JsonResponse({"ok": False})
-
-# class CheckAuthView(APIView):
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             return JsonResponse({"ok": True})
-#         else:
-#             return JsonResponse({"ok": False})
+        
 
 class LogoutView(APIView):
     def post(self, request):
@@ -76,3 +73,56 @@ class GetUserView(APIView):
     def get(self, request):
         user = request.user
         return JsonResponse({"username": user.username})
+
+class UpdateEmailView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    fields = ['email']
+    success_url = '/'
+
+class TwoFactorSetupView(APIView):
+    def put(self, request):
+        username = request.data.get('username')
+        user = CustomUser.objects.filter(username=username).first()
+
+        if not user:
+            return JsonResponse({'ok': False})
+        if not user.email:
+            return JsonResponse({'ok': False})
+    
+        verification_code = get_random_string(length=6, allowed_chars='0123456789')
+
+        subject = 'Your Two-Factor Authentication Verification Code'
+        message = f'Your verification code is: {verification_code}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [user.email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+            user.verification_code = verification_code
+            user.verification_code_created_at = timezone.now()
+            user.save()
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)})
+        
+class TwoFactorVerifyView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        code = request.data.get('code')
+        
+        user = CustomUser.objects.filter(username=username).first()
+        
+        if not user:
+            return JsonResponse({'ok': False, 'error': 'User not found'})
+        
+        if user.verification_code != code:
+            return JsonResponse({'ok': False, 'error': 'Invalid code'})
+        
+        expiration_time = user.verification_code_created_at + timedelta(minutes=5)
+        if timezone.now() > expiration_time:
+            user.verification_code = None
+            user.verification_code_created_at = None
+            user.save()
+            return JsonResponse({'ok': False, 'error': 'Code expired'})
+        
+        return JsonResponse({'ok': True})

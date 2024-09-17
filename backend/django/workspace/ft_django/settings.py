@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api'
+    'two_factor'
+    'django_otp'
 ]
 
 REST_FRAMEWORK = {
@@ -53,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django_otp.middleware.OTPMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -137,3 +140,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'api.CustomUser'
+
+TWO_FACTOR_EMAIL = {
+    'FROM_EMAIL': '42hess@gmail.com',
+}

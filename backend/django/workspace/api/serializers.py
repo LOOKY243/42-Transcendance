@@ -1,14 +1,13 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from rest_framework.validators import UniqueValidator
+from .models import CustomUser
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, required=True, min_length=8)
 
     class Meta:
-        model = User
-        fields = ['username', 'password', 'password_confirm']
+        model = CustomUser
+        fields = ['username', 'password', 'password_confirm', 'email', 'phoneNumber', 'tfa', 'pfp']
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -16,5 +15,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        return User.objects.create_user(**validated_data)
+        user = CustomUser(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            phoneNumber=validated_data.get('phoneNumber', ''),
+            tfa=validated_data.get('tfa', False),
+            pfp=validated_data.get('pfp', None)
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
