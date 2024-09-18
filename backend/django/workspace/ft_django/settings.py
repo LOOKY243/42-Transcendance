@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -92,7 +93,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Transcendence',
         'USER': 'chief',
-        'PASSWORD': '29KezYvQmJ4wygF',
+        'PASSWORD': config('DB_PASSWORD'),
         'HOST': 'postgres',
         'PORT': 5432,
     }
@@ -148,5 +149,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '--------------'  # Gmail address
-EMAIL_HOST_PASSWORD = '----------------' # Gmail password (Application password)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')

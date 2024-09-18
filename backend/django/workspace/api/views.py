@@ -106,6 +106,14 @@ class GetUserView(APIView):
             "lang": user.lang
         })
 
+class GetUserTfaView(APIView):
+    def get(self, request):
+        user = user.request
+        return JsonResponse({
+            "ok": True,
+            "tfa": user.tfa
+        })
+
 class UpdateEmailView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -146,7 +154,7 @@ class TwoFactorActivateView(APIView):
         user.tfa = True
         user.save()
 
-        return JsonResponse({"ok": True, "message": "Email updated successfully"})
+        return JsonResponse({"ok": True, "message": "2fa activated successfully"})
     
 
 class TwoFactorSetupView(APIView):
