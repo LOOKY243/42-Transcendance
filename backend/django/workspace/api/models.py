@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from django.utils import timezone
+from django.conf import settings
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -37,3 +37,12 @@ class CustomUser(AbstractBaseUser):
     def __str__(self):
         return self.username
 
+class MatchHistory(models.Model):
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    match_date = models.DateTimeField(auto_now_add=True)
+    score = models.IntegerField()
+    gamemode = models.IntegerField();
+
+
+    class Meta:
+        ordering = ['-match_date']

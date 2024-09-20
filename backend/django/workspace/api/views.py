@@ -1,16 +1,11 @@
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, login, logout
-from .models import CustomUser
+from .models import CustomUser, MatchHistory
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -18,7 +13,6 @@ from datetime import timedelta
 from .utils import generate_verification_code
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -113,6 +107,11 @@ class GetUserTfaView(APIView):
             "ok": True,
             "tfa": user.tfa
         })
+
+class UpdatePfpView(APIView):
+    permission_classes = [IsAuthenticated]
+    def put(self, request):
+        pass
 
 class UpdateEmailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -220,3 +219,14 @@ class UpdateLanguageView(APIView):
         user.save()
 
         return JsonResponse({"ok": True})
+    
+class GetMatchHistoryView(APIView):
+    def get(self, request, player_id):
+        matches = MatchHistory.objects.filter(player_id=player_id)[:5]
+        match_data = [{
+            'opponent': match.match_date,
+            'score': match.score,
+            'game_mode': match.gamemode
+        } for match in matches]
+
+        return JsonResponse({'last_five_matches': match_data})
