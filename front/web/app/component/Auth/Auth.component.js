@@ -12,7 +12,7 @@ export class AuthComponent extends AComponent {
     passwordConfirm = "";
 
     onInit() {
-        if (!injector[UserService].username.isEmpty()) {
+        if (injector[UserService].user) {
             injector[Router].navigate("/profile");
             return false;
         }

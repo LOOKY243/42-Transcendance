@@ -39,7 +39,9 @@ export const en = {
 	},
 	"profileSettings": {
 		"lang": "default language",
-		"password": "Password",
+		"currentPassword": "Current Password",
+		"newPassword": "New password",
+		"newPasswordConfirm": "Confirm new password",
 	},
 	"pop": {
 		"loginSuccess": "Successfuly login",
@@ -47,6 +49,9 @@ export const en = {
 		"registerDanger": "Failed to register: invalid credentials",
 		"registerUsernameDanger": "Failed to register: Username already in use",
 		"logout": "successfully logout",
-		"reconnect": "Please reconnect,"
+		"reconnect": "Please reconnect",
+		"defaultLangSuccess": "Default language change successfully",
+		"passwordSuccess": "password change successfully",
+		"passwordDanger": "password can't be change, invalid credentials",
 	}
 }

@@ -22,7 +22,7 @@ export class Observable {
 	}
 
 	triggerFunc(func) {
-		let ret = JSON.parse(JSON.stringify(this.value)) ;
+		let ret = this.value != undefined ? JSON.parse(JSON.stringify(this.value)) : undefined;
 		if (this.mappingFunc)
 			ret = this.mappingFunc(this.value);
 		func(ret);

@@ -1,5 +1,6 @@
 NAME = 42-transcendance
 COMPOSE = docker-compose.yml
+COMPOSE_BACK = docker-compose.backend.yml
 
 all: build up
 
@@ -22,4 +23,11 @@ clean: down
 
 re: clean all
 
-.PHONY: all build up down clean re
+back: clean
+	@mkdir -p data/postgres
+	@mkdir -p data/django
+	@docker compose -p $(NAME) -f $(COMPOSE_BACK) build
+	@docker compose -p $(NAME) -f $(COMPOSE_BACK) up
+
+.PHONY: all build up down clean re back
+

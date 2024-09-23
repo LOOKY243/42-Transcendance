@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, GetUserView, LogoutView, UpdateLanguageView
+from .views import RegisterView, LoginView, GetUserView, LogoutView, UpdateLanguageView, UpdatePasswordView
 
 # TwoFactorSetupView, TwoFactorVerifyView
 
@@ -11,4 +11,5 @@ urlpatterns = [
     # path('2fa/setup/', TwoFactorSetupView.as_view(), name='two_factor_setup'),
     # path('2fa/verify/', TwoFactorVerifyView.as_view(), name='two_factor_verify'),
     path('updateLanguage/', UpdateLanguageView.as_view(), name='updateLanguage'),
+    path('updatePassword/', UpdatePasswordView.as_view(), name='updatePassword'),
 ]

@@ -11,13 +11,11 @@ import { TranslateService } from "../../spa/service/Translate.service.js";
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
 	defaultLang = new ReplayObservable();
-	user = {
-		username: undefined,
-		defaultLang: "en"
-	}
+	user = null
 
 	constructor() {
 		super();
+		this.getUser();
 		this.username.subscribe(value => {
 			if (value) {
 				this.user.username = value;
@@ -26,11 +24,8 @@ export class UserService extends AInjectable {
 		this.defaultLang.subscribe(value => {
 			if (value) {
 				this.user.defaultLang = value
-				injector[TranslateService].setLang(value);
 			}
 		});
-
-		this.getUser();
 	}
 
 	init() {
@@ -78,18 +73,20 @@ export class UserService extends AInjectable {
 
 	logout() {
 		injector[HttpClient].post("logout/", {}, true).then(response => {
-			this.username.next(null);
-			injector[TokenService].deleteCookie();
-			injector[Router].navigate("/");
-			injector[PopService].renderPop(true, "pop.logout");
+			this.logoutManager("/", true, "pop.logout");
 		});
 	}
 
 	getUser() {
 		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
-				this.defaultLang.next(response.lang);
+				this.user = {
+					username: response.username,
+					defaultLang: response.lang,
+				};
 				this.username.next(response.username);
+				this.defaultLang.next(response.lang);
+				injector[TranslateService].setLang(response.lang);
 				this.isReady.next(true);
 			}).catch(error => {
 				if (error instanceof TokenError) {
@@ -104,14 +101,38 @@ export class UserService extends AInjectable {
 			lang: newDefaultLang
 		}, true).then(response => {
 			this.defaultLang.next(newDefaultLang);
+			injector[PopService].renderPop(true, "pop.defaultLangSuccess");
 		}).catch(error => {
 			if (error instanceof TokenError) {
-				this.username.next(null);
-				injector[TokenError].deleteCookie();
-				injector[Router].navigate("/auth");
-				injector[PopService].renderPop(false, "pop.reconnect");
+				this.logoutManager("/auth", false, "pop.reconnect");
 			}
 		})
+	}
+
+	patchPassword(currentPassword, newPassword, newPasswordConfirm) {
+		injector[HttpClient].patch("updatePassword/", {
+			currentPassword: currentPassword,
+			newPassword: newPassword,
+			newPasswordConfirm: newPasswordConfirm
+		}, true).then(response => {
+			if (response.ok) {
+				injector[PopService].renderPop(true, "pop.passwordSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.passwordDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
+	logoutManager(path, popStatus, popMessage) {
+		this.user = null;
+		injector[TokenService].deleteCookie();
+		injector[Router].navigate(path);
+		injector[PopService].renderPop(popStatus, popMessage);
+		this.username.next(undefined);
 	}
 
 }

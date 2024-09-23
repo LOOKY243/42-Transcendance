@@ -23,11 +23,12 @@ class Bootstrap {
 		injector[Router] = new Router().init();
 		injector = {...injector, ...initBootstrap()};
 	
-		Object.values(injector).forEach(element => {
-			allReady.mergeObservable(typeof element, element.isReady);
+		Object.values(injector).forEach((element, id) => {
+			allReady.mergeObservable(id, element.isReady);
 		});
 		allReady.subscribe((value) => {
-			if (Object.values(value).some(value => value === true)) {
+			if (!Object.values(value).some(value => value === false)) {
+			} else {
 				injector[Router].start()
 			}
 		});
