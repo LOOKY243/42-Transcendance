@@ -51,10 +51,10 @@ export class PongNewComponent extends AComponent {
 		}));
 
 		this.createSubComponent(new RadioComponent(this.getSelector(), "ballRadio"));
-		this.subComponent["ballRadio"].radioSelect.subscribe((value) => {this.ballSpeed = value; this.params.ball = true; this.checkParams()});
+		this.subComponent["ballRadio"].radioSelectSubscribe((value) => {this.ballSpeed = value; this.params.ball = true; this.checkParams()});
 
 		this.createSubComponent(new RadioImgComponent(this.getSelector(), "themeRadio"));
-		this.subComponent["themeRadio"].radioSelect.subscribe((value) => {this.theme = value; this.params.theme = true; this.checkParams()});
+		this.subComponent["themeRadio"].radioSelectSubscribe((value) => {this.theme = value; this.params.theme = true; this.checkParams()});
 
 		this.setConfig({
 			pongTitle: this.translate("pongNew.pongTitle"),

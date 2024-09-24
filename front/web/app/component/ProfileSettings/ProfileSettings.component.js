@@ -90,7 +90,7 @@ export class ProfileSettingsComponent extends AComponent {
 		}));
 
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
-		this.subComponent["langageRadio"].radioSelect.subscribe((value) => {
+		this.subComponent["langageRadio"].radioSelectSubscribe((value) => {
 			this.defaultLang = value;
 			if (value) {
 				injector[TranslateService].setLang(value);
@@ -144,18 +144,20 @@ export class ProfileSettingsComponent extends AComponent {
 					<div class="line my-4"></div>
 					<div class="row m-3">
 						<div>
-							<div class="fs-3 text-light text-center">${config.currentPassword}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="currentPasswordInput" class="inputContainer"></div>
-							</div>
-							<div class="fs-3 text-light text-center">${config.newPassword}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="newPasswordInput" class="inputContainer"></div>
-							</div>
-							<div class="fs-3 text-light text-center">${config.newPasswordConfirm}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="newPasswordConfirmInput" class="inputContainer"></div>
-							</div>
+							<form>
+								<div class="fs-3 text-light text-center">${config.currentPassword}</div>
+								<div class="d-flex justify-content-center m-3">
+									<div id="currentPasswordInput" class="inputContainer"></div>
+								</div>
+								<div class="fs-3 text-light text-center">${config.newPassword}</div>
+								<div class="d-flex justify-content-center m-3">
+									<div id="newPasswordInput" class="inputContainer"></div>
+								</div>
+								<div class="fs-3 text-light text-center">${config.newPasswordConfirm}</div>
+								<div class="d-flex justify-content-center m-3">
+									<div id="newPasswordConfirmInput" class="inputContainer"></div>
+								</div>
+							</form>
 							<div class="text-center">
 								<div id="passwordModifier"></div>
 							</div>

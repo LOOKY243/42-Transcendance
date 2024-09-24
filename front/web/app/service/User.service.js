@@ -15,7 +15,6 @@ export class UserService extends AInjectable {
 
 	constructor() {
 		super();
-		this.getUser();
 		this.username.subscribe(value => {
 			if (value) {
 				this.user.username = value;
@@ -30,7 +29,8 @@ export class UserService extends AInjectable {
 
 	init() {
 		this.isReady.next(false);
-		return this
+		this.getUser();
+		return this;
 	}
 
 	register(username, password, passwordConfirm) {
@@ -88,11 +88,12 @@ export class UserService extends AInjectable {
 				this.username.next(response.username);
 				this.defaultLang.next(response.lang);
 				injector[TranslateService].setLang(response.lang);
-				this.isReady.next(true);
 			}).catch(error => {
 				if (error instanceof TokenError) {
 					injector[TokenService].deleteCookie();
 				}
+			}).finally(() => {
+				this.isReady.next(true);
 			});
 		} else {
 			this.isReady.next(true);

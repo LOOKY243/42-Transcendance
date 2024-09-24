@@ -17,7 +17,7 @@ export class TextButtonComponent extends AComponent {
 
 	static create(value) {
 		let ret = new TextButtonComponent(value.parentSelector, value.name);
-		ret.onClick.subscribe(value.onclick);
+		ret.registerOnClick(value.onclick);
 		if (value.text) {
 			ret.observableText = value.text;
 		}

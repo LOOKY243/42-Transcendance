@@ -12,7 +12,7 @@ export class MergedObservable extends ReplayObservable {
 		observable.subscribe((value) => {
 			this.value[name] = value;
 			this.func.forEach((value) => {
-				this.triggerFunc(value);
+				this.triggerFunc(value.func);
 			})
 		});
 		return this;

@@ -28,9 +28,6 @@ class Bootstrap {
 		});
 		allReady.subscribe((value) => {
 			if (!Object.values(value).some(value => value === false)) {
-				console.log("dont start")
-			} else {
-				console.log("start")
 				injector[Router].start()
 			}
 		});

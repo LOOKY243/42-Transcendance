@@ -34,6 +34,9 @@ export class Router extends AInjectable {
 
 	loadPage(route) {
 		injector[TranslateService].resetObservable();
+		if (this.loadedPage) {
+			this.loadedPage.destroy();
+		}
 		this.loadedPage = new route.component(this.routerSelector, route.selector);
 		document.querySelector(this.routerSelector).innerHTML = 
 		`<div id='${this.loadedPage.getComponentSelector()}'></div>`;

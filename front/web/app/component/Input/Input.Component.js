@@ -31,7 +31,7 @@ export class InputComponent extends AComponent {
 		} else {
 			ret.autocomplete.next("");
 		}
-		ret.onChange.subscribe(value.onchange);
+		ret.registerOnChange(value.onchange);
 		ret.error.next(false);
 		ret.errorText.next("");
 		return ret;

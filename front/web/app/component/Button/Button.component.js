@@ -17,7 +17,8 @@ export class ButtonComponent extends AComponent {
 	static create(value) {
 		let ret = new ButtonComponent(value.parentSelector, value.name);
 		if (value.onclick) {
-			ret.onClick.subscribe(value.onclick);
+			ret.registerOnClick(value.onclick);
+
 		}
 		ret.style.next(value.style);
 		ret.disabled.next(false);

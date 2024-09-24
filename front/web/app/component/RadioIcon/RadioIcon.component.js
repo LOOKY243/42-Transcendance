@@ -23,6 +23,18 @@ export class RadioIconComponent extends AComponent {
         return true;
     }
 
+    destroy(id) {
+		super.destroy();
+		if (this.radioSelectSubscription) {
+			this.radioSelect.unsubscribe(id);
+		}
+	}
+
+	radioSelectSubscribe(func) {
+		this.radioSelectSubscription = this.radioSelect.subscribe(func);
+		this.destroy();
+	}
+    
     render() {
         super.render();
         document.getElementsByName("langRadio").forEach(element => {

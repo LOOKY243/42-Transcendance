@@ -25,7 +25,6 @@ export class PongComponent extends AComponent {
     static startPong(value) {
         this.game = new Game();
         this.game.Start();
-        console.log("test")
     }
 
     getCSSPath() {
