@@ -1,7 +1,5 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+body {
+    --halftone: url("../../assets/img/halftone.jpg");
 }
 
 #root-window h1 {
@@ -32,7 +30,7 @@ html, body {
 #root-window ul {
     background:
         linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('./textures/halftone.jpg');
+        var(--halftone);
     background-size: 100% 100%;
     background-position: 0% 50%;
     border: 1px solid white;
@@ -46,7 +44,7 @@ html, body {
 #active {
     background:
         linear-gradient(rgba(128, 0, 128, 0.5), rgba(128, 0, 128, 0.5)),
-        url('./textures/halftone.jpg');
+        var(--halftone);
     background-size: 100% 100%;
     background-position: 0% 50%;
 }
@@ -54,7 +52,7 @@ html, body {
 #red-bg {
     background:
         linear-gradient(rgba(128, 0, 0, 0.5), rgba(128, 0, 0, 0.5)),
-        url('./textures/halftone.jpg');
+        var(--halftone);
     background-size: 100% 100%;
     background-position: 0% 50%;
 }
@@ -62,7 +60,7 @@ html, body {
 #green-bg {
     background:
         linear-gradient(rgba(0, 128, 0, 0.5), rgba(0, 128, 0, 0.5)),
-        url('./textures/halftone.jpg');
+        var(--halftone);
     background-size: 100% 100%;
     background-position: 0% 50%;
 }
@@ -76,7 +74,7 @@ html, body {
     box-shadow: 0px 0px 5px white;
     background:
         linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('./textures/halftone.jpg');
+        var(--halftone);
     background-size: 100% 100%;
     background-position: 0% 50%;
     width: 10%;
