@@ -1,7 +1,7 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
-import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
@@ -10,13 +10,19 @@ import { NavBarComponent } from "../NavBar/NavBar.component.js";
 import { RadioIconComponent } from "../RadioIcon/RadioIcon.component.js";
 
 export class ProfileSettingsComponent extends AComponent {
-	username = new ReplayObservable();
-	password = new ReplayObservable();
+	username = injector[UserService].username;
 	newUsername = "";
+	currentPassword = "";
 	newPassword = "";
+	newPasswordConfirm = ""
 	defaultLang = "";
 
 	onInit() {
+		if (!injector[UserService].user) {
+            injector[Router].navigate("/auth");
+			return false;
+        }
+
 		super.onInit();
 		this.generateHtml({});
 
@@ -47,15 +53,33 @@ export class ProfileSettingsComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "modifier",
 			style: "btn",
-			onclick: () => this.password.next(this.newpassword)
+			onclick: () => injector[UserService].patchPassword(this.currentPassword, this.newPassword, this.newPasswordConfirm)
 		}));
 		this.createSubComponent(InputComponent.create({
-			name: "passwordInput",
+			name: "currentPasswordInput",
 			parentSelector: this.getSelector(),
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
+			placeholder: "********",
+			onchange: (value) => this.currentPassword = value
+		}));
+		this.createSubComponent(InputComponent.create({
+			name: "newPasswordInput",
+			parentSelector: this.getSelector(),
+			inputType: "password",
+			autocomplete: `autocomplete="new-password"`,
+			placeholder: "********",
 			onchange: (value) => this.newPassword = value
 		}));
+		this.createSubComponent(InputComponent.create({
+			name: "newPasswordConfirmInput",
+			parentSelector: this.getSelector(),
+			inputType: "password",
+			autocomplete: `autocomplete="new-password"`,
+			placeholder: "********",
+			onchange: (value) => this.newPasswordConfirm = value
+		}));
+
 
 		this.createSubComponent(ButtonIconComponent.create({
 			name: "profilePictureModifier",
@@ -80,10 +104,11 @@ export class ProfileSettingsComponent extends AComponent {
 			onclick: () => injector[UserService].patchDefaultLang(this.defaultLang)
 		}));
 
-		this.username.next("Username");
 		this.setConfig({
 			username: this.username,
-			password: this.translate("profileSettings.password"),
+			currentPassword: this.translate("profileSettings.currentPassword"),
+			newPassword: this.translate("profileSettings.newPassword"),
+			newPasswordConfirm: this.translate("profileSettings.newPasswordConfirm"),
 			lang: this.translate("profileSettings.lang"),
 		});
 
@@ -110,6 +135,8 @@ export class ProfileSettingsComponent extends AComponent {
 							<div class="fs-3 text-light text-center">${config.username}</div>
 							<div class="d-flex justify-content-center m-3">
 								<div id="usernameInput" class="inputContainer"></div>
+							</div>
+							<div class="text-center">
 								<div id="usernameModifier"></div>
 							</div>
 						</div>
@@ -117,9 +144,19 @@ export class ProfileSettingsComponent extends AComponent {
 					<div class="line my-4"></div>
 					<div class="row m-3">
 						<div>
-							<div class="fs-3 text-light text-center">${config.password}</div>
+							<div class="fs-3 text-light text-center">${config.currentPassword}</div>
 							<div class="d-flex justify-content-center m-3">
-								<div id="passwordInput" class="inputContainer"></div>
+								<div id="currentPasswordInput" class="inputContainer"></div>
+							</div>
+							<div class="fs-3 text-light text-center">${config.newPassword}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="newPasswordInput" class="inputContainer"></div>
+							</div>
+							<div class="fs-3 text-light text-center">${config.newPasswordConfirm}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="newPasswordConfirmInput" class="inputContainer"></div>
+							</div>
+							<div class="text-center">
 								<div id="passwordModifier"></div>
 							</div>
 						</div>

@@ -4,7 +4,6 @@ import { Router } from "../../../spa/Router.js";
 import { ButtonComponent } from "../Button/Button.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
-import { PopComponent } from "../Pop/Pop.component.js";
 
 export class HomeComponent extends AComponent {
 	inputId = "";

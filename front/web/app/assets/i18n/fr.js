@@ -46,6 +46,6 @@ export const fr = {
 		"loginDanger": "Échec de la connexion : identifiants invalides",
 		"registerDanger": "Échec de l'inscription : identifiants invalides",
 		"registerUsernameDanger": "Échec de l'inscription : nom d'utilisateur déjà utilisé",
-		"logout": "Déconnexion réussie"
+		"logout": "Déconnexion réussie",
 	}
 }

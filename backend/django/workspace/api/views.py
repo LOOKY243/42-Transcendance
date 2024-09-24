@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UpdatePasswordSerializer
 from django.contrib.auth import authenticate, login, logout
 from .models import CustomUser
 from django.contrib.auth import get_user_model
@@ -21,6 +21,8 @@ from django.core.exceptions import ValidationError
 from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import update_session_auth_hash
+
 
 User = get_user_model() 
 
@@ -212,3 +214,25 @@ class UpdateLanguageView(APIView):
         user.save()
 
         return JsonResponse({"ok": True})
+
+class UpdatePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        serializer = UpdatePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            currentPassword = serializer.validated_data['currentPassword']
+            newPassword = serializer.validated_data['newPassword']
+
+            if not user.check_password(currentPassword):
+                return JsonResponse({"ok": False, "error": "Current password is incorrect"})
+
+            user.set_password(newPassword)
+            user.save()
+            update_session_auth_hash(request, user)
+
+            return JsonResponse({"ok": True})
+        
+        return JsonResponse({"ok": False, "errors": serializer.errors})
