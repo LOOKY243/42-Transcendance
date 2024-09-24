@@ -27,7 +27,6 @@ class Bootstrap {
 			allReady.mergeObservable(id, element.isReady);
 		});
 		allReady.subscribe((value) => {
-			console.log(Object.values(value))
 			if (!Object.values(value).some(value => value === false)) {
 				console.log("dont start")
 			} else {
