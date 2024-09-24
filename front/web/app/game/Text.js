@@ -14,7 +14,7 @@ export class Text
     constructor(_scene, _text, _position, _rotation, _size, _depth, _color)
     {
         this.scene = _scene;
-        this.color = color;
+        this.color = _color;
         this.loader = new FontLoader();
         this.loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
             this.CreateText(font, _text, _position, _rotation, _size, _depth);

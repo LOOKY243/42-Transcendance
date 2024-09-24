@@ -6,7 +6,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-    const game = new GamePong("slow", 2, 5, "theme4");
+    const game = new GamePong("fast", 2, 5, "theme4");
     game.Start(); 
 });
 
