@@ -89,10 +89,14 @@ export class UserService extends AInjectable {
 				injector[TranslateService].setLang(response.lang);
 				this.isReady.next(true);
 			}).catch(error => {
+				console.log(error)
 				if (error instanceof TokenError) {
 					injector[TokenService].deleteCookie();
 				}
 			});
+		} else {
+			this.isReady.next(true);
+			console.log("getUser")
 		}
 	}
 
