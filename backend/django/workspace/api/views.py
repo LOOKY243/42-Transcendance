@@ -10,11 +10,13 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
-from .utils import generate_verification_code
+from .utils import generate_verification_code, get_ft_token, log_ft_user, authorize_redirect
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+import requests
+from django.shortcuts import redirect
 
 User = get_user_model() 
 
@@ -78,6 +80,88 @@ class LoginView(APIView):
         else:
             return JsonResponse({"ok": False}, status=404)
         
+
+# class FtLoginView(APIView):
+#     def post(self, request):
+#         access_token = get_ft_token()
+#         redirect = authorize_redirect()
+#         user_info_url = 'https://api.intra.42.fr/v2/me'
+#         headers = {
+#             'Authorization': f'Bearer {access_token}'
+#         }
+#         response = requests.get(user_info_url, headers=headers)
+#         user_info = response.json()
+#         username = user_info.get('login')
+#         email = user_info.get('email')
+#         if not username or not email:
+#             return JsonResponse({
+#                 'ok': False,
+#             })
+#         mode = log_ft_user(request, username, email)
+#         if mode == 1:
+#             return JsonResponse({
+#                 'ok': True,
+#                 'mode': 'register'
+#             })
+#         if mode == 2:
+#             return JsonResponse({
+#                 'ok': True,
+#                 'mode': 'login'
+#             })
+
+class FtLoginRedirectView(APIView):
+    def get(self, request):
+        client_id = settings.CLIENT_ID
+        redirect_uri = settings.REDIRECT_URI
+        authorization_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
+        return redirect(authorization_url)
+
+class FtLoginCallbackView(APIView):
+    def get(self, request):
+        code = request.GET.get('code')
+        if not code:
+            return JsonResponse({
+                'ok': False,
+                'error': 'Authorization code not provided'
+                }, status=400)
+
+        access_token = get_ft_token(code)
+
+        if not access_token:
+            return JsonResponse({
+                'ok': False,
+                'error': 'Failed to obtain access token'
+                }, status=400)
+        
+        user_info_url = 'https://api.intra.42.fr/v2/me'
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+        response = requests.get(user_info_url, headers=headers)
+        user_info = response.json()
+
+        username = user_info.get('login')
+        email = user_info.get('email')
+
+        if not username or not email:
+            return JsonResponse({
+                'ok': False,
+                'error': 'Failed to retrieve user info'
+                })
+
+        mode = log_ft_user(request, username, email)
+
+        if mode == 1:
+            return JsonResponse({
+                'ok': True,
+                'mode': 'register'
+                })
+        if mode == 2:
+            return JsonResponse({
+                'ok': True,
+                'mode': 'login'
+                })
+
 
 class LogoutView(APIView):
     def post(self, request):
