@@ -23,11 +23,15 @@ export class Player
     bIA = true;
     nextPosition = null;
     ballSpeed = 0.1;
+    color;
 
-    constructor(_scene, _name, _position, _rotation, _fCap)
+    constructor(_scene, _name, _position, _rotation, _fCap, _color, _hp)
     {
         this.name = _name;
+        this.color = _color;
         this.fCap = _fCap;
+        this.iHP = _hp;
+        this.iMaxHP = _hp;
         this.#CreatePhysics(_scene, _position, _rotation);
         this.#UpdateHP();
         this.#GenerateScore();
@@ -35,8 +39,8 @@ export class Player
 
     #CreatePhysics(_scene, _position, _rotation)
     {
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.color});
+        material.emissive.set(this.color);
         // const capsule = new THREE.CapsuleGeometry(this.fPaddleWidth, this.fPaddleHeight, 4, 8);
         const capsule = new THREE.BoxGeometry(this.fPaddleWidth, this.fPaddleHeight, this.fPaddleWidth);
         this.mesh = new THREE.Mesh(capsule, material);
@@ -55,14 +59,14 @@ export class Player
     {
         const textRotation = new THREE.Vector3(0, _rotation.z + 90 * DEG2RAD, 0);
         const textPosition = _position.clone().add(new THREE.Vector3(_position.x * 0.1, 1, _position.z * 0.1));
-        this.textName = new Text(_scene, this.name, textPosition, textRotation, 0.4, 0.02);
+        this.textName = new Text(_scene, this.name, textPosition, textRotation, 0.4, 0.02, this.color);
     }
 
     #CreateKillZone(_scene, _position, _rotation)
     {
         const scale = 8;
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.color});
+        material.emissive.set(this.color);
         const capsule = new THREE.CapsuleGeometry(this.fPaddleWidth / scale, this.fPaddleHeight + this.fCap * 2, 4, 8);
         const mesh = new THREE.Mesh(capsule, material);
         mesh.rotation.set(_rotation.x, _rotation.y, _rotation.z);
@@ -97,8 +101,9 @@ export class Player
 
     #UpdateHP()
     {
+        const color = new THREE.Color(this.color);
         const colorPer = this.iHP / this.iMaxHP;
-        const colorCode = new THREE.Color(colorPer, colorPer, colorPer);
+        const colorCode = new THREE.Color(colorPer * color.r, colorPer * color.g, colorPer * color.b);
         const material = new THREE.MeshLambertMaterial({color: colorCode});
         material.emissive.set(colorCode);
         material.emissiveIntensity = colorPer;

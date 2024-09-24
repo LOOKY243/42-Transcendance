@@ -2,7 +2,7 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js"
 import { Router } from "../../../spa/Router.js";
 import { UserService } from "../../service/User.service.js";
-import { Game } from "./Game.js"
+import { GamePong } from "./GamePong.js"
 
 export class PongComponent extends AComponent {
     game = {};
@@ -23,9 +23,8 @@ export class PongComponent extends AComponent {
     }
 
     static startPong(value) {
-        this.game = new Game();
+        this.game = new GamePong("fast", 2, 5, "theme4");
         this.game.Start();
-        console.log("test")
     }
 
     getCSSPath() {

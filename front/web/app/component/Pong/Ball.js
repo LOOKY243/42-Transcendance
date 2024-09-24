@@ -5,11 +5,11 @@ export class Ball
     game;
     mesh;
     velocity;
-    fInitialSpeed = 0.1;
-    fMaxSpeed = 0.25; // 0.25
+    fInitialSpeed;
+    fMaxSpeed;
     fSpeedStep = 15;
     fSpeed;
-    fSpeedIncrement = (this.fMaxSpeed - this.fInitialSpeed) / this.fSpeedStep;
+    fSpeedIncrement;
     fRadius = 0.2;
     fRespawnTime = 2000;
     leftRaycaster;
@@ -21,16 +21,21 @@ export class Ball
     explosionParticles = [];
     bCanRespawn = true;
     fRaycastDistance = this.fRadius * 1.2;
+    color;
 
-    constructor(_game, _scene)
+    constructor(_game, _scene, _color)
     {
         this.game = _game;
+        this.color = _color;
+        this.fInitialSpeed = this.game.fBallSpeed;
         this.fSpeed = this.fInitialSpeed;
+        this.fMaxSpeed = this.fInitialSpeed * 2.5;
+        this.fSpeedIncrement = (this.fMaxSpeed - this.fInitialSpeed) / this.fSpeedStep;
         this.velocity = new THREE.Vector3(Math.random() * 2 - 1, 0,  Math.random() * 2 - 1);
         this.#UpdateSpeed();
         const geometry = new THREE.SphereGeometry(this.fRadius); 
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff, transparent: true});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.color, transparent: true});
+        material.emissive.set(this.color);
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.position.set(0, this.fRadius, 0);
         this.mesh.castShadow = true;
@@ -173,8 +178,8 @@ export class Ball
         for (let i = 0; i < _numSegments; i++)
         {
             const geometry = new THREE.SphereGeometry(this.fRadius, 16, 16);
-            const material = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
-            material.emissive.set(0xffffff);
+            const material = new THREE.MeshLambertMaterial({ color: this.color, transparent: true, opacity: 1 });
+            material.emissive.set(this.color);
             const sphere = new THREE.Mesh(geometry, material);
             sphere.visible = false;
             this.trailSpheres.push(sphere);
@@ -215,8 +220,8 @@ export class Ball
         for (let i = 0; i < numParticles; i++)
         {
             const geometry = new THREE.SphereGeometry(this.fRadius * 0.1, 8, 8);
-            const material = new THREE.MeshLambertMaterial({ color: 0xffffff});
-            material.emissive.set(0xffffff);
+            const material = new THREE.MeshLambertMaterial({ color: this.color});
+            material.emissive.set(this.color);
             const particle = new THREE.Mesh(geometry, material);
             particle.position.copy(_position);
             _scene.add(particle);

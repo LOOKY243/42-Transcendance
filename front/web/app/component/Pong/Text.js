@@ -9,10 +9,12 @@ export class Text
     loader;
     scene;
     mesh;
+    color;
 
-    constructor(_scene, _text, _position, _rotation, _size, _depth)
+    constructor(_scene, _text, _position, _rotation, _size, _depth, _color)
     {
         this.scene = _scene;
+        this.color = _color;
         this.loader = new FontLoader();
         this.loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
             this.CreateText(font, _text, _position, _rotation, _size, _depth);
@@ -36,8 +38,9 @@ export class Text
         const offsetY = textHeight / 2;
         const offsetZ = textDepth / 2;
         textGeometry.translate(-offsetX, -offsetY, -offsetZ);
-        const textMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-        textMaterial.emissive.set(0xffffff);
+        const textMaterial = new THREE.MeshLambertMaterial({ color: this.color });
+        textMaterial.emissive.set(this.color);
+        textMaterial.emissiveIntensity = 1;
         this.mesh = new THREE.Mesh(textGeometry, textMaterial);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;

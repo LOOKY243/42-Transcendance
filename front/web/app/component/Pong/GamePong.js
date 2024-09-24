@@ -5,7 +5,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-export class Game
+export class GamePong
 {
     gameWindow;
     scene;
@@ -14,12 +14,25 @@ export class Game
     map;
     composer;
     world;
+    iPlayers;
+    iPoints;
+    theme;
     fBallSpeed = 10;
     iPaddleDirection = [2];
     fPaddleSpeed = 10;
 
-    constructor()
+    constructor(_ballSpeed, _iPlayers, _iPoints, _theme)
     {
+        this.iPlayers = _iPlayers;
+        this.iPoints = _iPoints;
+        this.theme = _theme;
+
+        if (_ballSpeed == "normal")
+            this.fBallSpeed = 0.075;
+        else if (_ballSpeed == "slow")
+            this.fBallSpeed = 0.05;
+        else
+            this.fBallSpeed = 0.1;
     }
 
     Start()
@@ -36,6 +49,9 @@ export class Game
 
     Update() 
     {
+        if (!this.map.init)
+            return;
+
         const speed = -0.15;
 
         this.map.Update(this.scene);
@@ -68,23 +84,24 @@ export class Game
         const renderPass = new RenderPass(this.scene, this.cameraManager.camera);
         this.composer.addPass(renderPass);
 
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.gameWindow.innerWidth, this.gameWindow.innerHeight), 0.5, 0.4, 0); // Str, Rad, Tresh
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.gameWindow.innerWidth, this.gameWindow.innerHeight), 0.5, 0.4, 0); // Str, Rad, Treshold
         this.composer.addPass(bloomPass);
     }
 
     #CreateScene()
     {
         this.gameWindow = document.getElementById("render-target");
+        console.log('Game window:', this.gameWindow, this.gameWindow.offsetWidth, this.gameWindow.offsetHeight);
         this.scene = new THREE.Scene();
         this.cameraManager = new CameraManager(new THREE.Vector3(), this.gameWindow);
-        this.renderer = new THREE.WebGLRenderer();
+        this.renderer = new THREE.WebGLRenderer({ alpha: true});
         this.renderer.setSize(this.gameWindow.offsetWidth, this.gameWindow.offsetHeight);
         this.renderer.setClearColor(0x000000, 0);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.gameWindow.appendChild(this.renderer.domElement);
         this.#CreateLight();
-        this.map = new Map(2, this);
+        this.map = new Map(this);
     }
 
     #CreateLight()
@@ -103,8 +120,6 @@ export class Game
         sun.shadow.camera.near = 0.5;
         sun.shadow.camera.far = 100;
         this.scene.add(sun);
-        //const helper = new THREE.CameraHelper(sun.shadow.camera);
-        //this.scene.add(helper);
     }
 
     #OnKeyDown(event) 

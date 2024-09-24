@@ -20,19 +20,60 @@ export class Map
     ground;
     texture;
     fCap = 1.9;
+    firstColor;
+    secondoColor;
+    init = false;
 
-    constructor(_iPlayers, _game)
+    constructor(_game)
     {
-        // this.iPlayers = _iPlayers > 8 ? 8 : _iPlayers;
-        this.iPlayers = _iPlayers;
         this.#game = _game;
+        this.SetTheme();
+        this.iPlayers = this.#game.iPlayers;
         this.textureLoader = new THREE.TextureLoader();
-        this.texture = this.textureLoader.load("app/assets/img/halftone.jpg");
-        console.log(this.texture)
-        this.texture.wrapS = THREE.RepeatWrapping;
-        this.texture.wrapT = THREE.RepeatWrapping;
-        this.GenerateMap();
-        setInterval(() => this.MovePlayerIA(), 25); // 1000
+        this.LoadSafe();
+    }
+
+    LoadSafe()
+    {
+        this.textureLoader.load(`http://${document.location.host}/app/assets/img/halftone.jpg`, 
+            texture => {
+                this.texture = texture;
+                this.texture.wrapS = THREE.RepeatWrapping;
+                this.texture.wrapT = THREE.RepeatWrapping;
+                console.log("Texture loaded:", this.texture);
+                this.GenerateMap();
+                this.init = true;
+                setInterval(() => this.MovePlayerIA(), 25); // 1000
+            }, 
+            undefined, 
+            function(err) {
+                console.error("Error loading texture", err);
+            }
+        );
+    }
+
+    SetTheme()
+    {
+        if (this.#game.theme == "theme2")
+        {
+            this.firstColor = 0xeccc68;
+            this.secondoColor = 0xff7f50;
+        }
+        else if (this.#game.theme == "theme3")
+        {
+            this.firstColor = 0x3742fa;
+            this.secondoColor = 0x2ed573;
+        }
+        else if (this.#game.theme == "theme4")
+        {
+            this.firstColor = 0xffa502;
+            this.secondoColor = 0x70a1ff;
+        }
+        else 
+        {
+            this.firstColor = 0xffffff;
+            this.secondoColor = 0x2f3542;
+        }
     }
 
     GenerateMap()
@@ -64,6 +105,9 @@ export class Map
 
     Update(_scene)
     {
+        if (!this.init)
+            return;
+
         this.ball.Update(_scene);
 
         for (let i = 0; i < this.paddles.length; i++)
@@ -81,8 +125,8 @@ export class Map
 
     #GenerateDot()
     {
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.firstColor});
+        material.emissive.set(this.firstColor);
         const geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.11);
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(0, 0, 0);
@@ -98,7 +142,7 @@ export class Map
         this.height = 5;
         const texture = this.texture.clone();
         texture.repeat.set(1, 1);
-        const material = new THREE.MeshLambertMaterial({color: 0x222222, map: texture});
+        const material = new THREE.MeshLambertMaterial({color: this.secondoColor, map: texture});
         const mesh = new THREE.Mesh(cube, material);
         mesh.scale.set(this.width, 0.1, this.height);
         mesh.position.set(0, 0, 0);
@@ -114,13 +158,13 @@ export class Map
         this.walls.push(this.#CreateSimpleWall(0, -this.height / 2 - this.iPaddleWidth / 2, this.width - this.iPaddleWidth));
         this.paddles.push(this.#CreateSimplePaddle(-this.width / 2, 0, 0));  
         this.paddles.push(this.#CreateSimplePaddle(this.width / 2, 0, 1));
-        this.ball = new Ball(this.#game, this.#game.scene);
+        this.ball = new Ball(this.#game, this.#game.scene, this.firstColor);
     }
 
     #CreateSimpleWall(_x, _y, _width)
     {
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.firstColor});
+        material.emissive.set(this.firstColor);
         // const capsule = new THREE.CapsuleGeometry(this.iPaddleWidth, _width, 8, 8);
         const capsule = new THREE.BoxGeometry(this.iPaddleWidth, _width, this.iPaddleWidth);
         const mesh = new THREE.Mesh(capsule, material);
@@ -152,11 +196,12 @@ export class Map
     {
         const position = new THREE.Vector3(_x, this.iPaddleWidth * 2, _y);
         let offset = 1;
+
         if (_index == 1)
             offset = -1;
 
         const rotation = new THREE.Vector3(90 * DEG2RAD * offset, 0, 0);
-        return new Player(this.#game.scene, "Player " + _index, position, rotation, this.fCap);
+        return new Player(this.#game.scene, "Player " + _index, position, rotation, this.fCap, this.firstColor, this.#game.iPoints);
     }
     // #endregion
 
@@ -170,8 +215,8 @@ export class Map
         this.width = this.width * dist;
         const texture = this.texture.clone();
         texture.repeat.set(1, 1);
+        const material = new THREE.MeshLambertMaterial({color: this.secondoColor, map: texture});
         const geometry = new THREE.CylinderGeometry(this.width, this.width, 0.1, this.iPlayers);
-        const material = new THREE.MeshLambertMaterial({color: 0x222222, map: texture});
         const mesh = new THREE.Mesh(geometry, material);
         mesh.userData.isKillZone = true;
         mesh.position.set(0, 0, 0);
@@ -189,15 +234,16 @@ export class Map
         for (let i = 0; i < this.iPlayers; i++)
             this.paddles.push(this.#CreatePaddle(i));
 
-        this.ball = new Ball(this.#game, this.#game.scene);
+        this.ball = new Ball(this.#game, this.#game.scene, this.firstColor);
     }
 
     #CreateWall(_x, _y, _width)
     {
+
         const texture = this.texture.clone();
         texture.repeat.set(1, 1);
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff, map: texture});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.firstColor, map: texture});
+        material.emissive.set(this.firstColor);
         material.emissiveIntensity = 1;
         const geometry = new THREE.TorusGeometry(_width, this.iPaddleWidth);
         const mesh = new THREE.Mesh(geometry, material);
@@ -286,7 +332,7 @@ export class Map
 
     #CreatePaddle(_index)
     {
-        return new Player(this.#game.scene, "Player " + _index, this.#GetPosition(_index), this.#GetRotation(_index), this.fCap);
+        return new Player(this.#game.scene, "Player " + _index, this.#GetPosition(_index), this.#GetRotation(_index), this.fCap, this.firstColor, this.#game.iPoints);
     }
     // #endregion
 }
