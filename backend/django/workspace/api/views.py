@@ -187,6 +187,9 @@ class UpdatePasswordView(APIView):
             if not user.check_password(currentPassword):
                 return JsonResponse({"ok": False, "error": "Current password is incorrect"})
 
+            if currentPassword == newPassword:
+                return JsonResponse({"ok": False, "error": "New password cannot be the same as the current password"})
+
             user.set_password(newPassword)
             user.save()
             update_session_auth_hash(request, user)
@@ -194,3 +197,28 @@ class UpdatePasswordView(APIView):
             return JsonResponse({"ok": True})
         
         return JsonResponse({"ok": False, "errors": serializer.errors})
+
+class UpdateUsernameView(APIView):
+    permission_classes = [IsAuthenticated]
+    USERNAME_MAX_LENGTH = 24
+
+    def patch(self, request):
+        user = request.user
+        new_username = request.data.get('username', '').strip()
+
+        if not new_username:
+            return JsonResponse({"ok": False, "error": "New username cannot be empty"})
+
+        if len(new_username) > self.USERNAME_MAX_LENGTH:
+            return JsonResponse({"ok": False, "error": f"Username cannot exceed 24 characters"})
+
+        if new_username == user.username:
+            return JsonResponse({"ok": False, "error": "New username cannot be the same as the current username"})
+
+        if User.objects.filter(username=new_username).exists():
+            return JsonResponse({"ok": False, "error": "Username already taken"})
+
+        user.username = new_username
+        user.save()
+
+        return JsonResponse({"ok": True, "username": user.username})

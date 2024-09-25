@@ -131,6 +131,23 @@ export class UserService extends AInjectable {
 		});
 	}
 
+	patchUsername(newUsername) {
+		injector[HttpClient].patch("updateUsername/", {
+			username: newUsername
+		}, true).then(response => {
+			if (response.ok) {
+				this.username.next(newUsername);
+				injector[PopService].renderPop(true, "pop.usernameSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.usernameDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
 	logoutManager(path, popStatus, popMessage) {
 		this.user = null;
 		injector[TokenService].deleteCookie();

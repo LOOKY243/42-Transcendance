@@ -39,7 +39,7 @@ export class ProfileSettingsComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "modifier",
 			style: "btn",
-			onclick: () => this.username.next(this.newUsername)
+			onclick: () => injector[UserService].patchUsername(this.newUsername)
 		}));
 		this.createSubComponent(InputComponent.create({
 			name: "usernameInput",

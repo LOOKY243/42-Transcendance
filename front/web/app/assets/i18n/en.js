@@ -53,5 +53,7 @@ export const en = {
 		"defaultLangSuccess": "Default language change successfully",
 		"passwordSuccess": "password change successfully",
 		"passwordDanger": "password can't be change, invalid credentials",
+		"usernameSuccess": "username change successfully",
+		"usernameDanger": "username can't be change, invalid credentials",
 	}
 }
