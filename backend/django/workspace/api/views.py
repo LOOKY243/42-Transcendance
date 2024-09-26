@@ -20,7 +20,8 @@ from .utils import check_token_status
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import update_session_auth_hash
-
+from rest_framework.parsers import MultiPartParser, FormParser
+import base64
 
 User = get_user_model() 
 
@@ -99,10 +100,16 @@ class GetUserView(APIView):
 
     def get(self, request):
         user = request.user
+        encoded_pfp = None
+        
+        if user.pfp:
+            encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
+
         return JsonResponse({
             "ok": True,
             "username": user.username,
-            "lang": user.lang
+            "lang": user.lang,
+            "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         })
 
 # class UpdateEmailView(LoginRequiredMixin, UpdateView):
@@ -168,6 +175,9 @@ class UpdateLanguageView(APIView):
         if not new_lang:
             return JsonResponse({"ok": False, "error": "No language provided"})
 
+        if new_lang == user.lang:
+            return JsonResponse({"ok": False, "error": "New language is the same as the current language"})
+
         user.lang = new_lang
         user.save()
 
@@ -175,6 +185,7 @@ class UpdateLanguageView(APIView):
 
 class UpdatePasswordView(APIView):
     permission_classes = [IsAuthenticated]
+    PASSWORD_MAX_LENGTH = 30
 
     def patch(self, request):
         user = request.user
@@ -189,6 +200,9 @@ class UpdatePasswordView(APIView):
 
             if currentPassword == newPassword:
                 return JsonResponse({"ok": False, "error": "New password cannot be the same as the current password"})
+            
+            if len(newPassword) > self.PASSWORD_MAX_LENGTH:
+                return JsonResponse({"ok": False, "error": f"Password cannot exceed {self.PASSWORD_MAX_LENGTH} characters"})
 
             user.set_password(newPassword)
             user.save()
@@ -222,3 +236,43 @@ class UpdateUsernameView(APIView):
         user.save()
 
         return JsonResponse({"ok": True, "username": user.username})
+
+
+class UpdateProfilePictureView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    MAX_FILE_SIZE = 5 * 1024 * 1024
+
+    def patch(self, request):
+        user = request.user
+        
+        if 'pfp' not in request.FILES:
+            return JsonResponse({"ok": False, "error": "No profile picture provided"})
+        
+        profile_picture = request.FILES['pfp']
+        
+        if profile_picture.content_type != 'image/png':
+            return JsonResponse({"ok": False, "error": "Only PNG images are allowed"})
+        
+        if profile_picture.size > self.MAX_FILE_SIZE:
+            return JsonResponse({"ok": False, "error": "File size exceeds 5MB limit"})
+        
+        user.pfp = profile_picture.read()
+        user.save()
+
+        return JsonResponse({"ok": True, "message": "Profile picture updated successfully"})
+
+class GetProfilePictureView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.pfp:
+            encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
+            return JsonResponse({
+                "ok": True,
+                "pfp": f"data:image/png;base64,{encoded_pfp}"
+            })
+        else:
+            return JsonResponse({"ok": False, "error": "Profile picture not found"})

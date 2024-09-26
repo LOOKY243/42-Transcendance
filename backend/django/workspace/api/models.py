@@ -17,7 +17,7 @@ class CustomUser(AbstractBaseUser):
     email = models.EmailField(blank=True, null=True)
     phoneNumber = models.CharField(max_length=10, blank=True, null=True)
     tfa = models.BooleanField(default=False)
-    pfp = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    pfp = models.BinaryField(blank=True, null=True)
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_code_created_at = models.DateTimeField(blank=True, null=True)
     lang = models.CharField(max_length=10, default='en')

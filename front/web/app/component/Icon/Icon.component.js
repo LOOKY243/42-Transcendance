@@ -6,7 +6,7 @@ export class IconComponent extends AComponent {
 	clickable = new ReplayObservable();
 	
 	iconList = {
-		"chat": "chat-left-text.svg",
+		"friends": "friends.svg",
 		"settings": "gear.svg",
 		"french": "FrenchFlag.svg",
 		"english": "UKingdomFlag.svg",

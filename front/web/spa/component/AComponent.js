@@ -17,6 +17,7 @@ export class AComponent {
 	configSubscription = null;
 	onClickSubscription = null;
 	onChangeSubscription = null;
+	onChangeFile = false;
 	
 	constructor(parentSelector, componentSelector, componentConfig) {
 		this.parentSelector = parentSelector;
@@ -58,8 +59,9 @@ export class AComponent {
 		});
 		document.querySelector(this.getSelector()).children[0].onclick = () => this.onClick.next({});
 		document.querySelector(this.getSelector()).children[0].addEventListener("change", (event) => {
-			this.onChangeValue = event.target.value;
-			this.onChange.next(event.target.value);
+			const specifiedValue = this.onChangeFile ? event.target.files[0] : event.target.value;
+			this.onChangeValue = specifiedValue;
+			this.onChange.next(specifiedValue, !this.onChangeFile);
 		});
 	}
 

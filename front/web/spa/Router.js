@@ -1,20 +1,19 @@
 import { initErrorPage, initRouter } from "../app/init.js";
 import { TranslateService } from "./service/Translate.service.js";
 import { injector } from "./Bootstrap.js";
-import { ReplayObservable } from "./utils/ReplayObservable.js";
 import { BackgroundComponent } from "../app/component/Background/Background.component.js";
 import { AInjectable } from "./service/AInjectable.js";
+import { Observable } from "./utils/Observable.js";
 
 export class Router extends AInjectable {
 	routes = initRouter();
 	errorPage = initErrorPage();
 	bgVideo = null;
-	windowPath = new ReplayObservable();
+	windowPath = new Observable();
 	loadedPage = null;
 	routerSelector = "#router"
 
 	start() {
-		this.windowPath.next(window.location.pathname);
 		this.windowPath.subscribe((path) => {
 				const route = this.routes.find((value) => {
 					return value.path == path;
@@ -24,6 +23,7 @@ export class Router extends AInjectable {
 				} else
 					this.loadPage(route);
 			});
+		this.windowPath.next(window.location.pathname);
 		window.addEventListener("popstate", (event) => {
 			this.windowPath.next(window.location.pathname);
 		});

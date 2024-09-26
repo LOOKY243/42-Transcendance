@@ -18,13 +18,13 @@ export class Observable {
 		this.func = this.func.filter(element => element.id !== id);
 	}
 
-	next(newValue) {
+	next(newValue, normalized = true) {
 		if (newValue == this.value) {
 			return ;
 		}
 		this.value = newValue;
 		this.func.forEach((value) => {
-			this.triggerFunc(value.func);
+			this.triggerFunc(value.func, normalized);
 		});
 	}
 
@@ -32,8 +32,11 @@ export class Observable {
 		this.mappingFunc = func;
 	}
 
-	triggerFunc(func) {
-		let ret = this.value != undefined ? JSON.parse(JSON.stringify(this.value)) : undefined;
+	triggerFunc(func, normalized) {
+		let ret = undefined;
+		if (this.value != undefined) {
+			ret = normalized ? JSON.parse(JSON.stringify(this.value)) : this.value;
+		}
 		if (this.mappingFunc)
 			ret = this.mappingFunc(this.value);
 		func(ret);

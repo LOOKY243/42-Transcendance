@@ -4,8 +4,8 @@ import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
 import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
-import { IconComponent } from "../Icon/Icon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
+import { InputFileComponent } from "../InputFile/InputFile.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
 import { RadioIconComponent } from "../RadioIcon/RadioIcon.component.js";
 
@@ -16,6 +16,7 @@ export class ProfileSettingsComponent extends AComponent {
 	newPassword = "";
 	newPasswordConfirm = ""
 	defaultLang = "";
+	pfp = null;
 
 	onInit() {
 		if (!injector[UserService].user) {
@@ -28,10 +29,17 @@ export class ProfileSettingsComponent extends AComponent {
 
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
 
-		this.createSubComponent(IconComponent.create({
-			name: "profilePicture",
+		this.createSubComponent(InputFileComponent.create({
+			name: "inputPP",
 			parentSelector: this.getSelector(),
-			icon: "defaultProfilePicture"
+			onchange: (value) => {this.pfp = value; console.log("input onChange: ", value)},
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "profilePictureModifier",
+			parentSelector: this.getSelector(),
+			icon: "modifier",
+			style: "btn",
+			onclick: () => injector[UserService].patchPfp(this.pfp)
 		}));
 
 		this.createSubComponent(ButtonIconComponent.create({
@@ -80,15 +88,6 @@ export class ProfileSettingsComponent extends AComponent {
 			onchange: (value) => this.newPasswordConfirm = value
 		}));
 
-
-		this.createSubComponent(ButtonIconComponent.create({
-			name: "profilePictureModifier",
-			parentSelector: this.getSelector(),
-			icon: "modifier",
-			style: "btn",
-			onclick: () => console.log("picture modifier")
-		}));
-
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
 		this.subComponent["langageRadio"].radioSelectSubscribe((value) => {
 			this.defaultLang = value;
@@ -125,7 +124,7 @@ export class ProfileSettingsComponent extends AComponent {
 					</div>
 					<div class="row m-3">
 						<div class="fs-3 text-light text-center">
-							<div id="profilePicture"></div>
+							<div id="inputPP"></div>
 							<div id="profilePictureModifier"></div>
 						</div>
 					</div>
