@@ -3,12 +3,25 @@ import { Observable } from "../../../spa/utils/Observable.js";
 
 export class RadioComponent extends AComponent {
 	radioSelect = new Observable();
+	radioSelectSubscription = null;
 
 	onInit() {
 		super.onInit();
 		this.generateHtml({});
 
 		return true;
+	}
+
+	destroy(id) {
+		super.destroy();
+		if (this.radioSelectSubscription) {
+			this.radioSelect.unsubscribe(id);
+		}
+	}
+
+	radioSelectSubscribe(func) {
+		this.radioSelectSubscription = this.radioSelect.subscribe(func);
+		this.destroy();
 	}
 
 	render() {

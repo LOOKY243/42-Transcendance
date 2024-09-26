@@ -51,14 +51,21 @@ export class HttpClient extends AInjectable {
 		})
 	}
 
-	patch(url, data, token = false) {
-		return this.fetchAndParseStream(this.getUrl(url), {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(data) 
-		}, token)
+	patch(url, data, token = false, isFile = false) {
+		if (isFile) {
+			return this.fetchAndParseStream(this.getUrl(url), {
+				method: "PATCH",
+				body: data,
+			}, token);
+		} else {
+			return this.fetchAndParseStream(this.getUrl(url), {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(data) 
+			}, token);
+		}
 	}
 
 	async fetchAndParseStream(url, options = {}, token = false) {

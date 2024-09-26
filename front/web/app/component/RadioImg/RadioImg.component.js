@@ -20,6 +20,18 @@ export class RadioImgComponent extends AComponent {
 		});
 	}
 	
+	destroy(id) {
+		super.destroy();
+		if (this.radioSelectSubscription) {
+			this.radioSelect.unsubscribe(id);
+		}
+	}
+
+	radioSelectSubscribe(func) {
+		this.radioSelectSubscription = this.radioSelect.subscribe(func);
+		this.destroy();
+	}
+	
 	getCSSPath() {
 		return "app/component/RadioImg/RadioImg.component.css";
 	}

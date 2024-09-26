@@ -2,7 +2,6 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { TranslateService } from "../../../spa/service/Translate.service.js";
-import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 import { UserService } from "../../service/User.service.js";
 import { DropButtonIconComponent } from "../DropButtonIcon/DropButtonIcon.component.js";
 import { IconComponent } from "../Icon/Icon.component.js";
@@ -16,10 +15,10 @@ export class NavBarComponent extends AComponent {
 		this.generateHtml({});
 
 		this.createSubComponent(IconComponent.create({
-			name: "chatIcon",
+			name: "friendsIcon",
 			parentSelector: this.getSelector(),
-			icon: "chat",
-			onclick: () => injector[Router].navigate("/chat")
+			icon: "friends",
+			onclick: () => injector[Router].navigate("/friends")
 		}));
 		this.createSubComponent(IconComponent.create({
 			name: "settingsIcon",
@@ -108,7 +107,7 @@ export class NavBarComponent extends AComponent {
             		<span class="navbar-toggler-icon"></span>
         		</button>
 				<div class="navbarCollapse d-flex justify-content-between">
-					<a id="chatIcon" class="nav-item navbar-brand"></a>
+					<a id="friendsIcon" class="nav-item navbar-brand" style="${config.auth ? `` : `display: none;`};"></a>
 				</div>
         		<div class="collapse navbar-collapse" id="navbarNavDropdown">
 					<div class="btn-group">

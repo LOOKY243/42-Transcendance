@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True, required=True, min_length=8)
+    password = serializers.CharField(write_only=True, required=True, min_length=8, max_length=30)
+    password_confirm = serializers.CharField(write_only=True, required=True, min_length=8, max_length=30)
     lang = serializers.CharField(required=False, allow_blank=True, default='en')
 
     class Meta:
@@ -15,7 +15,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({"password": "password are not the same."})
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+
+        if len(attrs['password']) > 30:
+            raise serializers.ValidationError({"password": "Password cannot exceed 30 characters."})
+
         return attrs
     
     def create(self, validated_data):
@@ -33,6 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+
 
 class UpdatePasswordSerializer(serializers.Serializer):
     currentPassword = serializers.CharField(required=True, write_only=True)

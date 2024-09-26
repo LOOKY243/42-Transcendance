@@ -28,7 +28,6 @@ export class Map
         this.#game = _game;
         this.textureLoader = new THREE.TextureLoader();
         this.texture = this.textureLoader.load("app/assets/img/halftone.jpg");
-        console.log(this.texture)
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
         this.GenerateMap();

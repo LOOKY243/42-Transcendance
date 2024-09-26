@@ -14,7 +14,7 @@ export class DropButtonIconComponent extends AComponent {
 	static create(value) {
 		let ret = new DropButtonIconComponent(value.parentSelector, value.name);
 		if (value.onclick) {
-			ret.onClick.subscribe(value.onclick);
+			ret.registerOnClick(value.onclick);
 			ret.clickable.next("true");
 		}
 		ret.createSubComponent(IconComponent.create({

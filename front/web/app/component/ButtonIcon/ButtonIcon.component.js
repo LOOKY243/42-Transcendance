@@ -16,7 +16,7 @@ export class ButtonIconComponent extends AComponent {
 	static create(value) {
 		let ret = new ButtonIconComponent(value.parentSelector, value.name);
 		if (value.onclick) {
-			ret.onClick.subscribe(value.onclick);
+			ret.registerOnClick(value.onclick);
 		}
 		ret.createSubComponent(IconComponent.create({
 			name: "icon",

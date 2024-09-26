@@ -14,6 +14,10 @@ export class AComponent {
 	onChange = new Observable();
 	onClick = new Observable();
 	subComponent = {};
+	configSubscription = null;
+	onClickSubscription = null;
+	onChangeSubscription = null;
+	onChangeFile = false;
 	
 	constructor(parentSelector, componentSelector, componentConfig) {
 		this.parentSelector = parentSelector;
@@ -38,6 +42,14 @@ export class AComponent {
 		return this.parentSelector + " #" + this.getComponentSelector();
 	}
 
+	registerOnClick(func) {
+		this.onClickSubscription = this.onClick.subscribe(func);
+	}
+
+	registerOnChange(func) {
+		this.onChangeSubscription = this.onChange.subscribe(func);
+	}
+
 	render() {
 		document.querySelector(this.getSelector()).innerHTML = this.getHtml();
 		this.getChildComponent().forEach((value) => {
@@ -47,9 +59,23 @@ export class AComponent {
 		});
 		document.querySelector(this.getSelector()).children[0].onclick = () => this.onClick.next({});
 		document.querySelector(this.getSelector()).children[0].addEventListener("change", (event) => {
-			this.onChangeValue = event.target.value;
-			this.onChange.next(event.target.value);
+			const specifiedValue = this.onChangeFile ? event.target.files[0] : event.target.value;
+			this.onChangeValue = specifiedValue;
+			this.onChange.next(specifiedValue, !this.onChangeFile);
 		});
+	}
+
+	destroy() {
+		this.getChildComponent().forEach((value) => {
+			value.destroy();
+		});
+		if (this.onClickSubscription) {
+			this.onClick.unsubscribe(this.onClickSubscription);
+		}
+		if (this.onChangeSubscription) {
+			this.onChange.unsubscribe(this.onChangeSubscription);
+		}
+		this.configObservable.unsubscribe(this.configSubscription);
 	}
 
 	createSubComponent(aComponent) {
@@ -79,7 +105,7 @@ export class AComponent {
 			}
 			this.configObservable.mergeObservable(value, obs);
 		});
-		this.configObservable.subscribe((conf) => {
+		this.configSubscription = this.configObservable.subscribe((conf) => {
 			Object.keys(conf).forEach((key) => {
 				conf[key] = this.escapeHtml(conf[key]);
 			});

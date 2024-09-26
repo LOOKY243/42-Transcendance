@@ -16,6 +16,9 @@ export const en = {
 		"home": "Home",
 		"profile": "Login"
 	},
+	"friends": {
+		"noFriends": "You dont have a single friend",
+	},
 	"auth": {
 		"login": "Log in",
 		"register": "Register",
@@ -43,6 +46,9 @@ export const en = {
 		"newPassword": "New password",
 		"newPasswordConfirm": "Confirm new password",
 	},
+	"inputFile": {
+		"text": "No file chosen"
+	},
 	"pop": {
 		"loginSuccess": "Successfuly login",
 		"loginDanger": "Failed to login: invalid credentials",
@@ -51,7 +57,12 @@ export const en = {
 		"logout": "successfully logout",
 		"reconnect": "Please reconnect",
 		"defaultLangSuccess": "Default language change successfully",
+		"defaultLangDanger": "Default language can't be changed",
 		"passwordSuccess": "password change successfully",
 		"passwordDanger": "password can't be change, invalid credentials",
+		"usernameSuccess": "username change successfully",
+		"usernameDanger": "username can't be change, invalid credentials",
+		"pfpSuccess": "Profile picture change successfully",
+		"pfpDanger": "Profile picture can't be change, invalid given file",
 	}
 }

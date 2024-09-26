@@ -11,11 +11,12 @@ import { TranslateService } from "../../spa/service/Translate.service.js";
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
 	defaultLang = new ReplayObservable();
+	friendsList = new ReplayObservable();
+	pfp = new ReplayObservable()
 	user = null
 
 	constructor() {
 		super();
-		this.getUser();
 		this.username.subscribe(value => {
 			if (value) {
 				this.user.username = value;
@@ -23,16 +24,27 @@ export class UserService extends AInjectable {
 		})
 		this.defaultLang.subscribe(value => {
 			if (value) {
-				this.user.defaultLang = value
+				this.user.defaultLang = value;
+			}
+		});
+		this.friendsList.subscribe(value => {
+			if (value) {
+				this.user.friendsList = value;
+			}
+		});
+		this.pfp.subscribe(value => {
+			if (value) {
+				this.user.pfp = value;
 			}
 		});
 	}
 
 	init() {
 		this.isReady.next(false);
-		return this
+		this.getUser();
+		return this;
 	}
-
+	
 	register(username, password, passwordConfirm) {
 			injector[HttpClient].put("register/", {
 			username: username,
@@ -83,16 +95,37 @@ export class UserService extends AInjectable {
 				this.user = {
 					username: response.username,
 					defaultLang: response.lang,
+					pfp: response.pfp,
 					readyToPlay: false,
+					friendsList: {
+						"1": {
+							"name": "Alice"
+						},
+						"2": {
+							"name": "Bob"
+						},
+						"3": {
+							"name": "Charlie"
+						},
+						"4": {
+							"name": "Diana"
+						},
+						"5": {
+							"name": "Eve"
+						}
+					}
 				};
 				this.username.next(response.username);
 				this.defaultLang.next(response.lang);
+				this.pfp.next(response.pfp),
+				this.friendsList.next(response.friendsList);
 				injector[TranslateService].setLang(response.lang);
-				this.isReady.next(true);
 			}).catch(error => {
 				if (error instanceof TokenError) {
 					injector[TokenService].deleteCookie();
 				}
+			}).finally(() => {
+				this.isReady.next(true);
 			});
 		} else {
 			this.isReady.next(true);
@@ -103,8 +136,12 @@ export class UserService extends AInjectable {
 		injector[HttpClient].patch("updateLanguage/", {
 			lang: newDefaultLang
 		}, true).then(response => {
-			this.defaultLang.next(newDefaultLang);
-			injector[PopService].renderPop(true, "pop.defaultLangSuccess");
+			if (response.ok) {
+				this.defaultLang.next(newDefaultLang);
+				injector[PopService].renderPop(true, "pop.defaultLangSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.defaultLangDanger");
+			}
 		}).catch(error => {
 			if (error instanceof TokenError) {
 				this.logoutManager("/auth", false, "pop.reconnect");
@@ -124,6 +161,52 @@ export class UserService extends AInjectable {
 				injector[PopService].renderPop(false, "pop.passwordDanger");
 			}
 		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
+	patchUsername(newUsername) {
+		injector[HttpClient].patch("updateUsername/", {
+			username: newUsername
+		}, true).then(response => {
+			if (response.ok) {
+				this.username.next(newUsername);
+				injector[PopService].renderPop(true, "pop.usernameSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.usernameDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
+	patchPfp(newPfp) {
+		const formData = new FormData();
+		formData.append('pfp', newPfp);
+		injector[HttpClient].patch("updatePfp/", formData, true, true).then(response => {
+			if (response.ok) {
+				this.getPfp();
+				injector[PopService].renderPop(true, "pop.pfpSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.pfpDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
+	getPfp() {
+		injector[HttpClient].get("getPfp/", true).then(response => {
+			if (response.ok) {
+				this.pfp.next(response.pfp);
+			}
+		}).catch (error => {
 			if (error instanceof TokenError) {
 				this.logoutManager("/auth", false, "pop.reconnect");
 			};

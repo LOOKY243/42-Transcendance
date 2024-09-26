@@ -4,6 +4,7 @@ import { Router } from "../../../spa/Router.js";
 import { UserService } from "../../service/User.service.js";
 import { IconComponent } from "../Icon/Icon.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
+import { profilePictureComponent } from "../ProfilePicture/ProfilePicture.component.js";
 import { TablesComponent } from "../Tables/Tables.component.js";
 
 export class ProfileComponent extends AComponent {
@@ -20,11 +21,7 @@ export class ProfileComponent extends AComponent {
 
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
 
-		this.createSubComponent(IconComponent.create({
-			name: "profilePicture",
-			parentSelector: this.getSelector(),
-			icon: "defaultProfilePicture"
-		}));
+		this.createSubComponent(new profilePictureComponent(this.getSelector(), "profilePicture"));
 		this.createSubComponent(IconComponent.create({
 			name: "profileSettings",
 			parentSelector: this.getSelector(),
