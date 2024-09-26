@@ -347,8 +347,6 @@ class UpdatePasswordView(APIView):
             return JsonResponse({"ok": True})
         
         return JsonResponse({"ok": False, "errors": serializer.errors})
-<<<<<<< HEAD
-=======
 
 class UpdateUsernameView(APIView):
     permission_classes = [IsAuthenticated]
@@ -414,4 +412,3 @@ class GetProfilePictureView(APIView):
             })
         else:
             return JsonResponse({"ok": False, "error": "Profile picture not found"})
->>>>>>> user
