@@ -1,8 +1,5 @@
 from rest_framework import serializers
 from .models import CustomUser
-from django.contrib.auth.models import User
-from rest_framework.validators import UniqueValidator
-from django.conf import settings
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -23,9 +20,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        
-        user = User(
-            username=validated_data['username'],
+        user = CustomUser(
+            username=validated_data.get('username'),
             email=validated_data.get('email', ''),
             tfa=validated_data.get('tfa', False),
             pfp=validated_data.get('pfp', None),
@@ -33,7 +29,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             verification_code_created_at=validated_data.get('verification_code_created_at', None),
             lang=validated_data.pop('language', 'en')
         )
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data.get('password'))
         user.save()
         
         return user

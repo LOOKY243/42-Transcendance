@@ -1,8 +1,5 @@
 import random, string, requests
-from .models import CustomUser, CustomUserManager
-from django.contrib.auth import login
 from django.conf import settings
-from django.shortcuts import redirect
 
 def generate_verification_code(length=6):
     return ''.join(random.choices(string.digits, k=length))
@@ -21,20 +18,20 @@ def get_ft_token(code):
     access_token = token_info.get('access_token')
     return access_token
 
+def generate_random_password(length=12):
+    if length < 12:
+        raise ValueError("Password length should be at least 12 characters.")
     
-def log_ft_user(request, username, email):
-    user = CustomUser.objects.filter(username=username)
-    if not user:
-        user = CustomUserManager().create_user(username=username, email=email, password=None)
-        login(request, user)
-        return 1
-    else:
-        login(request, user)
-        return 2
+    lowercase = random.choice(string.ascii_lowercase)
+    uppercase = random.choice(string.ascii_uppercase)
+    digit = random.choice(string.digits)
+    symbol = random.choice(string.punctuation)
     
-def authorize_redirect(request):
-    client_id = settings.CLIENT_ID
-    redirect_uri = settings.REDIRECT_URI
-    authorization_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
+    remaining_length = length - 4
+    all_characters = string.ascii_letters + string.digits + string.punctuation
+    password = [lowercase, uppercase, digit, symbol] + random.choices(all_characters, k=remaining_length)
     
-    return redirect(authorization_url)
+    random.shuffle(password)
+    
+    return ''.join(password)
+

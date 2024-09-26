@@ -26,8 +26,6 @@ class CustomUser(AbstractBaseUser):
 
     objects = CustomUserManager()
 
-    objects = CustomUserManager()
-
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
     

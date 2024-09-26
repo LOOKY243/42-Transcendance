@@ -1,8 +1,5 @@
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer
-from django.contrib.auth import authenticate, login, logout
-from .models import CustomUser, MatchHistory
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -10,13 +7,14 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
-from .utils import generate_verification_code, get_ft_token, log_ft_user, authorize_redirect
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
 import requests
 from django.shortcuts import redirect
+from .models import CustomUser, MatchHistory
+from .serializers import RegisterSerializer
+from .utils import generate_verification_code, get_ft_token, generate_random_password
 
 User = get_user_model() 
 
@@ -46,13 +44,13 @@ class RegisterView(APIView):
         username = request.data.get('username')
         
         if CustomUser.objects.filter(username=username).exists():
-            return JsonResponse({"ok": False, "error": "usernameError"})
+            return JsonResponse({"ok": False, "error": "usernameError"}, status=400)
 
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             return JsonResponse({"ok": True, "username": user.username})
-        return JsonResponse({"ok": False}, status=400)
+        return JsonResponse({"ok": False, 'password': request.data.get('password'), 'passwd_confirm': request.data.get('password_confirm')}, status=400)
 
 
 class LoginView(APIView):
@@ -64,7 +62,7 @@ class LoginView(APIView):
         if user is not None:
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            response =  JsonResponse({
+            response = JsonResponse({
                 "ok": True,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
@@ -79,35 +77,7 @@ class LoginView(APIView):
             return response
         else:
             return JsonResponse({"ok": False}, status=404)
-        
 
-# class FtLoginView(APIView):
-#     def post(self, request):
-#         access_token = get_ft_token()
-#         redirect = authorize_redirect()
-#         user_info_url = 'https://api.intra.42.fr/v2/me'
-#         headers = {
-#             'Authorization': f'Bearer {access_token}'
-#         }
-#         response = requests.get(user_info_url, headers=headers)
-#         user_info = response.json()
-#         username = user_info.get('login')
-#         email = user_info.get('email')
-#         if not username or not email:
-#             return JsonResponse({
-#                 'ok': False,
-#             })
-#         mode = log_ft_user(request, username, email)
-#         if mode == 1:
-#             return JsonResponse({
-#                 'ok': True,
-#                 'mode': 'register'
-#             })
-#         if mode == 2:
-#             return JsonResponse({
-#                 'ok': True,
-#                 'mode': 'login'
-#             })
 
 class FtLoginRedirectView(APIView):
     def get(self, request):
@@ -115,52 +85,75 @@ class FtLoginRedirectView(APIView):
         redirect_uri = settings.REDIRECT_URI
         authorization_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
         return redirect(authorization_url)
+        
 
 class FtLoginCallbackView(APIView):
     def get(self, request):
         code = request.GET.get('code')
         if not code:
-            return JsonResponse({
-                'ok': False,
-                'error': 'Authorization code not provided'
-                }, status=400)
+            return JsonResponse({'ok': False, 'error': 'Authorization code not provided'}, status=400)
 
         access_token = get_ft_token(code)
-
         if not access_token:
-            return JsonResponse({
-                'ok': False,
-                'error': 'Failed to obtain access token'
-                }, status=400)
+            return JsonResponse({'ok': False, 'error': 'Failed to obtain access token'}, status=400)
         
         user_info_url = 'https://api.intra.42.fr/v2/me'
-        headers = {
-            'Authorization': f'Bearer {access_token}'
-        }
+        headers = {'Authorization': f'Bearer {access_token}'}
         response = requests.get(user_info_url, headers=headers)
         user_info = response.json()
 
         username = user_info.get('login')
         email = user_info.get('email')
-
         if not username or not email:
-            return JsonResponse({
-                'ok': False,
-                'error': 'Failed to retrieve user info'
-                })
+            return JsonResponse({'ok': False, 'error': 'Failed to retrieve user info'})
 
-        mode = log_ft_user(request, username, email)
+        user = CustomUser.objects.filter(username=username).first()
 
-        if mode == 1:
-            return JsonResponse({
-                'ok': True,
-                'mode': 'register'
+        if not user:
+            tmp_password = generate_random_password()
+            register_data = {
+                'username': username,
+                'password': tmp_password,
+                'password_confirm': tmp_password,
+                'email': email
+            }
+            if CustomUser.objects.filter(username=username).exists():
+                return JsonResponse({"ok": False, "error": "usernameError"}, status=400)
+            
+            serializer = RegisterSerializer(data=register_data)
+            
+            if serializer.is_valid():
+                user = serializer.save()
+
+                subject = 'Registered successfully'
+                message = f'You have been registered successfully. Your temporary password is {tmp_password}. Please change it as soon as possible.'
+                from_email = settings.EMAIL_HOST_USER
+                recipient_list = [email]
+                send_mail(subject, message, from_email, recipient_list)
+                login(request, user)
+                return JsonResponse({'ok': True, 'message': 'User registered successfully. Check your email.'})
+            else:
+                return JsonResponse({'ok': False, 'errors': serializer.errors}, status=400)
+        else:
+            user = authenticate(username=username, password=user.password)
+            if user:
+                login(request, user)
+                refresh = RefreshToken.for_user(user)
+                response = JsonResponse({
+                    "ok": True,
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "token_refresh_required": False,
                 })
-        if mode == 2:
-            return JsonResponse({
-                'ok': True,
-                'mode': 'login'
-                })
+                response.set_cookie(
+                    'accessToken', str(refresh.access_token), max_age=3600, httponly=True, secure=False, samesite='Lax'
+                )
+                response.set_cookie(
+                    'refreshToken', str(refresh), max_age=86400, httponly=True, secure=False, samesite='Lax'
+                )
+                return response
+            else:
+                return JsonResponse({"ok": False, "error": "Authentication failed"}, status=400)
 
 
 class LogoutView(APIView):
@@ -242,8 +235,7 @@ class TwoFactorActivateView(APIView):
 
 class TwoFactorSetupView(APIView):
     def put(self, request):
-        username = request.data.get('username')
-        user = CustomUser.objects.filter(username=username).first()
+        user = request.user
 
         if not user:
             return JsonResponse({'ok': False}, status=400)
@@ -268,10 +260,9 @@ class TwoFactorSetupView(APIView):
         
 class TwoFactorVerifyView(APIView):
     def post(self, request):
-        username = request.data.get('username')
         code = request.data.get('code')
         
-        user = CustomUser.objects.filter(username=username).first()
+        user = request.user
         
         if not user:
             return JsonResponse({'ok': False, 'error': 'User not found'})
@@ -314,3 +305,15 @@ class GetMatchHistoryView(APIView):
         } for match in matches]
 
         return JsonResponse({'last_five_matches': match_data})
+
+class SetNewPasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        new_password = requests.data.get('new_password')
+        if user.password != new_password:
+            user.password = new_password
+            return JsonResponse({'ok': True})
+        return JsonResponse({'ok': False, 'error': "password can't be the same as the old one"})
+    
