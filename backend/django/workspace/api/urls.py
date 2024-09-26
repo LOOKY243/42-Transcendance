@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, GetUserView, LogoutView, TwoFactorSetupView, TwoFactorVerifyView, TwoFactorActivateView, UpdateLanguageView, GetUserTfaView, GetMatchHistoryView, FtLoginRedirectView, FtLoginCallbackView
-
+from .views import RegisterView, LoginView, GetUserView, LogoutView, TwoFactorSetupView, TwoFactorVerifyView, TwoFactorActivateView, UpdateLanguageView, GetUserTfaView, GetMatchHistoryView, FtLoginRedirectView, FtLoginCallbackView, UpdatePasswordView
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
@@ -14,4 +13,5 @@ urlpatterns = [
     path('getmatchHistory/', GetMatchHistoryView.as_view(), name='get_match_history'),
     path('ftRedirect/', FtLoginRedirectView.as_view(), name='ft_redirect'),
     path('ftCallback/', FtLoginCallbackView.as_view(), name='ft_callback'),
+    path('updatePassword/', UpdatePasswordView.as_view(), name='updatePassword'),
 ]

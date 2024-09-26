@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
+from .serializers import RegisterSerializer, UpdatePasswordSerializer
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -13,8 +14,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 import requests
 from django.shortcuts import redirect
 from .models import CustomUser, MatchHistory
-from .serializers import RegisterSerializer
 from .utils import generate_verification_code, get_ft_token, generate_random_password
+
 
 User = get_user_model() 
 
@@ -305,15 +306,25 @@ class GetMatchHistoryView(APIView):
         } for match in matches]
 
         return JsonResponse({'last_five_matches': match_data})
-
-class SetNewPasswordView(APIView):
+    
+class UpdatePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request):
+    def patch(self, request):
         user = request.user
-        new_password = requests.data.get('new_password')
-        if user.password != new_password:
-            user.password = new_password
-            return JsonResponse({'ok': True})
-        return JsonResponse({'ok': False, 'error': "password can't be the same as the old one"})
-    
+        serializer = UpdatePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            currentPassword = serializer.validated_data['currentPassword']
+            newPassword = serializer.validated_data['newPassword']
+
+            if not user.check_password(currentPassword):
+                return JsonResponse({"ok": False, "error": "Current password is incorrect"})
+
+            user.set_password(newPassword)
+            user.save()
+            update_session_auth_hash(request, user)
+
+            return JsonResponse({"ok": True})
+        
+        return JsonResponse({"ok": False, "errors": serializer.errors})

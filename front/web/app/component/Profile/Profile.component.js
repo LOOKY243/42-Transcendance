@@ -11,7 +11,7 @@ export class ProfileComponent extends AComponent {
 	// history = injector[UserService].history;
 
 	onInit() {
-		if (injector[UserService].username.isEmpty()) {
+		if (!injector[UserService].user) {
             injector[Router].navigate("/auth");
 			return false;
         }

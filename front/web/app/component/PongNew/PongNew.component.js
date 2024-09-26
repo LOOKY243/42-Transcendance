@@ -1,9 +1,12 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { Router } from "../../../spa/Router.js";
 import { GameService } from "../../service/Game.service.js";
+import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
+import { PongComponent } from "../Pong/Pong.component.js";
 import { RadioComponent } from "../Radio/Radio.component.js";
 import { RadioImgComponent } from "../RadioImg/RadioImg.component.js";
 
@@ -44,7 +47,7 @@ export class PongNewComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "arrow",
 			style: "btn btn-outline-info",
-			onclick: () => injector[GameService].pongParams(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme)
+			onclick: () => this.startGame()
 		}));
 
 		this.createSubComponent(new RadioComponent(this.getSelector(), "ballRadio"));
@@ -65,12 +68,22 @@ export class PongNewComponent extends AComponent {
 		return true;
 	}
 
+	startGame() {
+		// injector[GameService].pongParams(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme);
+		if (injector[UserService].user) {
+			injector[UserService].user.readyToPlay = true;
+		}
+		injector[Router].navigate("/pong");
+		PongComponent.startPong();
+	}
+
 	checkParams() {
 		if (Object.values(this.params).some(value => value === false)) {
 			this.subComponent["startButton"].disabled.next(true);
 		} else {
 			this.subComponent["startButton"].disabled.next(false);
 		}
+		this.subComponent["startButton"].disabled.next(false);
 	}
 
 	checkInputPoint() {

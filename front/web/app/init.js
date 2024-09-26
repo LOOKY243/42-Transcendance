@@ -1,6 +1,7 @@
 import { AuthComponent } from "./component/Auth/Auth.component.js";
 import { HomeComponent } from "./component/Home/Home.component.js";
 import { NotFoundComponent } from "./component/NotFound/NotFound.component.js";
+import { PongComponent } from "./component/Pong/Pong.component.js";
 import { PongNewComponent } from "./component/PongNew/PongNew.component.js";
 import { ProfileComponent } from "./component/Profile/Profile.component.js";
 import { ProfileSettingsComponent } from "./component/ProfileSettings/ProfileSettings.component.js";
@@ -29,6 +30,10 @@ export function initRouter() {
 		path: "/profile/settings",
 		selector: "profileSettings",
 		component: ProfileSettingsComponent
+	}, {
+		path: "/pong",
+		selector: "pong",
+		component: PongComponent
 	}];
 }
 
