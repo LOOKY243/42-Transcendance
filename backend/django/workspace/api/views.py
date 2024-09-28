@@ -22,6 +22,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import update_session_auth_hash
 from rest_framework.parsers import MultiPartParser, FormParser
 import base64
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 User = get_user_model() 
 
@@ -68,6 +71,8 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+
+            user.update_last_activity()
             refresh = RefreshToken.for_user(user)
             response =  JsonResponse({
                 "ok": True,
@@ -85,14 +90,23 @@ class LoginView(APIView):
         else:
             return JsonResponse({"ok": False})
 
+
 class LogoutView(APIView):
     def post(self, request):
-        logout(request)
-        response = JsonResponse({"ok": True})
+        current_user = request.user
         
-        response.delete_cookie('accessToken')
-        response.delete_cookie('refreshToken')
-        
+        if current_user.is_authenticated:
+            current_user.is_online = False
+            current_user.save()
+            
+            logout(request)
+
+            response = JsonResponse({"ok": True})
+            response.delete_cookie('accessToken')
+            response.delete_cookie('refreshToken')
+        else:
+            response = JsonResponse({"ok": False, "error": "User is not authenticated."})
+
         return response
 
 class GetUserView(APIView):
@@ -112,65 +126,14 @@ class GetUserView(APIView):
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         })
 
-# class UpdateEmailView(LoginRequiredMixin, UpdateView):
-#     model = CustomUser
-#     fields = ['email']
-#     success_url = '/'
-
-# class TwoFactorSetupView(APIView):
-#     def put(self, request):
-#         username = request.data.get('username')
-#         user = CustomUser.objects.filter(username=username).first()
-
-#         if not user:
-#             return JsonResponse({'ok': False})
-#         if not user.email:
-#             return JsonResponse({'ok': False})
-    
-#         verification_code = get_random_string(length=6, allowed_chars='0123456789')
-
-#         subject = 'Your Two-Factor Authentication Verification Code'
-#         message = f'Your verification code is: {verification_code}'
-#         from_email = settings.DEFAULT_FROM_EMAIL
-#         recipient_list = [user.email]
-
-#         try:
-#             send_mail(subject, message, from_email, recipient_list)
-#             user.verification_code = verification_code
-#             user.verification_code_created_at = timezone.now()
-#             user.save()
-#             return JsonResponse({'ok': True})
-#         except Exception as e:
-#             return JsonResponse({'ok': False, 'error': str(e)})
-        
-# class TwoFactorVerifyView(APIView):
-#     def post(self, request):
-#         username = request.data.get('username')
-#         code = request.data.get('code')
-        
-#         user = CustomUser.objects.filter(username=username).first()
-        
-#         if not user:
-#             return JsonResponse({'ok': False, 'error': 'User not found'})
-        
-#         if user.verification_code != code:
-#             return JsonResponse({'ok': False, 'error': 'Invalid code'})
-        
-#         expiration_time = user.verification_code_created_at + timedelta(minutes=5)
-#         if timezone.now() > expiration_time:
-#             user.verification_code = None
-#             user.verification_code_created_at = None
-#             user.save()
-#             return JsonResponse({'ok': False, 'error': 'Code expired'})
-        
-#         return JsonResponse({'ok': True})
-
 class UpdateLanguageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
         user = request.user
         new_lang = request.data.get('lang')
+
+        user.update_last_activity()
 
         if not new_lang:
             return JsonResponse({"ok": False, "error": "No language provided"})
@@ -189,6 +152,7 @@ class UpdatePasswordView(APIView):
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         serializer = UpdatePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -218,6 +182,7 @@ class UpdateUsernameView(APIView):
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         new_username = request.data.get('username', '').strip()
 
         if not new_username:
@@ -246,6 +211,7 @@ class UpdateProfilePictureView(APIView):
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         
         if 'pfp' not in request.FILES:
             return JsonResponse({"ok": False, "error": "No profile picture provided"})
@@ -268,6 +234,8 @@ class GetProfilePictureView(APIView):
 
     def get(self, request):
         user = request.user
+        user.update_last_activity()
+
         if user.pfp:
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
             return JsonResponse({
@@ -276,3 +244,109 @@ class GetProfilePictureView(APIView):
             })
         else:
             return JsonResponse({"ok": False, "error": "Profile picture not found"})
+
+class SearchUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        search_string = request.data.get('search_string', '')
+        current_user = request.user
+        current_user.update_last_activity()
+        friends = current_user.friends.all()
+
+        users = CustomUser.objects.filter(
+            username__icontains=search_string
+        ).exclude(
+            id__in=friends.values_list('id', flat=True)
+        ).exclude(
+            id=current_user.id
+        )
+
+        user_list = [{"id": user.id, "username": user.username} for user in users]
+
+        return JsonResponse({
+            "ok": True,
+            "users": user_list
+        })
+
+class AddFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        friend_username = request.data.get('username')
+
+        if not friend_username:
+            return JsonResponse({"ok": False, "error": "No username provided."})
+
+        try:
+            friend = User.objects.get(username=friend_username)
+        except User.DoesNotExist:
+            return JsonResponse({"ok": False, "error": "User not found."})
+
+        current_user = request.user
+        current_user.update_last_activity()
+
+        if friend.id == current_user.id:
+            return JsonResponse({"ok": False, "error": "You cannot add yourself as a friend."})
+
+        if friend in current_user.friends.all():
+            return JsonResponse({"ok": False, "error": "This user is already your friend."})
+
+        current_user.friends.add(friend)
+        current_user.save()
+
+        return JsonResponse({"ok": True, "message": f"{friend.username} has been added as a friend."})
+
+class GetFriendListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        current_user = request.user
+        current_user.update_last_activity()
+
+        friends = current_user.friends.all()
+        friend_list = []
+
+        expiration_time = timedelta(minutes=15)
+
+        for friend in friends:
+            is_online = False
+            if not friend.is_online:
+                is_online = False
+
+            elif friend.last_activity and (timezone.now() - friend.last_activity) < expiration_time:
+                is_online = True
+            else:
+                friend.is_online = False
+                friend.save()
+                
+            friend_list.append({
+                "id": friend.id,
+                "username": friend.username,
+                "is_online": is_online,
+            })
+
+        if not friend_list:
+            return JsonResponse({
+                "ok": False,
+                "message": "No friends found."
+            })
+
+        return JsonResponse({
+            "ok": True,
+            "friends": friend_list
+        })
+
+class RemoveFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        current_user = request.user
+        friend_to_remove = get_object_or_404(CustomUser, username=request.data.get('username'))
+
+        if friend_to_remove in current_user.friends.all():
+            current_user.friends.remove(friend_to_remove)
+            current_user.save()
+            return JsonResponse({"ok": True, "message": "Friend has been removed."})
+        else:
+            return JsonResponse({"ok": False, "message": "Friend not found in your friend list."})

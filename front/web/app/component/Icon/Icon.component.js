@@ -4,6 +4,7 @@ import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 export class IconComponent extends AComponent {
 	icon = new ReplayObservable();
 	clickable = new ReplayObservable();
+	id = new ReplayObservable();
 	
 	iconList = {
 		"friends": "friends.svg",
@@ -18,6 +19,9 @@ export class IconComponent extends AComponent {
 		"defaultProfilePicture": "defaultPP.svg",
 		"modifier": "modifier.svg",
 		"logout": "logout.svg",
+		"search": "search.svg",
+		"addFriends": "addFriends.svg",
+		"removeFriends": "removeFriends.svg"
 	}
 
 	initConfig() {

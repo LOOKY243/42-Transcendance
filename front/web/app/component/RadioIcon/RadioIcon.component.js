@@ -23,16 +23,16 @@ export class RadioIconComponent extends AComponent {
         return true;
     }
 
-    destroy(id) {
+    destroy() {
 		super.destroy();
 		if (this.radioSelectSubscription) {
-			this.radioSelect.unsubscribe(id);
+			this.radioSelect.unsubscribe(this.radioSelectSubscription);
 		}
 	}
 
 	radioSelectSubscribe(func) {
 		this.radioSelectSubscription = this.radioSelect.subscribe(func);
-		this.destroy();
+		// this.destroy();
 	}
     
     render() {

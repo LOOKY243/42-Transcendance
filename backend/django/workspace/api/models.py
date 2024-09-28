@@ -21,6 +21,9 @@ class CustomUser(AbstractBaseUser):
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_code_created_at = models.DateTimeField(blank=True, null=True)
     lang = models.CharField(max_length=10, default='en')
+    friends = models.ManyToManyField('self', symmetrical=False, related_name='friends_of', blank=True)
+    is_online = models.BooleanField(default=False)
+    last_activity = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -35,4 +38,9 @@ class CustomUser(AbstractBaseUser):
 
     def __str__(self):
         return self.username
+
+    def update_last_activity(self):
+        self.last_activity = timezone.now()
+        self.is_online = True
+        self.save()
 

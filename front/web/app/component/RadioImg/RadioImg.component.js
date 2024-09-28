@@ -20,10 +20,10 @@ export class RadioImgComponent extends AComponent {
 		});
 	}
 	
-	destroy(id) {
+	destroy() {
 		super.destroy();
 		if (this.radioSelectSubscription) {
-			this.radioSelect.unsubscribe(id);
+			this.radioSelect.unsubscribe(this.radioSelectSubscription);
 		}
 	}
 

@@ -37,18 +37,14 @@ export class HttpClient extends AInjectable {
 		});
 	}
 
-	delete(url, data) {
+	delete(url, data, token = false) {
 		return this.fetchAndParseStream(this.getUrl(url), {
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify(data) 
-		}).then(response => {
-			if (!response.ok)
-				throw new Error(response.status)
-			return response.json();
-		})
+		}, token);
 	}
 
 	patch(url, data, token = false, isFile = false) {
@@ -89,7 +85,7 @@ export class HttpClient extends AInjectable {
 					await injector[TokenService].refreshToken();
 					return this.fetchAndParseStream(url, options, true);
 				} catch (error) {
-					throw error;
+					return {"ok": "false"};
 				}
 			} else {
 				response = await this.responseDecoder(response);

@@ -12,10 +12,10 @@ export class RadioComponent extends AComponent {
 		return true;
 	}
 
-	destroy(id) {
+	destroy() {
 		super.destroy();
 		if (this.radioSelectSubscription) {
-			this.radioSelect.unsubscribe(id);
+			this.radioSelect.unsubscribe(this.radioSelectSubscription);
 		}
 	}
 

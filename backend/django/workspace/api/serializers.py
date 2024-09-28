@@ -4,8 +4,11 @@ from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+import re
 
 User = get_user_model()
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8, max_length=30)
@@ -16,12 +19,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'password', 'password_confirm', 'email', 'phoneNumber', 'tfa', 'pfp', 'lang']
     
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        if len(value) > 30:
+            raise serializers.ValidationError("Password cannot exceed 30 characters.")
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError("Password must contain at least one uppercase letter.")
+        if not re.search(r'[a-z]', value):
+            raise serializers.ValidationError("Password must contain at least one lowercase letter.")
+        if not re.search(r'[0-9]', value):
+            raise serializers.ValidationError("Password must contain at least one digit.")
+        if not re.search(r'[\W_]', value):
+            raise serializers.ValidationError("Password must contain at least one special character.")
+        if value.lower() in ['password', '123456', 'qwerty']:
+            raise serializers.ValidationError("Password is too common.")
+        return value
+    
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
 
-        if len(attrs['password']) > 30:
-            raise serializers.ValidationError({"password": "Password cannot exceed 30 characters."})
+        self.validate_password(attrs['password'])
 
         return attrs
     
@@ -50,4 +69,15 @@ class UpdatePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs['newPassword'] != attrs['newPasswordConfirm']:
             raise serializers.ValidationError({"newPassword": "New passwords do not match."})
+        
+        password_regex = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$')
+
+        if not password_regex.match(attrs['newPassword']):
+            raise serializers.ValidationError({
+                "newPassword": (
+                    "Password must be 8-30 characters long, contain at least one uppercase letter, "
+                    "one lowercase letter, one digit, and one special character."
+                )
+            })
+        
         return attrs

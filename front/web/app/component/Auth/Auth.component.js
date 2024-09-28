@@ -41,7 +41,7 @@ export class AuthComponent extends AComponent {
             parentSelector: this.getSelector(),
             inputType: "text",
             placeholder: "Jean-Michel",
-            onchange: (value) => this.username = value
+            onchange: (value) => {this.username = value; this.regCheck();}
         }));
         this.createSubComponent(InputComponent.create({
             name: "inputRegPass",
@@ -94,7 +94,24 @@ export class AuthComponent extends AComponent {
         return true;
     }
 
+    passwordPolicyCheck(pwd) {
+        const commonPassword = ['password', '123456', 'qwerty', `azerty`];
+        return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(pwd) &&
+            !commonPassword.includes(pwd.toLowerCase()) 
+        );
+        return true;
+    }
+
     passwordCheck() {
+        if (!this.passwordPolicyCheck(this.password)) {
+            this.subComponent["inputRegPass"].error.next(true);
+            this.subComponent["inputRegPass"].errorText.next("auth.errorPolicy");
+            this.subComponent["registerButton"].disabled.next(true);
+        } else {
+            this.subComponent["inputRegPass"].error.next(false);
+            this.regCheck();
+        }
+        
         if (this.password !== this.passwordConfirm) {
             this.subComponent["inputRegPassConfirm"].error.next(true);
             this.subComponent["inputRegPassConfirm"].errorText.next("auth.errorText");

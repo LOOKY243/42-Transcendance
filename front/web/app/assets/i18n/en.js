@@ -18,6 +18,8 @@ export const en = {
 	},
 	"friends": {
 		"noFriends": "You dont have a single friend",
+		"addFriends": "Add friends",
+		"friendsListTitle": "Friends List",
 	},
 	"auth": {
 		"login": "Log in",
@@ -26,6 +28,7 @@ export const en = {
 		"password": "Password",
 		"confirm": "Confirm",
 		"errorText": "Passwords are not the same",
+		"errorPolicy": "Password must be 8-30 characters, contain: 1 uppercase, 1 lowercase, 1 digit, 1 special character, and cannot be a common password",
 		"errorUsername": "This username is already in use"
 	},
 	"pongNew": {
@@ -64,5 +67,10 @@ export const en = {
 		"usernameDanger": "username can't be change, invalid credentials",
 		"pfpSuccess": "Profile picture change successfully",
 		"pfpDanger": "Profile picture can't be change, invalid given file",
+		"friendSuccess": "Friend add successfully",
+		"friendDanger": "Friend can't be add",
+		"inactive": "You are AFK",
+		"deleteFriendSuccess": "Remove friend successfully",
+		"deleteFriendDanger": "Can't remove this friend",
 	}
 }

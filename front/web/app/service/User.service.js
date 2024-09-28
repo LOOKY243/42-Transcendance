@@ -11,9 +11,9 @@ import { TranslateService } from "../../spa/service/Translate.service.js";
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
 	defaultLang = new ReplayObservable();
-	friendsList = new ReplayObservable();
 	pfp = new ReplayObservable()
 	user = null
+	isOnline = false;
 
 	constructor() {
 		super();
@@ -25,11 +25,6 @@ export class UserService extends AInjectable {
 		this.defaultLang.subscribe(value => {
 			if (value) {
 				this.user.defaultLang = value;
-			}
-		});
-		this.friendsList.subscribe(value => {
-			if (value) {
-				this.user.friendsList = value;
 			}
 		});
 		this.pfp.subscribe(value => {
@@ -92,33 +87,16 @@ export class UserService extends AInjectable {
 	getUser() {
 		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
+				this.isOnline = true;
 				this.user = {
 					username: response.username,
 					defaultLang: response.lang,
 					pfp: response.pfp,
 					readyToPlay: false,
-					friendsList: {
-						"1": {
-							"name": "Alice"
-						},
-						"2": {
-							"name": "Bob"
-						},
-						"3": {
-							"name": "Charlie"
-						},
-						"4": {
-							"name": "Diana"
-						},
-						"5": {
-							"name": "Eve"
-						}
-					}
-				};
+				}
 				this.username.next(response.username);
 				this.defaultLang.next(response.lang);
 				this.pfp.next(response.pfp),
-				this.friendsList.next(response.friendsList);
 				injector[TranslateService].setLang(response.lang);
 			}).catch(error => {
 				if (error instanceof TokenError) {
@@ -136,6 +114,7 @@ export class UserService extends AInjectable {
 		injector[HttpClient].patch("updateLanguage/", {
 			lang: newDefaultLang
 		}, true).then(response => {
+			this.isOnline = true;
 			if (response.ok) {
 				this.defaultLang.next(newDefaultLang);
 				injector[PopService].renderPop(true, "pop.defaultLangSuccess");
@@ -155,6 +134,7 @@ export class UserService extends AInjectable {
 			newPassword: newPassword,
 			newPasswordConfirm: newPasswordConfirm
 		}, true).then(response => {
+			this.isOnline = true;
 			if (response.ok) {
 				injector[PopService].renderPop(true, "pop.passwordSuccess");
 			} else {
@@ -171,6 +151,7 @@ export class UserService extends AInjectable {
 		injector[HttpClient].patch("updateUsername/", {
 			username: newUsername
 		}, true).then(response => {
+			this.isOnline = true;
 			if (response.ok) {
 				this.username.next(newUsername);
 				injector[PopService].renderPop(true, "pop.usernameSuccess");
@@ -188,6 +169,7 @@ export class UserService extends AInjectable {
 		const formData = new FormData();
 		formData.append('pfp', newPfp);
 		injector[HttpClient].patch("updatePfp/", formData, true, true).then(response => {
+			this.isOnline = true;
 			if (response.ok) {
 				this.getPfp();
 				injector[PopService].renderPop(true, "pop.pfpSuccess");
@@ -203,6 +185,7 @@ export class UserService extends AInjectable {
 
 	getPfp() {
 		injector[HttpClient].get("getPfp/", true).then(response => {
+			this.isOnline = true;
 			if (response.ok) {
 				this.pfp.next(response.pfp);
 			}
@@ -214,6 +197,7 @@ export class UserService extends AInjectable {
 	}
 
 	logoutManager(path, popStatus, popMessage) {
+		this.isOnline = false;
 		this.user = null;
 		injector[TokenService].deleteCookie();
 		injector[Router].navigate(path);

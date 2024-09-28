@@ -69,7 +69,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.currentPassword = value
+			onchange: (value) => {this.currentPassword = value; this.pwdCheck();}
 		}));
 		this.createSubComponent(InputComponent.create({
 			name: "newPasswordInput",
@@ -77,7 +77,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.newPassword = value
+			onchange: (value) => {this.newPassword = value; this.pwdInputCheck();}
 		}));
 		this.createSubComponent(InputComponent.create({
 			name: "newPasswordConfirmInput",
@@ -85,7 +85,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.newPasswordConfirm = value
+			onchange: (value) => {this.newPasswordConfirm = value; this.pwdInputCheck();}
 		}));
 
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
@@ -111,7 +111,45 @@ export class ProfileSettingsComponent extends AComponent {
 			lang: this.translate("profileSettings.lang"),
 		});
 
+		this.pwdCheck()
+
 		return true;
+	}
+
+	passwordPolicyCheck(pwd) {
+        const commonPassword = ['password', '123456', 'qwerty', `azerty`];
+        return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(pwd) &&
+            !commonPassword.includes(pwd.toLowerCase()) 
+        );
+        return true;
+    }
+
+	pwdInputCheck() {
+		if (!this.passwordPolicyCheck(this.newPassword)) {
+			this.subComponent["newPasswordInput"].error.next(true);
+			this.subComponent["newPasswordInput"].errorText.next("auth.errorPolicy");
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["newPasswordInput"].error.next(false);
+			this.pwdCheck();
+		}
+
+		if(this.newPassword !== this.newPasswordConfirm) {
+			this.subComponent["newPasswordConfirmInput"].error.next(true);
+			this.subComponent["newPasswordConfirmInput"].errorText.next("auth.errorText");
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["newPasswordConfirmInput"].error.next(false);
+			this.pwdCheck();
+		}
+	}
+
+	pwdCheck() {
+		if (this.currentPassword === "" || this.newPassword === "" || this.newPasswordConfirm === "") {
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["passwordModifier"].disabled.next(false);
+		}
 	}
 
 	generateHtml(config) {
@@ -124,7 +162,9 @@ export class ProfileSettingsComponent extends AComponent {
 					</div>
 					<div class="row m-3">
 						<div class="fs-3 text-light text-center">
-							<div id="inputPP"></div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="inputPP"></div>
+							</div>
 							<div id="profilePictureModifier"></div>
 						</div>
 					</div>
