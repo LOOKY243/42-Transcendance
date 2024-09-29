@@ -19,16 +19,12 @@ up:
 	@docker compose -p $(NAME) -f $(COMPOSE) up
 
 down:
-	@docker compose -p $(NAME) -f $(COMPOSE) down
+	@docker compose -p $(NAME) -f $(COMPOSE) down --volumes
 
 clean: down
 	rm -rf data/postgres
 	rm -rf data/django
 	rm -rf nginx/cert
-	@docker volume rm 42-transcendance_postgres || true
-	@docker volume rm 42-transcendance_django || true
-	@docker volume rm 42-transcendance_nginx || true
-	
 
 re: clean all
 
