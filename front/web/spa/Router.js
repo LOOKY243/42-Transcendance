@@ -15,13 +15,18 @@ export class Router extends AInjectable {
 
 	start() {
 		this.windowPath.subscribe((path) => {
-				const route = this.routes.find((value) => {
-					return value.path == path;
+			let splitPath = path.split('/');
+			const route = this.routes.find((value) => {
+					let splitValuePath = value.path.split('/');
+					return splitValuePath.length === splitPath.length && ((splitValuePath[splitValuePath.length - 1].includes(':') && splitValuePath.slice(0, -1).every(item => splitPath.slice(0, -1).includes(item))) || path === value.path);
 				});
+				console.log(path);
+				console.log(route);
+				let pathArgument = splitPath[splitPath.length - 1];
 				if (route == undefined) {
-					this.loadPage(this.errorPage);
+					this.loadPage(this.errorPage, pathArgument);
 				} else
-					this.loadPage(route);
+					this.loadPage(route, pathArgument);
 			});
 		this.windowPath.next(window.location.pathname);
 		window.addEventListener("popstate", (event) => {
@@ -32,12 +37,12 @@ export class Router extends AInjectable {
 		this.bgVideo.render();
 	}
 
-	loadPage(route) {
+	loadPage(route, pathArgument) {
 		injector[TranslateService].resetObservable();
 		if (this.loadedPage) {
 			this.loadedPage.destroy();
 		}
-		this.loadedPage = new route.component(this.routerSelector, route.selector);
+		this.loadedPage = new route.component(this.routerSelector, route.selector, {}, pathArgument);
 		document.querySelector(this.routerSelector).innerHTML = 
 		`<div id='${this.loadedPage.getComponentSelector()}'></div>`;
 		if(this.loadedPage.onInit()) {

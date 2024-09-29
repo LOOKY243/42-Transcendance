@@ -6,6 +6,7 @@ import { Observable } from "../utils/Observable.js";
 export class AComponent {
 	parentSelector = "";
 	componentSelector = "";
+	pathArgument = "";
 	html = "";
 	onChangeValue = "";
 	componentConfig = null;
@@ -20,10 +21,11 @@ export class AComponent {
 	onChangeFile = false;
 	isRelativeHtml = false;
 	
-	constructor(parentSelector, componentSelector, componentConfig) {
+	constructor(parentSelector, componentSelector, componentConfig, pathArgument) {
 		this.parentSelector = parentSelector;
 		this.componentSelector = componentSelector;
 		this.componentConfig = componentConfig;
+		this.pathArgument = pathArgument;
 	}
 
 	onInit() {
