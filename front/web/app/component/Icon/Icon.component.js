@@ -43,7 +43,7 @@ export class IconComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<img style="cursor:${config.clickable ? "pointer" : "inherit"};" src="http://${document.location.host}/app/assets/icon/${this.iconList[config.icon]}">
+			<img style="cursor:${config.clickable ? "pointer" : "inherit"};" src="https://${document.location.host}/app/assets/icon/${this.iconList[config.icon]}">
 		`
 	}
 }

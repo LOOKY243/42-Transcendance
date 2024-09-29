@@ -11,7 +11,7 @@ export class profilePictureComponent extends AComponent {
 		super.onInit();
 		this.generateHtml({});
 
-		this.pfpUrl.next(this.pfp.isEmpty() ? `http://${document.location.host}/app/assets/icon/defaultPP.svg` : injector[UserService].user.pfp);
+		this.pfpUrl.next(this.pfp.isEmpty() ? `https://${document.location.host}/app/assets/icon/defaultPP.svg` : injector[UserService].user.pfp);
 		
 		this.setConfig({
 			pfpUrl: this.pfpUrl

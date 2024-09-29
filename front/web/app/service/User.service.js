@@ -65,8 +65,6 @@ export class UserService extends AInjectable {
 			password: password
 		}).then(response => {
 			if (response.ok) {
-				injector[TokenService].setCookie('accessToken', response.access, 1);
-        		injector[TokenService].setCookie('refreshToken', response.refresh, 7);
 				injector[Router].navigate("/");
 				injector[PopService].renderPop(true, "pop.loginSuccess");
 				this.getUser();
@@ -87,17 +85,19 @@ export class UserService extends AInjectable {
 	getUser() {
 		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
-				this.isOnline = true;
-				this.user = {
-					username: response.username,
-					defaultLang: response.lang,
-					pfp: response.pfp,
-					readyToPlay: false,
+				if (response.ok) {
+					this.isOnline = true;
+					this.user = {
+						username: response.username,
+						defaultLang: response.lang,
+						pfp: response.pfp,
+						readyToPlay: false,
+					}
+					this.username.next(response.username);
+					this.defaultLang.next(response.lang);
+					this.pfp.next(response.pfp),
+					injector[TranslateService].setLang(response.lang);
 				}
-				this.username.next(response.username);
-				this.defaultLang.next(response.lang);
-				this.pfp.next(response.pfp),
-				injector[TranslateService].setLang(response.lang);
 			}).catch(error => {
 				if (error instanceof TokenError) {
 					injector[TokenService].deleteCookie();

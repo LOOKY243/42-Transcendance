@@ -81,10 +81,10 @@ class LoginView(APIView):
                 "token_refresh_required": False,
             })
             response.set_cookie(
-                'accessToken', str(refresh.access_token), max_age=3600, httponly=True, secure=False, samesite='Lax'
+                'accessToken', str(refresh.access_token), max_age=3600, secure=False, samesite='Lax'
             )
             response.set_cookie(
-                'refreshToken', str(refresh), max_age=86400, httponly=True, secure=False, samesite='Lax'
+                'refreshToken', str(refresh), max_age=86400, secure=False, samesite='Lax'
             )
             return response
         else:

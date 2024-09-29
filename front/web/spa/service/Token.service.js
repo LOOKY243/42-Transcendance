@@ -14,15 +14,15 @@ export class TokenService extends AInjectable {
 		if (parts.length === 2) return parts.pop().split(';').shift();
 	}
 
-	setCookie(name, value, days) {
-		let expires = "";
-		if (days) {
-			const date = new Date();
-			date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-			expires = "; expires=" + date.toUTCString();
-		}
-		document.cookie = name + "=" + (value || "") + expires + "; path=/";
-	}
+	// setCookie(name, value, days) {
+	// 	let expires = "";
+	// 	if (days) {
+	// 		const date = new Date();
+	// 		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+	// 		expires = "; expires=" + date.toUTCString();
+	// 	}
+	// 	document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=None";
+	// }
 
 	deleteCookie() {
 		document.cookie = 'accessToken=; Max-Age=0; path=/; SameSite=Lax;';
@@ -35,7 +35,7 @@ export class TokenService extends AInjectable {
 		if (!refreshToken) {
 			throw new TokenError(`Erreur Token: no refresh token`);
 		}
-		let response = await fetch('http://localhost:8000/api/token/refresh/', {
+		let response = await fetch('https://localhost/api/token/refresh/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

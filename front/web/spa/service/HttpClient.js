@@ -3,7 +3,7 @@ import { AInjectable } from "./AInjectable.js";
 import { TokenService } from "./Token.service.js";
 
 export class HttpClient extends AInjectable {
-	baseUrl = "http://localhost:8000/api";
+	baseUrl = "https://localhost/api";
 
 	constructor() {
 		super();
@@ -85,7 +85,7 @@ export class HttpClient extends AInjectable {
 					await injector[TokenService].refreshToken();
 					return this.fetchAndParseStream(url, options, true);
 				} catch (error) {
-					return {"ok": "false"};
+					throw error;
 				}
 			} else {
 				response = await this.responseDecoder(response);
