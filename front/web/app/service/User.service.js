@@ -44,9 +44,25 @@ export class UserService extends AInjectable {
 	auth42() {
 		injector[HttpClient].get("42auth/login/").then(response => {
 			if (response.redirect_url) {
-				window.location.href = response.redirect_url;
-			} else {
-				console.log(response)
+				const authWindow = window.open(response.redirect_url, "_blank", "width=500,height=600");
+				const checkTokens = setInterval(() => {
+					const accessToken = injector[TokenService].getCookie('accessToken')
+					const refreshToken = injector[TokenService].getCookie('refreshToken')
+					const error = localStorage.getItem('error');
+	
+					if (accessToken && refreshToken) {
+						clearInterval(checkTokens);
+						injector[Router].navigate("/");
+						injector[PopService].renderPop(true, "pop.loginSuccess");
+						this.getUser();
+						localStorage.removeItem('accessToken');
+						localStorage.removeItem('refreshToken');
+					} else if (error) {
+						injector[Router].navigate("/auth");
+						injector[PopService].renderPop(false, "pop.loginDanger");
+						localStorage.removeItem('error');
+					}
+				}, 1000);
 			}
 		}).catch(error => {
 			console.error("Network error: ", error);

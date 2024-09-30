@@ -23,6 +23,7 @@ export class IconComponent extends AComponent {
 		"addFriends": "addFriends.svg",
 		"removeFriends": "removeFriends.svg",
 		"profile": "profile.svg",
+		"42": "42.svg",
 	}
 
 	initConfig() {

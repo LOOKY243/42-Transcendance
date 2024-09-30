@@ -24,7 +24,6 @@ export class PublicProfileComponent extends AComponent {
 
 		this.renderProfileSubscription = this.renderProfile.subscribe((value) => {
 			if (value) {
-				console.log(value)
 				this.pfp = value.pfp;
 				this.createSubComponent(profilePictureComponent.create({
 					name: "profilePicture",

@@ -97,7 +97,6 @@ export class HttpClient extends AInjectable {
 	async responseDecoder(response) {
 		const reader = response.body?.getReader();
 		if (!reader) {
-			console.log(response)
 			throw new Error('Erreur: La réponse ne contient pas de corps lisible.');
 		}
 

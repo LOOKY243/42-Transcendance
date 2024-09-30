@@ -89,6 +89,14 @@ export class AuthComponent extends AComponent {
             onclick: () => injector[UserService].auth42(),
         }));
 
+        // this.createSubComponent(ButtonIconComponent.create({
+        //     name: "fourtyTwoButton",
+        //     parentSelector: this.getSelector(),
+        //     icon: "42",
+        //     stye: "btn",
+        //     onclick: () => injector[UserService].auth42(),
+        // }));
+
         this.setConfig({
             login: this.translate("auth.login"),
             register: this.translate("auth.register"),
@@ -107,7 +115,6 @@ export class AuthComponent extends AComponent {
         return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(pwd) &&
             !commonPassword.includes(pwd.toLowerCase()) 
         );
-        return true;
     }
 
     passwordCheck() {
@@ -146,10 +153,6 @@ export class AuthComponent extends AComponent {
         }
     }
 
-    getCSSPath() {
-        return "app/component/Auth/Auth.component.css"
-    }
-
     generateHtml(config) {
         this.html = `
         <div id="navbar"></div>
@@ -173,9 +176,9 @@ export class AuthComponent extends AComponent {
                             </div>
                         </div>
                     </div>
-                    <div class="container col-md-2 mt-5">
-                        <div class="containerBlur p-3">
-                            <div id="fourtyTwoButton"></div>
+                    <div class="container col-md-1 offset-md-1 mt-5">
+                        <div class="containerBlur p-3 text-center text-info text-wrap">
+                            <a id="fourtyTwoButton"></a>
                         </div>
                     </div>
                     <div class="container col-md-4 offset-md-1 mt-5">

@@ -1,36 +1,40 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import RegisterSerializer, UpdatePasswordSerializer
-from django.contrib.auth import authenticate, login, logout
-from .models import CustomUser
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.views.generic.edit import UpdateView
+# Django imports
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils.crypto import get_random_string
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.conf import settings
-from django.utils import timezone
-from .utils import check_token_status
-from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import update_session_auth_hash
-from rest_framework.parsers import MultiPartParser, FormParser
-import base64
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
-import requests
-from django.conf import settings
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone, crypto
 from django.views import View
+from django.views.generic.edit import UpdateView
+from django.conf import settings
 from urllib.parse import quote
 
+# DRF imports
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+
+# DRF SimpleJWT imports
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+
+# Local imports
+from .models import CustomUser
+from .serializers import RegisterSerializer, UpdatePasswordSerializer
+from .utils import check_token_status
+
+# Third-party imports
+import requests
+import base64
+
+# Python standard library imports
+from datetime import timedelta
 
 User = get_user_model() 
 
@@ -87,10 +91,10 @@ class LoginView(APIView):
                 "token_refresh_required": False,
             })
             response.set_cookie(
-                'accessToken', str(refresh.access_token), max_age=3600, secure=False, samesite='Lax'
+                'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
             )
             response.set_cookie(
-                'refreshToken', str(refresh), max_age=86400, secure=False, samesite='Lax'
+                'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
             )
             return response
         else:
@@ -412,7 +416,7 @@ class OAuth42Callback(APIView):
         code = request.GET.get('code')
 
         if not code:
-            return JsonResponse({"ok": False, "message": "No code provided."})
+            return HttpResponse('<script>localStorage.setItem("error", "no_code"); window.close();</script>')
 
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
@@ -423,11 +427,7 @@ class OAuth42Callback(APIView):
         })
 
         if token_response.status_code != 200:
-            return JsonResponse({
-                "ok": False,
-                "message": "Authentication failed.",
-                "error_details": token_response.text
-            }, status=token_response.status_code)
+            return HttpResponse('<script>localStorage.setItem("error", "auth_failed"); window.close();</script>')
 
         token_data = token_response.json()
         access_token = token_data.get('access_token')
@@ -437,43 +437,33 @@ class OAuth42Callback(APIView):
         })
 
         if user_info_response.status_code != 200:
-            return JsonResponse({
-                "ok": False,
-                "message": "Failed to retrieve user information.",
-                "error_details": user_info_response.text
-            }, status=user_info_response.status_code)
+            return HttpResponse('<script>localStorage.setItem("error", "user_info_failed"); window.close();</script>')
 
         user_info = user_info_response.json()
         username = user_info.get('login')
 
-        if CustomUser.objects.filter(username=username).exists():
-            return JsonResponse({
-                "ok": False,
-                "error": "usernameError",
-                "message": "Username already taken."
-            })
+        existing_user = CustomUser.objects.filter(username=username).first()
 
-        user = CustomUser(username=username)
-        user.lang = 'en'
-        user.save()
+        if existing_user:
+            if existing_user.password:
+                return HttpResponse('<script>localStorage.setItem("error", "username_taken_with_password"); window.close();</script>')
+            else:
+                login(request, existing_user)
+                existing_user.update_last_activity()
+        else:
+            user = CustomUser(username=username)
+            user.lang = 'en'
+            user.save()
+            login(request, user)
+            user.update_last_activity()
 
-        login(request, user)
-        user.update_last_activity()
+        refresh = RefreshToken.for_user(existing_user if existing_user else user)
 
-        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
 
-        response = JsonResponse({
-            "ok": True,
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "token_refresh_required": False,
-        })
-
-        response.set_cookie(
-            'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
-        )
-        response.set_cookie(
-            'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
-        )
+        response = HttpResponse('<script>window.close();</script>')
+        response.set_cookie('accessToken', access_token, httponly=False, secure=True)
+        response.set_cookie('refreshToken', refresh_token, httponly=False, secure=True)
 
         return response

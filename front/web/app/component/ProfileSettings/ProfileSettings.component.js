@@ -32,7 +32,7 @@ export class ProfileSettingsComponent extends AComponent {
 		this.createSubComponent(InputFileComponent.create({
 			name: "inputPP",
 			parentSelector: this.getSelector(),
-			onchange: (value) => {this.pfp = value; console.log("input onChange: ", value)},
+			onchange: (value) => this.pfp = value,
 		}));
 		this.createSubComponent(ButtonIconComponent.create({
 			name: "profilePictureModifier",

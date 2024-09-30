@@ -20,8 +20,6 @@ export class Router extends AInjectable {
 					let splitValuePath = value.path.split('/');
 					return splitValuePath.length === splitPath.length && ((splitValuePath[splitValuePath.length - 1].includes(':') && splitValuePath.slice(0, -1).every(item => splitPath.slice(0, -1).includes(item))) || path === value.path);
 				});
-				console.log(path);
-				console.log(route);
 				let pathArgument = splitPath[splitPath.length - 1];
 				if (route == undefined) {
 					this.loadPage(this.errorPage, pathArgument);

@@ -28,23 +28,8 @@ export class HomeComponent extends AComponent {
 			content: "PLAY",
 			onclick: () => injector[Router].navigate("/battle/create")
 		}));
-		this.createSubComponent(ButtonComponent.create({
-			name: "idButton",
-			parentSelector: this.getSelector(),
-			style: "btn btn-outline-success",
-			content: "Search",
-		}));
-
-		this.createSubComponent(InputComponent.create({
-			name: "idInput",
-			parentSelector: this.getSelector(),
-			inputType: "number",
-			placeholder: "1234",
-			onchange: (value) => {this.inputId = value; this.checkInput()}
-		}));
 
 		this.setConfig({
-			searchGame: this.translate("home.searchGame"),
 			pongTitle: this.translate("home.pongTitle"),
 			battleTitle: this.translate("home.battleTitle"),
 			pongContent: this.translate("home.pongContent"),
@@ -53,23 +38,7 @@ export class HomeComponent extends AComponent {
 			battleContentBis: this.translate("home.battleContentBis")
 		});
 
-		this.checkInput();
-
 		return true;
-	}
-
-	checkInput() {
-		if (this.inputId === "") {
-			this.subComponent["idInput"].error.next(false);
-			this.subComponent["idButton"].disabled.next(true);
-		} else if (this.inputId <= 0) {
-			this.subComponent["idButton"].disabled.next(true);
-			this.subComponent["idInput"].error.next(true);
-			this.subComponent["idInput"].errorText.next("home.errorText");
-		} else {
-			this.subComponent["idButton"].disabled.next(false);
-			this.subComponent["idInput"].error.next(false);
-		}
 	}
 
 	getCSSPath() {
@@ -94,14 +63,6 @@ export class HomeComponent extends AComponent {
 							<p class="fs-5 text-light">${config.battleContentBis}</p>
 							<div id="battleButton"></div>
 						</div>
-					</div>
-					<div class="line mt-3"></div>
-					<div class="my-5">
-						<div class="text-center fs-3 fw-bold text-light">${config.searchGame}</div>
-						<div class="d-flex justify-content-center m-3">
-							<div id="idInput" class="inputContainer"></div>
-						</div>	
-						<div id="idButton" class="text-center m-3"></div>
 					</div>
 				</div>
 			</div>

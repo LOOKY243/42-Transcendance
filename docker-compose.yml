@@ -39,8 +39,8 @@ services:
     ports:
       - "8443:8443"
     restart: unless-stopped
-    # volumes:
-    #   - front:/usr/share/nginx/html:rw
+    volumes:
+      - front:/usr/share/nginx/html:rw
     networks:
       - Transcendence
     
@@ -58,12 +58,12 @@ volumes:
       type: none
       o: bind
       device: data/django
-  # front:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     o: bind
-  #     device: front/web
+  front:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: front/web
 
 networks:
   Transcendence:
