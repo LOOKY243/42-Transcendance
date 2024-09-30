@@ -15,7 +15,6 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser):
     username = models.CharField(max_length=24, unique=True)
     email = models.EmailField(blank=True, null=True)
-    phoneNumber = models.CharField(max_length=10, blank=True, null=True)
     tfa = models.BooleanField(default=False)
     pfp = models.BinaryField(blank=True, null=True)
     verification_code = models.CharField(max_length=6, blank=True, null=True)

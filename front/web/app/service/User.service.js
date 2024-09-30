@@ -14,6 +14,7 @@ export class UserService extends AInjectable {
 	pfp = new ReplayObservable()
 	user = null
 	isOnline = false;
+	userInformationsRender = new ReplayObservable();
 
 	constructor() {
 		super();
@@ -38,6 +39,18 @@ export class UserService extends AInjectable {
 		this.isReady.next(false);
 		this.getUser();
 		return this;
+	}
+
+	auth42() {
+		injector[HttpClient].get("42auth/login/").then(response => {
+			if (response.redirect_url) {
+				window.location.href = response.redirect_url;
+			} else {
+				console.log(response)
+			}
+		}).catch(error => {
+			console.error("Network error: ", error);
+		});
 	}
 	
 	register(username, password, passwordConfirm) {
@@ -108,6 +121,20 @@ export class UserService extends AInjectable {
 		} else {
 			this.isReady.next(true);
 		}
+	}
+
+	getUserInformations(username) {
+		injector[HttpClient].post("getUserInformations/", {
+			username: username
+		}, true).then(response => {
+			if (response.ok) {
+				this.userInformationsRender.next(response.user);
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
 	}
 
 	patchDefaultLang(newDefaultLang) {
@@ -184,7 +211,7 @@ export class UserService extends AInjectable {
 	}
 
 	getPfp() {
-		injector[HttpClient].get("getPfp/", true).then(response => {
+		injector[HttpClient].get("getPfp/", {}, true).then(response => {
 			this.isOnline = true;
 			if (response.ok) {
 				this.pfp.next(response.pfp);

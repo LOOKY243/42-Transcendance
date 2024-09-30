@@ -21,7 +21,11 @@ export class ProfileComponent extends AComponent {
 
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
 
-		this.createSubComponent(new profilePictureComponent(this.getSelector(), "profilePicture"));
+		this.createSubComponent(profilePictureComponent.create({
+			name: "profilePicture",
+			parentSelector: this.getSelector(),
+		}));
+
 		this.createSubComponent(IconComponent.create({
 			name: "profileSettings",
 			parentSelector: this.getSelector(),

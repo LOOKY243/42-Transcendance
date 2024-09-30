@@ -25,6 +25,12 @@ import base64
 from datetime import timedelta
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+import requests
+from django.conf import settings
+from django.views import View
+from urllib.parse import quote
+
 
 User = get_user_model() 
 
@@ -125,6 +131,44 @@ class GetUserView(APIView):
             "lang": user.lang,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         })
+
+class GetUserInformations(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        user.update_last_activity()
+
+        username = request.data.get('username')
+
+        if not username:
+            return Response({
+                "ok": False,
+                "message": "Username is required."
+            })
+
+        target_user = CustomUser.objects.filter(username=username).first()
+
+        if not target_user:
+            return Response({
+                "ok": False,
+                "message": "User not found."
+            })
+
+        encoded_pfp = None
+        if target_user.pfp:
+            encoded_pfp = base64.b64encode(target_user.pfp).decode('utf-8')
+
+        user_info = {
+            "username": target_user.username,
+            "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
+        }
+
+        return Response({
+            "ok": True,
+            "user": user_info
+        })
+
 
 class UpdateLanguageView(APIView):
     permission_classes = [IsAuthenticated]
@@ -350,3 +394,86 @@ class RemoveFriendView(APIView):
             return JsonResponse({"ok": True, "message": "Friend has been removed."})
         else:
             return JsonResponse({"ok": False, "message": "Friend not found in your friend list."})
+
+class OAuth42Login(APIView):
+    def get(self, request):
+        redirect_uri_encoded = quote(settings.REDIRECT_URI)
+        url = (
+            f"https://api.intra.42.fr/oauth/authorize"
+            f"?client_id={settings.CLIENT_ID}"
+            f"&redirect_uri={redirect_uri_encoded}"
+            f"&response_type=code"
+            f"&scope=public"
+        )
+        return JsonResponse({"redirect_url": url})
+
+class OAuth42Callback(APIView):
+    def get(self, request):
+        code = request.GET.get('code')
+
+        if not code:
+            return JsonResponse({"ok": False, "message": "No code provided."})
+
+        token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
+            'grant_type': 'authorization_code',
+            'client_id': settings.CLIENT_ID,
+            'client_secret': settings.CLIENT_SECRET,
+            'redirect_uri': settings.REDIRECT_URI,
+            'code': code
+        })
+
+        if token_response.status_code != 200:
+            return JsonResponse({
+                "ok": False,
+                "message": "Authentication failed.",
+                "error_details": token_response.text
+            }, status=token_response.status_code)
+
+        token_data = token_response.json()
+        access_token = token_data.get('access_token')
+
+        user_info_response = requests.get('https://api.intra.42.fr/v2/me', headers={
+            'Authorization': f'Bearer {access_token}'
+        })
+
+        if user_info_response.status_code != 200:
+            return JsonResponse({
+                "ok": False,
+                "message": "Failed to retrieve user information.",
+                "error_details": user_info_response.text
+            }, status=user_info_response.status_code)
+
+        user_info = user_info_response.json()
+        username = user_info.get('login')
+
+        if CustomUser.objects.filter(username=username).exists():
+            return JsonResponse({
+                "ok": False,
+                "error": "usernameError",
+                "message": "Username already taken."
+            })
+
+        user = CustomUser(username=username)
+        user.lang = 'en'
+        user.save()
+
+        login(request, user)
+        user.update_last_activity()
+
+        refresh = RefreshToken.for_user(user)
+
+        response = JsonResponse({
+            "ok": True,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "token_refresh_required": False,
+        })
+
+        response.set_cookie(
+            'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
+        )
+        response.set_cookie(
+            'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
+        )
+
+        return response

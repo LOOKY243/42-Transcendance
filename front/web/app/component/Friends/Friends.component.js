@@ -80,7 +80,7 @@ export class FriendsComponent extends AComponent {
 					<div class="containerBlur mt-5 col-md-6">
 						<div class="fs-3 fw-semibold text-light text-center m-2">${config.friendsListTitle}</div>
 						<div class="fs-4 fw-semibold text-danger text-center p-5" style="${config.renderFriendsListBool ? `display: none;` : ``}">${config.noFriends}</div>
-						<div id="friendsList"style="${config.renderFriendsListBool ? `` : `display: none;`}"></div>
+						<div id="friendsList" style="${config.renderFriendsListBool ? `` : `display: none;`}"></div>
 					</div>
 					<div class="containerBlur mt-5 col-md-4 offset-md-1">
 						<div class="fs-3 fw-semibold text-light text-center m-2">${config.addFriends}</div>

@@ -65,7 +65,7 @@ export class FriendsService extends AInjectable {
 	}
 
 	getFriendsList() {
-		injector[HttpClient].get("getFriendsList/", true).then(response => {
+		injector[HttpClient].get("getFriendsList/", {}, true).then(response => {
 			injector[UserService].isOnline = true;
 			if (response.ok) {
 				this.friendsList = response.friends;

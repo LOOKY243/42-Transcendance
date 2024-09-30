@@ -33,9 +33,8 @@ INSTALLED_APPS = [
 
     'corsheaders',
     'rest_framework',
-    'api'
-    # 'two_factor'
-    # 'django_otp'
+    'api',
+    'oauth2_provider',
 ]
 
 REST_FRAMEWORK = {
@@ -58,12 +57,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    # 'django_otp.middleware.OTPMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://localhost",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -102,6 +98,16 @@ DATABASES = {
     }
 }
 
+OAUTH2_PROVIDER = {
+    'SCOPES': {
+        'read': 'Read access',
+        'write': 'Write access',
+    },
+}
+
+CLIENT_ID = 'u-s4t2ud-ea774500e1f28d65e410d9dc0839d513379ae33b8be1870ac2987f76ec197b68'
+CLIENT_SECRET = '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'
+REDIRECT_URI = 'https://localhost:8443/api/42auth/callback/'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

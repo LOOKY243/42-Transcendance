@@ -21,7 +21,8 @@ export class IconComponent extends AComponent {
 		"logout": "logout.svg",
 		"search": "search.svg",
 		"addFriends": "addFriends.svg",
-		"removeFriends": "removeFriends.svg"
+		"removeFriends": "removeFriends.svg",
+		"profile": "profile.svg",
 	}
 
 	initConfig() {

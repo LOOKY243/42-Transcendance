@@ -7,17 +7,20 @@ export class profilePictureComponent extends AComponent {
 	pfp = injector[UserService].pfp;
 	pfpUrl = new ReplayObservable();
 
-	onInit() {
-		super.onInit();
-		this.generateHtml({});
-
-		this.pfpUrl.next(this.pfp.isEmpty() ? `https://${document.location.host}/app/assets/icon/defaultPP.svg` : injector[UserService].user.pfp);
-		
+	initConfig() {
 		this.setConfig({
 			pfpUrl: this.pfpUrl
 		});
+	}
 
-		return true;
+	static create(value) {
+		let ret = new profilePictureComponent(value.parentSelector, value.name);
+		if (value.pfp) {
+			ret.pfpUrl.next(value.pfp === "defaultPP" ? `https://${document.location.host}/app/assets/icon/defaultPP.svg` : value.pfp);
+		} else {
+			ret.pfpUrl.next(ret.pfp.isEmpty() ? `https://${document.location.host}/app/assets/icon/defaultPP.svg` : injector[UserService].user.pfp);
+		}
+		return ret;
 	}
 
 	getCSSPath() {

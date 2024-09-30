@@ -3,7 +3,7 @@ import { AInjectable } from "./AInjectable.js";
 import { TokenService } from "./Token.service.js";
 
 export class HttpClient extends AInjectable {
-	baseUrl = "https://localhost/api";
+	baseUrl = "https://localhost:8443/api";
 
 	constructor() {
 		super();
@@ -13,8 +13,8 @@ export class HttpClient extends AInjectable {
 		return this.baseUrl + "/" + url;
 	}
 
-	get(url, token = false) {
-		return this.fetchAndParseStream(this.getUrl(url), {}, token);
+	get(url, options = {}, token = false) {
+		return this.fetchAndParseStream(this.getUrl(url), options, token);
 	}
 
 	post(url, data, token = false) {
@@ -97,6 +97,7 @@ export class HttpClient extends AInjectable {
 	async responseDecoder(response) {
 		const reader = response.body?.getReader();
 		if (!reader) {
+			console.log(response)
 			throw new Error('Erreur: La réponse ne contient pas de corps lisible.');
 		}
 

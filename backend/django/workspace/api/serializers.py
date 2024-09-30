@@ -17,7 +17,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'password', 'password_confirm', 'email', 'phoneNumber', 'tfa', 'pfp', 'lang']
+        fields = ['username', 'password', 'password_confirm', 'email', 'tfa', 'pfp', 'lang']
     
     def validate_password(self, value):
         if len(value) < 8:
@@ -50,7 +50,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = CustomUser(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
-            phoneNumber=validated_data.get('phoneNumber', ''),
             tfa=validated_data.get('tfa', False),
             pfp=validated_data.get('pfp', None),
             lang=validated_data.pop('lang', 'en')

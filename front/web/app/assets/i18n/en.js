@@ -29,7 +29,8 @@ export const en = {
 		"confirm": "Confirm",
 		"errorText": "Passwords are not the same",
 		"errorPolicy": "Password must be 8-30 characters, contain: 1 uppercase, 1 lowercase, 1 digit, 1 special character, and cannot be a common password",
-		"errorUsername": "This username is already in use"
+		"errorUsername": "This username is already in use",
+		"42auth": "42 Auth",
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
@@ -48,6 +49,9 @@ export const en = {
 		"currentPassword": "Current Password",
 		"newPassword": "New password",
 		"newPasswordConfirm": "Confirm new password",
+	},
+	"publicProfile" : {
+		"noProfile": "No profile found"
 	},
 	"inputFile": {
 		"text": "No file chosen"

@@ -5,6 +5,7 @@ import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
+import { TextButtonComponent } from "../textButton/TextButton.component.js";
 
 export class AuthComponent extends AComponent {
     username = "";
@@ -79,6 +80,13 @@ export class AuthComponent extends AComponent {
             icon: "arrow",
             style: "btn btn-outline-success",
             onclick: () => injector[UserService].login(this.username, this.password)
+        }));
+
+        this.createSubComponent(TextButtonComponent.create({
+            name: "fourtyTwoButton",
+            parentSelector: this.getSelector(),
+            langKey: "auth.42auth",
+            onclick: () => injector[UserService].auth42(),
         }));
 
         this.setConfig({
@@ -163,6 +171,11 @@ export class AuthComponent extends AComponent {
                             <div class="d-flex justify-content-end me-3">
                             <div id="loginButton"></div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="container col-md-2 mt-5">
+                        <div class="containerBlur p-3">
+                            <div id="fourtyTwoButton"></div>
                         </div>
                     </div>
                     <div class="container col-md-4 offset-md-1 mt-5">
