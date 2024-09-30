@@ -11,16 +11,10 @@
 | `Major` | User management                          | [Implementing a remote authentication] | 1 | &#9989; |
 | `Major` | Gameplay                          | [Add Another Game with User History and Matchmaking] | 1 | &#10060; |
 | `Minor` | Gameplay                         | [Game Customization Options] | 0.5 | &#10060; |
-| `Major` | Gameplay                          | [Live Chat.] | 1 | &#10060; |
 | `Minor` | Accessibility                         | [Support on all devices] | 0.5 | &#10060; |
 | `Minor` | Accessibility                         | [Expanding Browser Compatibility] | 0.5 | &#9989; |
 | `Minor` | Accessibility                         | [Multiple language supports] | 0.5 | &#9989; |
 | `Major` | Graphics                         | [ Use of advanced 3D techniques] | 1 |  &#10060; |
 | `Major` | Cybersecurity | [ Implement Two-Factor Authentication (2FA) and JWT.] | 1 | WIP |
-| | | | 10/9.5 | 5/9.5 |
-
-
-to start the front without nginx: <br>
-`npm install http-server` <br>
-`cd front/web` <br>
-`npx http-server --spa -P http://localhost:8080?`
+| `Minor` | Cybersecurity | [ GDPR Compliance Options with User Anonymization, LocalData Management, and Account Deletion.] | 0.5 | WIP |
+| | | | 9.5/9.5 | 5/9.5 |
