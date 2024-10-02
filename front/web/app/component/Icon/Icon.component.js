@@ -24,6 +24,10 @@ export class IconComponent extends AComponent {
 		"removeFriends": "removeFriends.svg",
 		"profile": "profile.svg",
 		"42": "42.svg",
+		"check": "check.svg",
+		"notCheck": "notCheck.svg",
+		"download": "download.svg",
+		"delete": "delete.svg",
 	}
 
 	initConfig() {

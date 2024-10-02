@@ -111,6 +111,48 @@ export class UserService extends AInjectable {
 		});
 	}
 
+	deleteUser(password) {
+		injector[HttpClient].post("deleteUser/", {
+			password: password
+		}, true).then(response => {
+			if (response.ok) {
+				this.logoutManager("/", true, "pop.deleteUserSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.deleteUserDanger");
+			}
+		}).catch(error => {
+			console.error("Network error: ", error);
+		});
+	}
+
+	encryptUser() {
+		injector[HttpClient].post("encryptUser/", {}, true).then(response => {
+			if (response.ok) {
+				injector[PopService].renderPop(true, "pop.encryptSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.encryptDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	decryptUser() {
+		injector[HttpClient].post("decryptUser/", {}, true).then(response => {
+			if (response.ok) {
+				injector[PopService].renderPop(true, "pop.decryptSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.decryptDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
 	getUser() {
 		if (injector[TokenService].getCookie('accessToken') || injector[TokenService].getCookie('refreshToken')) {
 			injector[HttpClient].get("getUser/", {}, true).then(response => {
@@ -145,6 +187,26 @@ export class UserService extends AInjectable {
 		}, true).then(response => {
 			if (response.ok) {
 				this.userInformationsRender.next(response.user);
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	getPersonalData() {
+		injector[HttpClient].get("getUserData/", {}, true).then(response => {
+			if (response.ok) {
+				const dataStr = JSON.stringify(response.userData);
+				const blob = new Blob([dataStr], {type: "application/JSON"});
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = "personal_data.json";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {
@@ -226,11 +288,28 @@ export class UserService extends AInjectable {
 		});
 	}
 
+	deletePfp() {
+		injector[HttpClient].delete("deletePfp/", {}, true).then(response => {
+			if (response.ok) {
+				this.getPfp();
+				injector[PopService].renderPop(true, "pop.deletePfpSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.deletePfpDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				this.logoutManager("/auth", false, "pop.reconnect");
+			};
+		});
+	}
+
 	getPfp() {
 		injector[HttpClient].get("getPfp/", {}, true).then(response => {
 			this.isOnline = true;
 			if (response.ok) {
 				this.pfp.next(response.pfp);
+			} else {
+				this.pfp.next(null);
 			}
 		}).catch (error => {
 			if (error instanceof TokenError) {

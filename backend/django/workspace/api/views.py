@@ -1,5 +1,6 @@
 # Django imports
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -14,7 +15,7 @@ from urllib.parse import quote
 # DRF imports
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
@@ -35,6 +36,8 @@ import base64
 
 # Python standard library imports
 from datetime import timedelta
+
+from cryptography.fernet import Fernet
 
 User = get_user_model() 
 
@@ -125,16 +128,24 @@ class GetUserView(APIView):
     def get(self, request):
         user = request.user
         encoded_pfp = None
-        
+
+        if user.is_encrypted:
+            username = user.decrypt_data(user.username)
+            lang = user.decrypt_data(user.lang)
+        else:
+            username = user.username
+            lang = user.lang
+            
         if user.pfp:
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
 
         return JsonResponse({
             "ok": True,
-            "username": user.username,
-            "lang": user.lang,
+            "username": username,
+            "lang": lang,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         })
+
 
 class GetUserInformations(APIView):
     permission_classes = [IsAuthenticated]
@@ -151,7 +162,14 @@ class GetUserInformations(APIView):
                 "message": "Username is required."
             })
 
-        target_user = CustomUser.objects.filter(username=username).first()
+        all_users = CustomUser.objects.all()
+        target_user = None
+
+        for user in all_users:
+            decrypted_username = user.decrypt_data(user.username) if user.is_encrypted else user.username
+            if decrypted_username == username:
+                target_user = user
+                break
 
         if not target_user:
             return Response({
@@ -160,11 +178,17 @@ class GetUserInformations(APIView):
             })
 
         encoded_pfp = None
+
+        if target_user.is_encrypted:
+            username = target_user.decrypt_data(target_user.username)
+        else:
+            username = target_user.username
+
         if target_user.pfp:
             encoded_pfp = base64.b64encode(target_user.pfp).decode('utf-8')
 
         user_info = {
-            "username": target_user.username,
+            "username": username,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         }
 
@@ -172,6 +196,7 @@ class GetUserInformations(APIView):
             "ok": True,
             "user": user_info
         })
+
 
 
 class UpdateLanguageView(APIView):
@@ -186,13 +211,24 @@ class UpdateLanguageView(APIView):
         if not new_lang:
             return JsonResponse({"ok": False, "error": "No language provided"})
 
-        if new_lang == user.lang:
+        if user.is_encrypted:
+            current_lang = user.decrypt_data(user.lang)
+        else:
+            current_lang = user.lang
+
+        if new_lang == current_lang:
             return JsonResponse({"ok": False, "error": "New language is the same as the current language"})
 
-        user.lang = new_lang
+        if user.is_encrypted:
+            cipher_suite = Fernet(settings.SECRET_KEY.encode())
+            user.lang = cipher_suite.encrypt(new_lang.encode()).decode('utf-8')
+        else:
+            user.lang = new_lang
+
         user.save()
 
         return JsonResponse({"ok": True})
+
 
 class UpdatePasswordView(APIView):
     permission_classes = [IsAuthenticated]
@@ -226,7 +262,7 @@ class UpdatePasswordView(APIView):
 
 class UpdateUsernameView(APIView):
     permission_classes = [IsAuthenticated]
-    USERNAME_MAX_LENGTH = 24
+    USERNAME_MAX_LENGTH = 32
 
     def patch(self, request):
         user = request.user
@@ -237,19 +273,22 @@ class UpdateUsernameView(APIView):
             return JsonResponse({"ok": False, "error": "New username cannot be empty"})
 
         if len(new_username) > self.USERNAME_MAX_LENGTH:
-            return JsonResponse({"ok": False, "error": f"Username cannot exceed 24 characters"})
+            return JsonResponse({"ok": False, "error": f"Username cannot exceed {self.USERNAME_MAX_LENGTH} characters"})
 
         if new_username == user.username:
             return JsonResponse({"ok": False, "error": "New username cannot be the same as the current username"})
 
-        if User.objects.filter(username=new_username).exists():
+        if CustomUser.objects.filter(username=new_username).exists():
             return JsonResponse({"ok": False, "error": "Username already taken"})
 
-        user.username = new_username
+        if user.is_encrypted:
+            user.username = user.encrypt_data(new_username)
+        else:
+            user.username = new_username
+
         user.save()
 
         return JsonResponse({"ok": True, "username": user.username})
-
 
 class UpdateProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
@@ -277,6 +316,21 @@ class UpdateProfilePictureView(APIView):
 
         return JsonResponse({"ok": True, "message": "Profile picture updated successfully"})
 
+class DeleteProfilePictureView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.update_last_activity()
+
+        if user.pfp:
+            user.pfp = None
+            user.save()
+            return JsonResponse({"ok": True, "message": "Profile picture deleted successfully."})
+        else:
+            return JsonResponse({"ok": False, "error": "No profile picture to delete."})
+
+
 class GetProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -293,6 +347,7 @@ class GetProfilePictureView(APIView):
         else:
             return JsonResponse({"ok": False, "error": "Profile picture not found"})
 
+
 class SearchUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -308,9 +363,9 @@ class SearchUserView(APIView):
             id__in=friends.values_list('id', flat=True)
         ).exclude(
             id=current_user.id
-        )
+        )[:5]
 
-        user_list = [{"id": user.id, "username": user.username} for user in users]
+        user_list = [{"id": user.id, "username": user.decrypt_data(user.username) if user.is_encrypted else user.username} for user in users]
 
         return JsonResponse({
             "ok": True,
@@ -326,24 +381,45 @@ class AddFriendView(APIView):
         if not friend_username:
             return JsonResponse({"ok": False, "error": "No username provided."})
 
-        try:
-            friend = User.objects.get(username=friend_username)
-        except User.DoesNotExist:
-            return JsonResponse({"ok": False, "error": "User not found."})
-
         current_user = request.user
         current_user.update_last_activity()
+        if current_user.is_encrypted:
+            current_username = current_user.decrypt_data(current_user.username)
+        else:
+            current_username = current_user.username
 
-        if friend.id == current_user.id:
+        if current_username == friend_username:
             return JsonResponse({"ok": False, "error": "You cannot add yourself as a friend."})
 
-        if friend in current_user.friends.all():
-            return JsonResponse({"ok": False, "error": "This user is already your friend."})
+        for existing_friend in current_user.friends.all():
+            if existing_friend.is_encrypted:
+                decrypted_friend_username = existing_friend.decrypt_data(existing_friend.username)
+            else:
+                decrypted_friend_username = existing_friend.username
+
+            if decrypted_friend_username == friend_username:
+                return JsonResponse({"ok": False, "error": "This user is already your friend."})
+
+        all_users = CustomUser.objects.all()
+        friend = None
+        for user in all_users:
+            if user.is_encrypted:
+                decrypted_username = user.decrypt_data(user.username)
+            else:
+                decrypted_username = user.username
+
+            if decrypted_username == friend_username:
+                friend = user
+                break
+
+        if friend is None:
+            return JsonResponse({"ok": False, "error": "User not found."})
 
         current_user.friends.add(friend)
         current_user.save()
 
         return JsonResponse({"ok": True, "message": f"{friend.username} has been added as a friend."})
+
 
 class GetFriendListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -367,10 +443,12 @@ class GetFriendListView(APIView):
             else:
                 friend.is_online = False
                 friend.save()
-                
+
+            decrypted_username = friend.decrypt_data(friend.username)
+
             friend_list.append({
                 "id": friend.id,
-                "username": friend.username,
+                "username": decrypted_username,
                 "is_online": is_online,
             })
 
@@ -385,19 +463,30 @@ class GetFriendListView(APIView):
             "friends": friend_list
         })
 
+
 class RemoveFriendView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request):
         current_user = request.user
-        friend_to_remove = get_object_or_404(CustomUser, username=request.data.get('username'))
+        friend_username = request.data.get('username')
 
-        if friend_to_remove in current_user.friends.all():
+        if not friend_username:
+            return JsonResponse({"ok": False, "message": "No username provided."})
+
+        friend_to_remove = CustomUser.objects.filter(username=friend_username).first()
+
+        if not friend_to_remove:
+            all_users = CustomUser.objects.all()
+            friend_to_remove = next((user for user in all_users if user.decrypt_data(user.username) == friend_username), None)
+
+        if friend_to_remove and friend_to_remove in current_user.friends.all():
             current_user.friends.remove(friend_to_remove)
             current_user.save()
             return JsonResponse({"ok": True, "message": "Friend has been removed."})
         else:
             return JsonResponse({"ok": False, "message": "Friend not found in your friend list."})
+
 
 class OAuth42Login(APIView):
     def get(self, request):
@@ -412,6 +501,8 @@ class OAuth42Login(APIView):
         return JsonResponse({"redirect_url": url})
 
 class OAuth42Callback(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
         code = request.GET.get('code')
 
@@ -467,3 +558,94 @@ class OAuth42Callback(APIView):
         response.set_cookie('refreshToken', refresh_token, httponly=False, secure=True)
 
         return response
+
+class EncryptUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            if user.is_encrypted:
+                return JsonResponse({"ok": False, "message": "Les donnees sont deja chiffrees."})
+
+            if user.username:
+                user.username = user.encrypt_data(user.username)
+            if user.email:
+                user.email = user.encrypt_data(user.email)
+            if user.lang:
+                user.lang = user.encrypt_data(user.lang)
+
+            user.is_encrypted = True
+            user.save()
+
+            return JsonResponse({"ok": True, "message": "Les donnees ont ete chiffrees avec succès."})
+        
+        except Exception as e:
+            return JsonResponse({"ok": False, "message": str(e)})
+
+class DecryptUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            
+            if not user.is_encrypted:
+                return JsonResponse({"ok": False, "message": "Les donnees ne sont pas chiffrees."})
+
+            if user.username:
+                user.username = user.decrypt_data(user.username)
+            if user.email:
+                user.email = user.decrypt_data(user.email)
+            if user.lang:
+                user.lang = user.decrypt_data(user.lang)
+
+            user.is_encrypted = False
+            user.save()
+
+            return JsonResponse({"ok": True, "message": "Les donnees ont ete dechiffrees avec succes."})
+        
+        except Exception as e:
+            return JsonResponse({"ok": False, "message": str(e)})
+
+class GetUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.is_encrypted:
+            user_data = {
+                "username": user.decrypt_data(user.username),
+                "email": user.decrypt_data(user.email),
+                "defaultLang": user.decrypt_data(user.lang),
+                "lastActivity": user.last_activity,
+            }
+        else:
+            user_data = {
+                "username": user.username,
+                "email": user.email,
+                "defaultLang": user.lang,
+                "lastActivity": user.last_activity,
+            }
+
+        return JsonResponse({
+            "ok": True,
+            "userData": user_data
+        })
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_user = request.user
+        password = request.data.get('password')
+
+        if not password:
+            return JsonResponse({"ok": False, "error": "Password is required."})
+
+        if not check_password(password, current_user.password):
+            return JsonResponse({"ok": False, "error": "Incorrect password."})
+
+        current_user.delete()
+
+        return JsonResponse({"ok": True, "message": "Your account has been successfully deleted."})

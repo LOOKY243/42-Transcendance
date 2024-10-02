@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+from cryptography.fernet import Fernet
 import os
 
 
@@ -108,6 +109,8 @@ OAUTH2_PROVIDER = {
 CLIENT_ID = 'u-s4t2ud-ea774500e1f28d65e410d9dc0839d513379ae33b8be1870ac2987f76ec197b68'
 CLIENT_SECRET = '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'
 REDIRECT_URI = 'https://localhost:8443/api/42auth/callback/'
+
+SECRET_KEY = Fernet.generate_key().decode()
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

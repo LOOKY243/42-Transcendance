@@ -47,8 +47,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         
+        username = validated_data['username']
+        if len(username) > 32:
+            raise serializers.ValidationError({"username": "Le nom d'utilisateur ne peut pas dépasser 32 caractères."})
+
         user = CustomUser(
-            username=validated_data['username'],
+            username=username,
             email=validated_data.get('email', ''),
             tfa=validated_data.get('tfa', False),
             pfp=validated_data.get('pfp', None),
