@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import RegisterView, LoginView, GetUserView, LogoutView, UpdateLanguageView, UpdatePasswordView
-import * from views;
 
 # TwoFactorSetupView, TwoFactorVerifyView
 

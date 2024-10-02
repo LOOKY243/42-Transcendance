@@ -5,26 +5,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-let room_name = "test"
-let url = `ws://localhost:8000/ws/socket-server/${room_name}`;
-const socket = new WebSocket(url);
-
-socket.onmessage = function(e)
-{
-    let data = JSON.parse(e.data);
-    console.log("Receive:", data.message);
-}
-
-socket.onopen = function(e)
-{
-    console.log("Connected to game room");
-}
-
-socket.onclose = function(e)
-{
-    console.log("Disconnected from the game room");
-}
-
 export class GamePong
 {
     gameWindow;
@@ -40,10 +20,12 @@ export class GamePong
     fBallSpeed = 10;
     iPaddleDirection = [2];
     fPaddleSpeed = 10;
+    playerLeft = "Left";
+    playerRight = "Right";
 
     constructor(_ballSpeed, _iPlayers, _iPoints, _theme)
     {
-        this.iPlayers = _iPlayers;
+        this.iPlayers = 2;
         this.iPoints = _iPoints;
         this.theme = _theme;
 
@@ -79,7 +61,7 @@ export class GamePong
         this.map.MovePlayer(1, this.iPaddleDirection[0] * speed);
         this.cameraManager.Update();
         // this.renderer.render(this.scene, this.cameraManager.camera);
-        this.composer.render();  
+        this.composer.render();
     }
 
     OnDestroy()
@@ -184,5 +166,11 @@ export class GamePong
 
         if (event.code === "KeyW" || event.code === "KeyS")
             this.iPaddleDirection[1] = 0;
+
+        if (event.code === "KeyE")
+            this.map.TogglePlayerIA(0);
+
+        if (event.code === "Numpad1")
+            this.map.TogglePlayerIA(1);
     }
 }
