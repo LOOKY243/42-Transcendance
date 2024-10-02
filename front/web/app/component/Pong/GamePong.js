@@ -5,6 +5,26 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
+let room_name = "test"
+let url = `ws://localhost:8000/ws/socket-server/${room_name}`;
+const socket = new WebSocket(url);
+
+socket.onmessage = function(e)
+{
+    let data = JSON.parse(e.data);
+    console.log("Receive:", data.message);
+}
+
+socket.onopen = function(e)
+{
+    console.log("Connected to game room");
+}
+
+socket.onclose = function(e)
+{
+    console.log("Disconnected from the game room");
+}
+
 export class GamePong
 {
     gameWindow;
@@ -80,21 +100,43 @@ export class GamePong
 
     #PostProcess()
     {
-        this.composer = new EffectComposer(this.renderer);
+        const renderTarget = new THREE.WebGLRenderTarget(
+            this.gameWindow.offsetWidth,
+            this.gameWindow.offsetHeight,
+            {
+                format: THREE.RGBAFormat,
+                type: THREE.UnsignedByteType,
+                depthBuffer: true,
+                stencilBuffer: false,
+            }
+        );
+        this.composer = new EffectComposer(this.renderer, renderTarget);
+
         const renderPass = new RenderPass(this.scene, this.cameraManager.camera);
+        renderPass.clearColor = new THREE.Color(0x000000); 
+        renderPass.clearAlpha = 0;
         this.composer.addPass(renderPass);
 
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(this.gameWindow.innerWidth, this.gameWindow.innerHeight), 0.5, 0.4, 0); // Str, Rad, Treshold
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(this.gameWindow.innerWidth, this.gameWindow.innerHeight),
+            0.5,  // Bloom strength
+            0.4,  // Bloom radius
+            0     // Bloom threshold
+        );
         this.composer.addPass(bloomPass);
     }
 
     #CreateScene()
     {
         this.gameWindow = document.getElementById("render-target");
-        console.log('Game window:', this.gameWindow, this.gameWindow.offsetWidth, this.gameWindow.offsetHeight);
         this.scene = new THREE.Scene();
+        this.scene.background = null;
         this.cameraManager = new CameraManager(new THREE.Vector3(), this.gameWindow);
-        this.renderer = new THREE.WebGLRenderer({ alpha: true});
+        this.renderer = new THREE.WebGLRenderer({ 
+            alpha: true,
+            antialias: true,
+            preserveDrawingBuffer: true
+        });
         this.renderer.setSize(this.gameWindow.offsetWidth, this.gameWindow.offsetHeight);
         this.renderer.setClearColor(0x000000, 0);
         this.renderer.shadowMap.enabled = true;

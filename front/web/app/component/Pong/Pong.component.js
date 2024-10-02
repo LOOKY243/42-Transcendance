@@ -22,8 +22,8 @@ export class PongComponent extends AComponent {
         return true;
     }
 
-    static startPong(value) {
-        this.game = new GamePong("fast", 2, 5, "theme4");
+    static startPong(inputPlayers, inputPoints, ballSpeed, theme) {
+        this.game = new GamePong(ballSpeed, inputPlayers, inputPoints, theme);
         this.game.Start();
     }
 

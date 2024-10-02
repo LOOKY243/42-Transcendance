@@ -89,7 +89,7 @@ export class Map
     MovePlayerIA()
     {
         for (let i = 0; i < this.paddles.length; i++)
-            {
+        {
             if (this.paddles[i].bIA)
                 this.paddles[i].UpdateIA(this.ball);
         }

@@ -11,10 +11,10 @@ import { RadioComponent } from "../Radio/Radio.component.js";
 import { RadioImgComponent } from "../RadioImg/RadioImg.component.js";
 
 export class PongNewComponent extends AComponent {
-	inputPlayers = "";
-	inputPoints = "";
-	ballSpeed = "";
-	theme = "";
+	inputPlayers = 2;
+	inputPoints = 5;
+	ballSpeed = "normal";
+	theme = "theme1";
 	params = {
 		"players": false,
 		"points": false,
@@ -74,7 +74,7 @@ export class PongNewComponent extends AComponent {
 			injector[UserService].user.readyToPlay = true;
 		}
 		injector[Router].navigate("/pong");
-		PongComponent.startPong();
+		PongComponent.startPong(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme);
 	}
 
 	checkParams() {
