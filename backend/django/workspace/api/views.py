@@ -537,6 +537,7 @@ class OAuth42Callback(APIView):
         username = user_info.get('login')
 
         existing_user = CustomUser.objects.filter(username=username).first()
+        existing_user_42 = None
 
         if existing_user:
             if existing_user.is_42auth:
