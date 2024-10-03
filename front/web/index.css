@@ -9,6 +9,12 @@ html, body {
     height: 100%;
 }
 
+#render-target {
+    background-color: transparent;
+    position: relative;
+    height: 100vh;
+}
+
 .containerBlur {
 	height: fit-content;
 	backdrop-filter: blur(8px);
@@ -60,11 +66,6 @@ html, body {
 
 #no-height {
 	height: 0;
-}
-
-#render-target {
-    position: relative;
-    height: 100%;
 }
 
 #render-score {

@@ -22,6 +22,7 @@ export class GamePong
     fPaddleSpeed = 10;
     playerLeft = "Left";
     playerRight = "Right";
+    bCalled = false;
 
     constructor(_ballSpeed, _iPlayers, _iPoints, _theme)
     {
@@ -62,6 +63,16 @@ export class GamePong
         this.cameraManager.Update();
         // this.renderer.render(this.scene, this.cameraManager.camera);
         this.composer.render();
+
+        if (this.map.init && !this.map.start && !this.bCalled)
+            this.StopGame();
+    }
+
+    StopGame()
+    {
+        this.bCalled = true;
+        
+        console.log("game finished");
     }
 
     OnDestroy()

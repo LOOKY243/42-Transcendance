@@ -8,20 +8,26 @@ import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 
+const color = ["Black", "Blue", "Red", "Whiite"];
+
 document.addEventListener("DOMContentLoaded", () => {
-    const game = new Game();
+    const game = new GameBattleship();
     game.Start(); 
 });
 
-export class Game
+export class GameBattleship
 {
     gameWindow;
     scene;
     renderer;
     cameraManager;
     map;
+    enemyMap;
     composer;
     world;
+    currentPlayer = 0;
+    nextPlayer = 1;
+    clock;
 
     constructor()
     {
@@ -29,6 +35,7 @@ export class Game
 
     Start()
     {
+        this.clock = new THREE.Clock();
         this.#CreateScene();
         this.#PostProcess();
         window.addEventListener("resize", () => { this.#OnResize(); });
@@ -39,13 +46,79 @@ export class Game
 
     Update() 
     {
+
         this.cameraManager.Update();
         this.composer.render();
         this.map.Update();
+        this.enemyMap.Update();
+        this.TurnHandler();
+
+        if (this.currentPlayer == 0)
+        {
+            this.enemyMap.SetActive(false);
+            this.map.SetActive(true);
+        }
+        else if (this.currentPlayer == 1)
+        {
+            this.enemyMap.SetActive(true);
+            this.map.SetActive(false);
+        }
+        else
+        {
+            this.enemyMap.SetActive(false);
+            this.map.SetActive(false);
+        }
     }
 
     OnDestroy()
     {
+    }
+
+    TurnHandler()
+    {
+        if (this.currentPlayer == 0 && this.map.cannon.bNeedSwitch)
+        {
+            if (!this.ClockChecker(1))
+                return;
+
+            this.GoBlack(1);
+        }
+        else if (this.currentPlayer == 1 && this.enemyMap.cannon.bNeedSwitch)
+        {
+            if (!this.ClockChecker(1))
+                return;
+
+            this.GoBlack(0);
+        }
+        else if (this.currentPlayer == -1)
+        {
+            if (!this.ClockChecker(1))
+                return;
+
+            this.currentPlayer = this.nextPlayer;
+            this.map.cannon.bNeedSwitch = false;
+            this.enemyMap.cannon.bNeedSwitch = false;
+        }
+    }
+
+    GoBlack(_next)
+    {
+        this.currentPlayer = -1;
+        this.nextPlayer = _next;
+    }
+
+    ClockChecker(_time)
+    {
+        if (!this.clock.running)
+            this.clock.start();
+
+        if (this.clock.getElapsedTime() >= _time)
+        {
+            this.clock.stop();
+            return true;
+        }
+
+        return false;
     }
 
     #OnResize()
@@ -83,7 +156,10 @@ export class Game
         this.gameWindow.appendChild(this.renderer.domElement);
         this.#CreateLight();
         this.cameraManager.Update();
-        this.map = new Map(this);
+        this.map = new Map(this, color[1]);
+        this.enemyMap = new Map(this, color[2]);
+        this.map.otherMap = this.enemyMap;
+        this.enemyMap.otherMap = this.map;
     }
 
     #CreateLight()
@@ -102,8 +178,6 @@ export class Game
         sun.shadow.camera.near = 0.5;
         sun.shadow.camera.far = 100;
         this.scene.add(sun);
-        //const helper = new THREE.CameraHelper(sun.shadow.camera);
-        //this.scene.add(helper);
     }
 
     #OnKeyDown(event) 

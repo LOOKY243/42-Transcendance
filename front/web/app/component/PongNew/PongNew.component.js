@@ -74,7 +74,7 @@ export class PongNewComponent extends AComponent {
 			injector[UserService].user.readyToPlay = true;
 		}
 		injector[Router].navigate("/pong");
-		PongComponent.startPong(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme);
+		PongComponent.startPong(this.inputPoints, this.ballSpeed, this.theme);
 	}
 
 	checkParams() {

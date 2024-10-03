@@ -17,7 +17,8 @@ export class Cannon
     map;
     placed = 0;
     turn = true;
-    ball;
+    bActive = true;
+    bNeedSwitch = false;
 
     constructor(_scene, _offset, _camera, _map)
     {
@@ -34,6 +35,9 @@ export class Cannon
 
     onKeyDown(event)
     {
+        if (!this.bActive || this.bNeedSwitch)
+            return;
+
         if (event.key != 'E' && event.key != 'e')
             return;
 
@@ -75,12 +79,18 @@ export class Cannon
 
     onMouseClick(event)
     {
+        if (!this.bActive || this.bNeedSwitch)
+            return;
+
         if (this.objectInHand && this.#CanPlace())
         {
             this.#PlaceHere();
             this.objectInHand.userData.canBeMove = false;
             this.objectInHand = null;
             this.placed++;
+
+            if (this.placed == 6)
+                this.bNeedSwitch = true;
         }
         else if (this.intersectedObject?.userData.canBeMove && !this.objectInHand)
             this.objectInHand = this.intersectedObject;
@@ -259,6 +269,7 @@ export class Cannon
         this.map.ShootHere(this.intersectedObject.userData.x, this.intersectedObject.userData.y);
         this.intersectedObject.userData.hit = false;
         this.intersectedObject.userData.canBeHighlight = false;
+        this.bNeedSwitch = true;
     }
 
     #GetTileStatus(_x, _y)
@@ -341,7 +352,7 @@ export class Cannon
             this.mesh = object;
         });
         this.#GenerateBase(_scene, _offset);
-        this.ball = new Ball(_scene, this.camera);
+        this.ball = new Ball(_scene, this.camera, false);
     }
 
     #GenerateBase(_scene, _offset)

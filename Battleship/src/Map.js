@@ -4,7 +4,6 @@ import { Ball } from "./Ball.js";
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
 const DEG2RAD = Math.PI / 180;
-
 const cube = new THREE.BoxGeometry(1, 1, 1);
 
 export class Map
@@ -12,16 +11,22 @@ export class Map
     #game;
     width = 10;
     tiles = [];
+    wall = [];
     loader;
     fMapOffset = 5.5;
     texture;
     waterColor = 0xFFFFFF;
+    color;
     cannon;
     ball;
+    bActive = true;
+    ship = [];
+    otherMap;
 
-    constructor(_game)
+    constructor(_game, _color)
     {
         this.loader = new FBXLoader();
+        this.color = _color;
         this.#game = _game;
         this.texture = new THREE.TextureLoader().load("./public/textures/halftone.jpg");
         this.texture.wrapS = THREE.RepeatWrapping;
@@ -32,6 +37,9 @@ export class Map
 
     Update()
     {
+        if (!this.bActive)
+            return;
+
         this.cannon.Update();
         this.ball.Update();
     }
@@ -40,21 +48,21 @@ export class Map
     {
         this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.#game.cameraManager, this);
         this.#GenerateAlly();
-        this.#GenerateShip("Whiite");
+        this.#GenerateShip(this.color);
         this.#GenerateEnemy();
-        this.ball = new Ball(this.#game.scene, this.#game.cameraManager);
+        this.ball = new Ball(this.#game.scene, this.#game.cameraManager, true);
     }
 
     ShootHere(_x, _y)
     {
         let tile = null;
 
-        for (let i = 0; i < this.tiles.length; i++)
+        for (let i = 0; i < this.otherMap.tiles.length; i++)
         {
-            const tmp = this.tiles[i];
+            const tmp = this.otherMap.tiles[i];
 
             if (tmp.userData.x == _x && tmp.userData.y == _y)
-                tile = this.tiles[i];
+                tile = this.otherMap.tiles[i];
         }
 
         if (!tile)
@@ -62,6 +70,36 @@ export class Map
 
         const start = tile.position.clone().add(new THREE.Vector3(0, 20, 0));
         this.ball.Shoot(start, tile.position, tile, tile.userData.used);
+    }
+
+    SetActive(_status)
+    {
+        this.bActive = _status;
+        this.cannon.bActive = _status;
+
+        if (this.cannon.mesh)
+            this.cannon.mesh.visible = _status;
+
+        if (this.cannon.base)
+            this.cannon.base.visible = _status;
+
+        for (let i = 0; i < this.ship.length; i++)
+        {
+            if (this.ship[i])
+                this.ship[i].visible = _status;            
+        }
+
+        for (let i = 0; i < this.tiles.length; i++)
+        {
+            if (this.tiles[i])
+                this.tiles[i].visible = _status;            
+        }
+
+        for (let i = 0; i < this.wall.length; i++)
+        {
+            if (this.wall[i])
+                this.wall[i].visible = _status;            
+        }
     }
 
     #GenerateAlly()
@@ -124,6 +162,7 @@ export class Map
             });
         
             this.#game.scene.add(object);
+            this.ship.push(object);
         });
     }
 
@@ -146,7 +185,7 @@ export class Map
         mesh.userData.x = _indexX;
         mesh.userData.y = this.width - 1 - _indexY;
         mesh.userData.ground = false;
-        // this.tiles.push(mesh);
+        this.wall.push(mesh);
         this.#game.scene.add(mesh);
     }
 }

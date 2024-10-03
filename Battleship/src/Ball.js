@@ -18,12 +18,14 @@ export class Ball
     usedTileColor = 0x00FF00;
     emptyTileColorExplosion = 0xFF0000;
     usedTileColorExplosion = 0x00FF00;
+    bMap = false;
 
-    constructor(_scene, _camera)
+    constructor(_scene, _camera, _map)
     {
         this.scene = _scene;
         this.camera = _camera;
         this.#CreatePhysics();
+        this.bMap = _map;
     }
 
     #CreatePhysics()
@@ -49,7 +51,7 @@ export class Ball
         this.final = _finalObject;
         this.finalStatus = _finalStatus;
         this.bMove = true;
-        this.mesh.visible = true;
+        this.mesh.visible = !this.bMap;
         this.start = new Date().getTime();
         return true;
     }
@@ -80,8 +82,11 @@ export class Ball
             if (this.finalStatus && this.final.userData.ground && this.final.userData.size >= 1)
                 explosionPosition.add(new THREE.Vector3(0, 1, 0));
 
-            this.#CreateExplosion(explosionPosition, this.finalStatus ? this.usedTileColorExplosion : this.emptyTileColorExplosion);
-            this.camera.Shake(0.1, this.explosionDuration);
+            if (!this.bMap)
+            {
+                this.#CreateExplosion(explosionPosition, this.finalStatus ? this.usedTileColorExplosion : this.emptyTileColorExplosion);
+                this.camera.Shake(0.1, this.explosionDuration);
+            }
 
             if (!this.final.userData.ship)
                 return;

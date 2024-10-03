@@ -23,6 +23,7 @@ export class Map
     firstColor;
     secondoColor;
     init = false;
+    start = false;
 
     constructor(_game)
     {
@@ -40,9 +41,9 @@ export class Map
                 this.texture = texture;
                 this.texture.wrapS = THREE.RepeatWrapping;
                 this.texture.wrapT = THREE.RepeatWrapping;
-                console.log("Texture loaded:", this.texture);
                 this.GenerateMap();
                 this.init = true;
+                this.start = true;
                 setInterval(() => this.MovePlayerIA(), 25); // 1000
             }, 
             undefined, 
@@ -125,7 +126,10 @@ export class Map
                 this.paddles.splice(i, 1);
 
                 if (this.paddles.length <= 1)
+                {
                     this.ball.SetNoRespawn();
+                    this.start = false;
+                }
             }
         }
     }
