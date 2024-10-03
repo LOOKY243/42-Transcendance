@@ -22,12 +22,15 @@ export class Map
     bActive = true;
     ship = [];
     otherMap;
+    name;
 
-    constructor(_game, _color)
+    constructor(_game, _color, _waterColor, _name)
     {
         this.loader = new FBXLoader();
+        this.waterColor = _waterColor;
         this.color = _color;
         this.#game = _game;
+        this.name = _name;
         this.texture = new THREE.TextureLoader().load("./public/textures/halftone.jpg");
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
@@ -46,11 +49,11 @@ export class Map
 
     GenerateMap()
     {
-        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.#game.cameraManager, this);
+        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.name, this.#game.cameraManager, this);
         this.#GenerateAlly();
         this.#GenerateShip(this.color);
         this.#GenerateEnemy();
-        this.ball = new Ball(this.#game.scene, this.#game.cameraManager, true);
+        this.ball = new Ball(this.#game.scene, this.#game.cameraManager, true, this.cannon);
     }
 
     ShootHere(_x, _y)

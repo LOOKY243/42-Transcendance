@@ -78,21 +78,21 @@ export class GameBattleship
     {
         if (this.currentPlayer == 0 && this.map.cannon.bNeedSwitch)
         {
-            if (!this.ClockChecker(1))
+            if (!this.ClockChecker(1.5))
                 return;
 
             this.GoBlack(1);
         }
         else if (this.currentPlayer == 1 && this.enemyMap.cannon.bNeedSwitch)
         {
-            if (!this.ClockChecker(1))
+            if (!this.ClockChecker(1.5))
                 return;
 
             this.GoBlack(0);
         }
         else if (this.currentPlayer == -1)
         {
-            if (!this.ClockChecker(1))
+            if (!this.ClockChecker(1.5))
                 return;
 
             this.currentPlayer = this.nextPlayer;
@@ -156,8 +156,8 @@ export class GameBattleship
         this.gameWindow.appendChild(this.renderer.domElement);
         this.#CreateLight();
         this.cameraManager.Update();
-        this.map = new Map(this, color[1]);
-        this.enemyMap = new Map(this, color[2]);
+        this.map = new Map(this, color[1], 0xFFFFFF, "Starter");
+        this.enemyMap = new Map(this, color[2], 0xFFFFFF, "Follower");
         this.map.otherMap = this.enemyMap;
         this.enemyMap.otherMap = this.map;
     }

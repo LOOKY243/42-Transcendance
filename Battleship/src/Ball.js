@@ -19,13 +19,15 @@ export class Ball
     emptyTileColorExplosion = 0xFF0000;
     usedTileColorExplosion = 0x00FF00;
     bMap = false;
+    cannon;
 
-    constructor(_scene, _camera, _map)
+    constructor(_scene, _camera, _map, _cannon)
     {
         this.scene = _scene;
         this.camera = _camera;
         this.#CreatePhysics();
         this.bMap = _map;
+        this.cannon = _cannon;
     }
 
     #CreatePhysics()
@@ -94,7 +96,10 @@ export class Ball
             this.final.userData.ship.userData.size--;
 
             if (this.final.userData.ship.userData.size <= 0)
+            {
+                this.cannon.AddScore();
                 this.final.userData.ship.visible = false;
+            }
         }
     }
 
