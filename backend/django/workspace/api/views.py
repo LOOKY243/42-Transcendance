@@ -1,24 +1,42 @@
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
-from .serializers import RegisterSerializer, UpdatePasswordSerializer
-from django.http import JsonResponse
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+# Django imports
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone, crypto
+from django.views import View
+from django.views.generic.edit import UpdateView
 from django.conf import settings
-from django.utils import timezone
-from datetime import timedelta
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from rest_framework_simplejwt.views import TokenRefreshView
-import requests
-from django.shortcuts import redirect
-from .models import CustomUser, MatchHistory
-from .utils import generate_verification_code, get_ft_token, generate_random_password
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import update_session_auth_hash
+from urllib.parse import quote
+
+# DRF imports
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.views import APIView
+
+# DRF SimpleJWT imports
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+
+# Local imports
+from .models import CustomUser
+from .serializers import RegisterSerializer, UpdatePasswordSerializer
+
+# Third-party imports
+import requests
 import base64
+
+# Python standard library imports
+from datetime import timedelta
+
+from cryptography.fernet import Fernet
 
 User = get_user_model() 
 
@@ -65,6 +83,8 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+
+            user.update_last_activity()
             refresh = RefreshToken.for_user(user)
             response = JsonResponse({
                 "ok": True,
@@ -73,10 +93,10 @@ class LoginView(APIView):
                 "token_refresh_required": False,
             })
             response.set_cookie(
-                'accessToken', str(refresh.access_token), max_age=3600, httponly=True, secure=False, samesite='Lax'
+                'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
             )
             response.set_cookie(
-                'refreshToken', str(refresh), max_age=86400, httponly=True, secure=False, samesite='Lax'
+                'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
             )
             return response
         else:
@@ -160,14 +180,23 @@ class FtLoginCallbackView(APIView):
                 return JsonResponse({"ok": False, "error": "Authentication failed"}, status=400)
 
 
+
 class LogoutView(APIView):
     def post(self, request):
-        logout(request)
-        response = JsonResponse({"ok": True})
+        current_user = request.user
         
-        response.delete_cookie('accessToken')
-        response.delete_cookie('refreshToken')
-        
+        if current_user.is_authenticated:
+            current_user.is_online = False
+            current_user.save()
+            
+            logout(request)
+
+            response = JsonResponse({"ok": True})
+            response.delete_cookie('accessToken')
+            response.delete_cookie('refreshToken')
+        else:
+            response = JsonResponse({"ok": False, "error": "User is not authenticated."})
+
         return response
 
 class GetUserView(APIView):
@@ -176,119 +205,76 @@ class GetUserView(APIView):
     def get(self, request):
         user = request.user
         encoded_pfp = None
-        
+
+        if user.is_encrypted:
+            username = user.decrypt_data(user.username)
+            lang = user.decrypt_data(user.lang)
+        else:
+            username = user.username
+            lang = user.lang
+            
         if user.pfp:
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
 
         return JsonResponse({
             "ok": True,
-            "username": user.username,
-            "lang": user.lang,
+            "username": username,
+            "lang": lang,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
         })
 
-class GetUserTfaView(APIView):
-    def get(self, request):
-        user = user.request
-        return JsonResponse({
+
+class GetUserInformations(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        user.update_last_activity()
+
+        username = request.data.get('username')
+
+        if not username:
+            return Response({
+                "ok": False,
+                "message": "Username is required."
+            })
+
+        all_users = CustomUser.objects.all()
+        target_user = None
+
+        for user in all_users:
+            decrypted_username = user.decrypt_data(user.username) if user.is_encrypted else user.username
+            if decrypted_username == username:
+                target_user = user
+                break
+
+        if not target_user:
+            return Response({
+                "ok": False,
+                "message": "User not found."
+            })
+
+        encoded_pfp = None
+
+        if target_user.is_encrypted:
+            username = target_user.decrypt_data(target_user.username)
+        else:
+            username = target_user.username
+
+        if target_user.pfp:
+            encoded_pfp = base64.b64encode(target_user.pfp).decode('utf-8')
+
+        user_info = {
+            "username": username,
+            "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
+        }
+
+        return Response({
             "ok": True,
-            "tfa": user.tfa
+            "user": user_info
         })
 
-class UpdatePfpView(APIView):
-    permission_classes = [IsAuthenticated]
-    def put(self, request):
-        pass
 
-class UpdateEmailView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        new_email = request.data.get('new_email')
-
-        if not new_email:
-            return JsonResponse({"ok": False, "error": "Email is required"}, status=400)
-
-        try:
-            validate_email(new_email)
-        except ValidationError:
-            return JsonResponse({"ok": False, "error": "Invalid email address"}, status=400)
-
-        user = request.user
-        user.email = new_email
-        user.save()
-
-        return JsonResponse({"ok": True, "message": "Email updated successfully"})
-    
-
-class TwoFactorActivateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        email = request.data.get('email')
-
-        if not email:
-            return JsonResponse({"ok": False, "error": "Email is required"}, status=400)
-
-        try:
-            validate_email(email)
-        except ValidationError:
-            return JsonResponse({"ok": False, "error": "Invalid email address"}, status=400)
-
-        user = request.user
-        user.email = email
-        user.tfa = True
-        user.save()
-
-        return JsonResponse({"ok": True, "message": "2fa activated successfully"})
-    
-
-class TwoFactorSetupView(APIView):
-    def put(self, request):
-        user = request.user
-
-        if not user:
-            return JsonResponse({'ok': False}, status=400)
-        if not user.tfa:
-            return JsonResponse({'ok': False, 'error': '2fa not active'}, status=404)
-    
-        verification_code = generate_verification_code()
-
-        subject = 'Your Two-Factor Authentication Verification Code'
-        message = f'Your verification code is: {verification_code}'
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = [user.email]
-
-        try:
-            send_mail(subject, message, from_email, recipient_list)
-            user.verification_code = verification_code
-            user.verification_code_created_at = timezone.now()
-            user.save()
-            return JsonResponse({'ok': True})
-        except Exception as e:
-            return JsonResponse({'ok': False, 'error': str(e), 'from email': from_email}, status=500)
-        
-class TwoFactorVerifyView(APIView):
-    def post(self, request):
-        code = request.data.get('code')
-        
-        user = request.user
-        
-        if not user:
-            return JsonResponse({'ok': False, 'error': 'User not found'})
-        if user.verification_code != code:
-            return JsonResponse({'ok': False, 'error': 'Invalid code'})
-        
-        expiration_time = user.verification_code_created_at + timedelta(minutes=5)
-        if timezone.now() > expiration_time:
-            user.verification_code = None
-            user.verification_code_created_at = None
-            user.save()
-            return JsonResponse({'ok': False, 'error': 'Code expired'})
-        user.verification_code = None
-        user.verification_code_created_at = None
-        user.save()
-        return JsonResponse({'ok': True})
 
 class UpdateLanguageView(APIView):
     permission_classes = [IsAuthenticated]
@@ -297,34 +283,36 @@ class UpdateLanguageView(APIView):
         user = request.user
         new_lang = request.data.get('lang')
 
+        user.update_last_activity()
+
         if not new_lang:
             return JsonResponse({"ok": False, "error": "No language provided"})
 
-        if new_lang == user.lang:
+        if user.is_encrypted:
+            current_lang = user.decrypt_data(user.lang)
+        else:
+            current_lang = user.lang
+
+        if new_lang == current_lang:
             return JsonResponse({"ok": False, "error": "New language is the same as the current language"})
 
-        user.lang = new_lang
+        if user.is_encrypted:
+            cipher_suite = Fernet(settings.SECRET_KEY.encode())
+            user.lang = cipher_suite.encrypt(new_lang.encode()).decode('utf-8')
+        else:
+            user.lang = new_lang
+
         user.save()
 
         return JsonResponse({"ok": True})
-    
-class GetMatchHistoryView(APIView):
-    def get(self, request, player_id):
-        matches = MatchHistory.objects.filter(player_id=player_id)[:5]
-        match_data = [{
-            'opponent': match.match_date,
-            'score': match.score,
-            'game_mode': match.gamemode
-        } for match in matches]
 
-        return JsonResponse({'last_five_matches': match_data})
-    
 class UpdatePasswordView(APIView):
     permission_classes = [IsAuthenticated]
     PASSWORD_MAX_LENGTH = 30
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         serializer = UpdatePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -350,29 +338,36 @@ class UpdatePasswordView(APIView):
 
 class UpdateUsernameView(APIView):
     permission_classes = [IsAuthenticated]
-    USERNAME_MAX_LENGTH = 24
+    USERNAME_MAX_LENGTH = 32
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         new_username = request.data.get('username', '').strip()
 
+        if user.is_42auth:
+            return JsonResponse({"ok": False, "error": "42 account can't change their username"})
         if not new_username:
             return JsonResponse({"ok": False, "error": "New username cannot be empty"})
-
+        if '42' in new_username:
+            return JsonResponse({"ok": False, "error": "42 is forbidden is username"})
         if len(new_username) > self.USERNAME_MAX_LENGTH:
-            return JsonResponse({"ok": False, "error": f"Username cannot exceed 24 characters"})
+            return JsonResponse({"ok": False, "error": f"Username cannot exceed {self.USERNAME_MAX_LENGTH} characters"})
 
         if new_username == user.username:
             return JsonResponse({"ok": False, "error": "New username cannot be the same as the current username"})
 
-        if User.objects.filter(username=new_username).exists():
+        if CustomUser.objects.filter(username=new_username).exists():
             return JsonResponse({"ok": False, "error": "Username already taken"})
 
-        user.username = new_username
+        if user.is_encrypted:
+            user.username = user.encrypt_data(new_username)
+        else:
+            user.username = new_username
+
         user.save()
 
         return JsonResponse({"ok": True, "username": user.username})
-
 
 class UpdateProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
@@ -382,6 +377,7 @@ class UpdateProfilePictureView(APIView):
 
     def patch(self, request):
         user = request.user
+        user.update_last_activity()
         
         if 'pfp' not in request.FILES:
             return JsonResponse({"ok": False, "error": "No profile picture provided"})
@@ -399,11 +395,28 @@ class UpdateProfilePictureView(APIView):
 
         return JsonResponse({"ok": True, "message": "Profile picture updated successfully"})
 
+class DeleteProfilePictureView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.update_last_activity()
+
+        if user.pfp:
+            user.pfp = None
+            user.save()
+            return JsonResponse({"ok": True, "message": "Profile picture deleted successfully."})
+        else:
+            return JsonResponse({"ok": False, "error": "No profile picture to delete."})
+
+
 class GetProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
+        user.update_last_activity()
+
         if user.pfp:
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
             return JsonResponse({
@@ -412,3 +425,322 @@ class GetProfilePictureView(APIView):
             })
         else:
             return JsonResponse({"ok": False, "error": "Profile picture not found"})
+
+
+class SearchUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        search_string = request.data.get('search_string', '')
+        current_user = request.user
+        current_user.update_last_activity()
+        friends = current_user.friends.all()
+
+        users = CustomUser.objects.filter(
+            username__icontains=search_string
+        ).exclude(
+            id__in=friends.values_list('id', flat=True)
+        ).exclude(
+            id=current_user.id
+        )[:5]
+
+        user_list = [{"id": user.id, "username": user.decrypt_data(user.username) if user.is_encrypted else user.username} for user in users]
+
+        return JsonResponse({
+            "ok": True,
+            "users": user_list
+        })
+
+class AddFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        friend_username = request.data.get('username')
+
+        if not friend_username:
+            return JsonResponse({"ok": False, "error": "No username provided."})
+
+        current_user = request.user
+        current_user.update_last_activity()
+        if current_user.is_encrypted:
+            current_username = current_user.decrypt_data(current_user.username)
+        else:
+            current_username = current_user.username
+
+        if current_username == friend_username:
+            return JsonResponse({"ok": False, "error": "You cannot add yourself as a friend."})
+
+        for existing_friend in current_user.friends.all():
+            if existing_friend.is_encrypted:
+                decrypted_friend_username = existing_friend.decrypt_data(existing_friend.username)
+            else:
+                decrypted_friend_username = existing_friend.username
+
+            if decrypted_friend_username == friend_username:
+                return JsonResponse({"ok": False, "error": "This user is already your friend."})
+
+        all_users = CustomUser.objects.all()
+        friend = None
+        for user in all_users:
+            if user.is_encrypted:
+                decrypted_username = user.decrypt_data(user.username)
+            else:
+                decrypted_username = user.username
+
+            if decrypted_username == friend_username:
+                friend = user
+                break
+
+        if friend is None:
+            return JsonResponse({"ok": False, "error": "User not found."})
+
+        current_user.friends.add(friend)
+        current_user.save()
+
+        return JsonResponse({"ok": True, "message": f"{friend.username} has been added as a friend."})
+
+
+class GetFriendListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        current_user = request.user
+        current_user.update_last_activity()
+
+        friends = current_user.friends.all()
+        friend_list = []
+
+        expiration_time = timedelta(minutes=15)
+
+        for friend in friends:
+            is_online = False
+            if not friend.is_online:
+                is_online = False
+
+            elif friend.last_activity and (timezone.now() - friend.last_activity) < expiration_time:
+                is_online = True
+            else:
+                friend.is_online = False
+                friend.save()
+
+            decrypted_username = friend.decrypt_data(friend.username)
+
+            friend_list.append({
+                "id": friend.id,
+                "username": decrypted_username,
+                "is_online": is_online,
+            })
+
+        if not friend_list:
+            return JsonResponse({
+                "ok": False,
+                "message": "No friends found."
+            })
+
+        return JsonResponse({
+            "ok": True,
+            "friends": friend_list
+        })
+
+
+class RemoveFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        current_user = request.user
+        friend_username = request.data.get('username')
+
+        if not friend_username:
+            return JsonResponse({"ok": False, "message": "No username provided."})
+
+        friend_to_remove = CustomUser.objects.filter(username=friend_username).first()
+
+        if not friend_to_remove:
+            all_users = CustomUser.objects.all()
+            friend_to_remove = next((user for user in all_users if user.decrypt_data(user.username) == friend_username), None)
+
+        if friend_to_remove and friend_to_remove in current_user.friends.all():
+            current_user.friends.remove(friend_to_remove)
+            current_user.save()
+            return JsonResponse({"ok": True, "message": "Friend has been removed."})
+        else:
+            return JsonResponse({"ok": False, "message": "Friend not found in your friend list."})
+
+
+class OAuth42Login(APIView):
+    def get(self, request):
+        redirect_uri_encoded = quote(settings.REDIRECT_URI)
+        url = (
+            f"https://api.intra.42.fr/oauth/authorize"
+            f"?client_id={settings.CLIENT_ID}"
+            f"&redirect_uri={redirect_uri_encoded}"
+            f"&response_type=code"
+            f"&scope=public"
+        )
+        return JsonResponse({"redirect_url": url})
+
+class OAuth42Callback(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        code = request.GET.get('code')
+
+        if not code:
+            return HttpResponse('<script>localStorage.setItem("error", "no_code"); window.close();</script>')
+
+        token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
+            'grant_type': 'authorization_code',
+            'client_id': settings.CLIENT_ID,
+            'client_secret': settings.CLIENT_SECRET,
+            'redirect_uri': settings.REDIRECT_URI,
+            'code': code
+        })
+
+        if token_response.status_code != 200:
+            return HttpResponse('<script>localStorage.setItem("error", "auth_failed"); window.close();</script>')
+
+        token_data = token_response.json()
+        access_token = token_data.get('access_token')
+
+        user_info_response = requests.get('https://api.intra.42.fr/v2/me', headers={
+            'Authorization': f'Bearer {access_token}'
+        })
+
+        if user_info_response.status_code != 200:
+            return HttpResponse('<script>localStorage.setItem("error", "user_info_failed"); window.close();</script>')
+
+        user_info = user_info_response.json()
+        username = user_info.get('login')
+
+        existing_user = CustomUser.objects.filter(username=username).first()
+
+        if existing_user:
+            if existing_user.is_42auth:
+                login(request, existing_user)
+                existing_user.update_last_activity()
+            else:
+                existing_user = None
+                username_with_42 = username + "42"
+                existing_user_42 = CustomUser.objects.filter(username=username_with_42).first()
+
+                if existing_user_42:
+                    if existing_user_42.is_42auth:
+                        login(request, existing_user_42)
+                        existing_user_42.update_last_activity()
+                    else:
+                        existing_user_42 = None
+                        return JsonResponse({"ok": False, "error": "User with '42' does not have 42auth enabled."})
+                else:
+                    user = CustomUser(username=username_with_42, lang='en', is_42auth=True)
+                    user.save()
+                    login(request, user)
+                    user.update_last_activity()
+        else:
+            user = CustomUser(username=username, lang='en', is_42auth=True)
+            user.save()
+            login(request, user)
+            user.update_last_activity()
+
+        current_user = existing_user_42 if existing_user_42 else (existing_user if existing_user else user)
+        refresh = RefreshToken.for_user(current_user)
+
+
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = HttpResponse('<script>window.close();</script>')
+        response.set_cookie('accessToken', access_token, httponly=False, secure=True)
+        response.set_cookie('refreshToken', refresh_token, httponly=False, secure=True)
+
+        return response
+
+class EncryptUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            if user.is_encrypted:
+                return JsonResponse({"ok": False, "message": "Les donnees sont deja chiffrees."})
+
+            if user.username:
+                user.username = user.encrypt_data(user.username)
+            if user.email:
+                user.email = user.encrypt_data(user.email)
+            if user.lang:
+                user.lang = user.encrypt_data(user.lang)
+
+            user.is_encrypted = True
+            user.save()
+
+            return JsonResponse({"ok": True, "message": "Les donnees ont ete chiffrees avec succès."})
+        
+        except Exception as e:
+            return JsonResponse({"ok": False, "message": str(e)})
+
+class DecryptUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            
+            if not user.is_encrypted:
+                return JsonResponse({"ok": False, "message": "Les donnees ne sont pas chiffrees."})
+
+            if user.username:
+                user.username = user.decrypt_data(user.username)
+            if user.email:
+                user.email = user.decrypt_data(user.email)
+            if user.lang:
+                user.lang = user.decrypt_data(user.lang)
+
+            user.is_encrypted = False
+            user.save()
+
+            return JsonResponse({"ok": True, "message": "Les donnees ont ete dechiffrees avec succes."})
+        
+        except Exception as e:
+            return JsonResponse({"ok": False, "message": str(e)})
+
+class GetUserDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.is_encrypted:
+            user_data = {
+                "username": user.decrypt_data(user.username),
+                "email": user.decrypt_data(user.email),
+                "defaultLang": user.decrypt_data(user.lang),
+                "lastActivity": user.last_activity,
+            }
+        else:
+            user_data = {
+                "username": user.username,
+                "email": user.email,
+                "defaultLang": user.lang,
+                "lastActivity": user.last_activity,
+            }
+
+        return JsonResponse({
+            "ok": True,
+            "userData": user_data
+        })
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_user = request.user
+        password = request.data.get('password')
+
+        if not password:
+            return JsonResponse({"ok": False, "error": "Password is required."})
+
+        if not check_password(password, current_user.password):
+            return JsonResponse({"ok": False, "error": "Incorrect password."})
+
+        current_user.delete()
+
+        return JsonResponse({"ok": True, "message": "Your account has been successfully deleted."})

@@ -18,6 +18,9 @@ export const en = {
 	},
 	"friends": {
 		"noFriends": "You dont have a single friend",
+		"addFriends": "Add friends",
+		"friendsListTitle": "Friends List",
+		"advertiser": "User with protected personal data will possibly not appear on this research, you can add them on their profile page",
 	},
 	"auth": {
 		"login": "Log in",
@@ -26,7 +29,9 @@ export const en = {
 		"password": "Password",
 		"confirm": "Confirm",
 		"errorText": "Passwords are not the same",
-		"errorUsername": "This username is already in use"
+		"errorPolicy": "Password must be 8-30 characters, contain: 1 uppercase, 1 lowercase, 1 digit, 1 special character, and cannot be a common password",
+		"errorUsername": "This username is already in use",
+		"42auth": "42 Auth",
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
@@ -45,6 +50,15 @@ export const en = {
 		"currentPassword": "Current Password",
 		"newPassword": "New password",
 		"newPasswordConfirm": "Confirm new password",
+		"dataEncrypt": "Anonymize my personal data: ",
+		"dataGet": "Get my personal data: ",
+		"getPolicy": "Download privacy policy: ",
+		"deleteUserTitle": "Account deletion",
+		"deleteUserPassword": "Enter your password to delete your account",
+		"deleteUserAdvert": "This action is irreversible and will delete all data related to your account"
+	},
+	"publicProfile" : {
+		"noProfile": "No profile found"
 	},
 	"inputFile": {
 		"text": "No file chosen"
@@ -64,5 +78,18 @@ export const en = {
 		"usernameDanger": "username can't be change, invalid credentials",
 		"pfpSuccess": "Profile picture change successfully",
 		"pfpDanger": "Profile picture can't be change, invalid given file",
-	}
+		"friendSuccess": "Friend add successfully",
+		"friendDanger": "Friend can't be add",
+		"inactive": "You are AFK",
+		"deleteFriendSuccess": "Remove friend successfully",
+		"deleteFriendDanger": "Can't remove this friend",
+		"encryptSuccess" : "Your personal data is now protected",
+		"encryptDanger": "Your personal data can't be protected",
+		"decryptSuccess" : "Your personal data is now unprotected",
+		"decryptDanger": "Your personal data can't be unprotected",
+		"deletePfpSuccess": "Profile picture delete successfully",
+		"deletePfpDanger": "Profile picture can't be delete",
+		"deleteUserSuccess": "Your account has been deleted",
+		"deleteUserDanger": "Your account can't be deleted, check your password or try later",
+	},
 }

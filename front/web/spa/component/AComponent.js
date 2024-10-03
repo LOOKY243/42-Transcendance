@@ -6,6 +6,7 @@ import { Observable } from "../utils/Observable.js";
 export class AComponent {
 	parentSelector = "";
 	componentSelector = "";
+	pathArgument = "";
 	html = "";
 	onChangeValue = "";
 	componentConfig = null;
@@ -18,11 +19,13 @@ export class AComponent {
 	onClickSubscription = null;
 	onChangeSubscription = null;
 	onChangeFile = false;
+	isRelativeHtml = false;
 	
-	constructor(parentSelector, componentSelector, componentConfig) {
+	constructor(parentSelector, componentSelector, componentConfig, pathArgument) {
 		this.parentSelector = parentSelector;
 		this.componentSelector = componentSelector;
 		this.componentConfig = componentConfig;
+		this.pathArgument = pathArgument;
 	}
 
 	onInit() {
@@ -51,7 +54,11 @@ export class AComponent {
 	}
 
 	render() {
-		document.querySelector(this.getSelector()).innerHTML = this.getHtml();
+		if (this.isRelativeHtml) {
+			document.querySelector(this.getSelector()).innerHTML += this.getHtml();
+		} else {
+			document.querySelector(this.getSelector()).innerHTML = this.getHtml();
+		}
 		this.getChildComponent().forEach((value) => {
 			if (!value.isInit)
 				value.onInit();

@@ -15,11 +15,13 @@ export class InputFileComponent extends AComponent {
 		return ret;
 	}
 
+	getCSSPath() {
+		return "app/component/InputFile/InputFile.component.css";
+	}
+
 	generateHtml(config) {
 		this.html = `
-			<div>
-				<input class="form-control" type="file" id="formFile" accept="image/png">
-			</div>
+			<input class="form-control inputFile" type="file" id="formFile" accept="image/png">
 		`;
 	}
 }

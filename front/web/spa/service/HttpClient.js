@@ -3,7 +3,7 @@ import { AInjectable } from "./AInjectable.js";
 import { TokenService } from "./Token.service.js";
 
 export class HttpClient extends AInjectable {
-	baseUrl = "http://localhost:8000/api";
+	baseUrl = "https://localhost:8443/api";
 
 	constructor() {
 		super();
@@ -13,8 +13,8 @@ export class HttpClient extends AInjectable {
 		return this.baseUrl + "/" + url;
 	}
 
-	get(url, token = false) {
-		return this.fetchAndParseStream(this.getUrl(url), {}, token);
+	get(url, options = {}, token = false) {
+		return this.fetchAndParseStream(this.getUrl(url), options, token);
 	}
 
 	post(url, data, token = false) {
@@ -37,18 +37,14 @@ export class HttpClient extends AInjectable {
 		});
 	}
 
-	delete(url, data) {
+	delete(url, data, token = false) {
 		return this.fetchAndParseStream(this.getUrl(url), {
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify(data) 
-		}).then(response => {
-			if (!response.ok)
-				throw new Error(response.status)
-			return response.json();
-		})
+		}, token);
 	}
 
 	patch(url, data, token = false, isFile = false) {

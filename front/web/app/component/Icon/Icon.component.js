@@ -4,6 +4,7 @@ import { ReplayObservable } from "../../../spa/utils/ReplayObservable.js";
 export class IconComponent extends AComponent {
 	icon = new ReplayObservable();
 	clickable = new ReplayObservable();
+	id = new ReplayObservable();
 	
 	iconList = {
 		"friends": "friends.svg",
@@ -18,6 +19,15 @@ export class IconComponent extends AComponent {
 		"defaultProfilePicture": "defaultPP.svg",
 		"modifier": "modifier.svg",
 		"logout": "logout.svg",
+		"search": "search.svg",
+		"addFriends": "addFriends.svg",
+		"removeFriends": "removeFriends.svg",
+		"profile": "profile.svg",
+		"42": "42.svg",
+		"check": "check.svg",
+		"notCheck": "notCheck.svg",
+		"download": "download.svg",
+		"delete": "delete.svg",
 	}
 
 	initConfig() {
@@ -39,7 +49,7 @@ export class IconComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
-			<img style="cursor:${config.clickable ? "pointer" : "inherit"};" src="http://${document.location.host}/app/assets/icon/${this.iconList[config.icon]}">
+			<img style="cursor:${config.clickable ? "pointer" : "inherit"};" src="https://${document.location.host}/app/assets/icon/${this.iconList[config.icon]}">
 		`
 	}
 }

@@ -23,16 +23,16 @@ export class RadioIconComponent extends AComponent {
         return true;
     }
 
-    destroy(id) {
+    destroy() {
 		super.destroy();
 		if (this.radioSelectSubscription) {
-			this.radioSelect.unsubscribe(id);
+			this.radioSelect.unsubscribe(this.radioSelectSubscription);
 		}
 	}
 
 	radioSelectSubscribe(func) {
 		this.radioSelectSubscription = this.radioSelect.subscribe(func);
-		this.destroy();
+		// this.destroy();
 	}
     
     render() {
@@ -76,17 +76,17 @@ export class RadioIconComponent extends AComponent {
             <div class="d-flex">
                 <div class="radioIconDiv">
                     <input type="radio" class="btn-check radioIconInput" name="langRadio" id="fr" autocomplete="off" ${config.fr ? "checked" : ""}>
-                    <label class="btn radioIconLabel" for="fr"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/FrenchFlag.svg"></label>
+                    <label class="btn radioIconLabel" for="fr"><img class="radioIconImg" src="https://${document.location.host}/app/assets/icon/FrenchFlag.svg"></label>
                 </div>
 
                 <div class="radioIconDiv">
                     <input type="radio" class="btn-check radioIconInput" name="langRadio" id="en" autocomplete="off" ${config.en ? "checked" : ""}>
-                    <label class="btn radioIconLabel" for="en"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/UKingdomFlag.svg"></label>
+                    <label class="btn radioIconLabel" for="en"><img class="radioIconImg" src="https://${document.location.host}/app/assets/icon/UKingdomFlag.svg"></label>
                 </div>
 
                 <div class="radioIconDiv">
                     <input type="radio" class="btn-check radioIconInput" name="langRadio" id="it" autocomplete="off" ${config.it ? "checked" : ""}>
-                    <label class="btn radioIconLabel" for="it"><img class="radioIconImg" src="http://${document.location.host}/app/assets/icon/ItalyFlag.svg"></label>
+                    <label class="btn radioIconLabel" for="it"><img class="radioIconImg" src="https://${document.location.host}/app/assets/icon/ItalyFlag.svg"></label>
                 </div>    
             </div>    
         `;

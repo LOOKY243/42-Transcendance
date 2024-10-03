@@ -16,6 +16,7 @@ export class ProfileSettingsComponent extends AComponent {
 	newPassword = "";
 	newPasswordConfirm = ""
 	defaultLang = "";
+	deleteUserPassword = "";
 	pfp = null;
 
 	onInit() {
@@ -32,7 +33,7 @@ export class ProfileSettingsComponent extends AComponent {
 		this.createSubComponent(InputFileComponent.create({
 			name: "inputPP",
 			parentSelector: this.getSelector(),
-			onchange: (value) => {this.pfp = value; console.log("input onChange: ", value)},
+			onchange: (value) => this.pfp = value,
 		}));
 		this.createSubComponent(ButtonIconComponent.create({
 			name: "profilePictureModifier",
@@ -40,6 +41,13 @@ export class ProfileSettingsComponent extends AComponent {
 			icon: "modifier",
 			style: "btn",
 			onclick: () => injector[UserService].patchPfp(this.pfp)
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "deletePP",
+			parentSelector: this.getSelector(),
+			icon: "delete",
+			style: "btn btn-outline-danger",
+			onclick: () => injector[UserService].deletePfp()
 		}));
 
 		this.createSubComponent(ButtonIconComponent.create({
@@ -69,7 +77,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.currentPassword = value
+			onchange: (value) => {this.currentPassword = value; this.pwdCheck();}
 		}));
 		this.createSubComponent(InputComponent.create({
 			name: "newPasswordInput",
@@ -77,7 +85,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.newPassword = value
+			onchange: (value) => {this.newPassword = value; this.pwdInputCheck();}
 		}));
 		this.createSubComponent(InputComponent.create({
 			name: "newPasswordConfirmInput",
@@ -85,7 +93,7 @@ export class ProfileSettingsComponent extends AComponent {
 			inputType: "password",
 			autocomplete: `autocomplete="new-password"`,
 			placeholder: "********",
-			onchange: (value) => this.newPasswordConfirm = value
+			onchange: (value) => {this.newPasswordConfirm = value; this.pwdInputCheck();}
 		}));
 
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
@@ -103,15 +111,119 @@ export class ProfileSettingsComponent extends AComponent {
 			onclick: () => injector[UserService].patchDefaultLang(this.defaultLang)
 		}));
 
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "encryptButton",
+			parentSelector: this.getSelector(),
+			icon: "check",
+			style: "btn",
+			onclick: () => injector[UserService].encryptUser(),
+			id: 0,
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "decryptButton",
+			parentSelector: this.getSelector(),
+			icon: "notCheck",
+			style: "btn",
+			onclick: () => injector[UserService].decryptUser(),
+		}));
+
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "getPersonalDataButton",
+			parentSelector: this.getSelector(),
+			icon: "download",
+			style: "btn btn-outline-warning",
+			onclick: () => injector[UserService].getPersonalData(),
+			id: 0,
+		}));
+
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "policyButton",
+			parentSelector: this.getSelector(),
+			icon: "download",
+			style: "btn btn-outline-warning",
+			onclick : () => this.downloadPolicy(),
+			id: 1,
+		}));
+
+		this.createSubComponent(InputComponent.create({
+			name: "deleteUserPassword",
+			parentSelector: this.getSelector(),
+			inputType: "password",
+			autocomplete: `autocomplete="password"`,
+			placeholder: "********",
+			onchange: value => this.deleteUserPassword = value,
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "deleteUserButton",
+			icon: "check",
+			parentSelector: this.getSelector(),
+			style: "btn btn-outline-danger",
+			onclick: () => injector[UserService].deleteUser(this.deleteUserPassword),
+			id: 1,
+		}))
+
 		this.setConfig({
 			username: this.username,
 			currentPassword: this.translate("profileSettings.currentPassword"),
 			newPassword: this.translate("profileSettings.newPassword"),
 			newPasswordConfirm: this.translate("profileSettings.newPasswordConfirm"),
 			lang: this.translate("profileSettings.lang"),
+			dataTitle: this.translate("profileSettings.dataTitle"),
+			dataEncrypt: this.translate("profileSettings.dataEncrypt"),
+			dataGet: this.translate("profileSettings.dataGet"),
+			getPolicy: this.translate("profileSettings.getPolicy"),
+			deleteUserTitle: this.translate("profileSettings.deleteUserTitle"),
+			deleteUserPassword: this.translate("profileSettings.deleteUserPassword"),
+			deleteUserAdvert: this.translate("profileSettings.deleteUserAdvert"), 
 		});
 
+		this.pwdCheck()
+
 		return true;
+	}
+
+	downloadPolicy() {
+		const link = document.createElement('a');
+		link.href = 'app/assets/policy.txt';
+		link.download = 'policy.txt';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+
+	passwordPolicyCheck(pwd) {
+        const commonPassword = ['password', '123456', 'qwerty', `azerty`];
+        return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(pwd) &&
+            !commonPassword.includes(pwd.toLowerCase()) 
+        );
+    }
+
+	pwdInputCheck() {
+		if (!this.passwordPolicyCheck(this.newPassword)) {
+			this.subComponent["newPasswordInput"].error.next(true);
+			this.subComponent["newPasswordInput"].errorText.next("auth.errorPolicy");
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["newPasswordInput"].error.next(false);
+			this.pwdCheck();
+		}
+
+		if(this.newPassword !== this.newPasswordConfirm) {
+			this.subComponent["newPasswordConfirmInput"].error.next(true);
+			this.subComponent["newPasswordConfirmInput"].errorText.next("auth.errorText");
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["newPasswordConfirmInput"].error.next(false);
+			this.pwdCheck();
+		}
+	}
+
+	pwdCheck() {
+		if (this.currentPassword === "" || this.newPassword === "" || this.newPasswordConfirm === "") {
+			this.subComponent["passwordModifier"].disabled.next(true);
+		} else {
+			this.subComponent["passwordModifier"].disabled.next(false);
+		}
 	}
 
 	generateHtml(config) {
@@ -124,8 +236,11 @@ export class ProfileSettingsComponent extends AComponent {
 					</div>
 					<div class="row m-3">
 						<div class="fs-3 text-light text-center">
-							<div id="inputPP"></div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="inputPP"></div>
+							</div>
 							<div id="profilePictureModifier"></div>
+							<div id="deletePP"></div>
 						</div>
 					</div>
 					<div class="line my-4"></div>
@@ -173,6 +288,39 @@ export class ProfileSettingsComponent extends AComponent {
 									<div id="defaultLangModifier"></div>
 								</div>
 							</div>
+						</div>
+					<div class="line my-4"></div>
+						<div class="row m-3">
+							<div class="text-center mt-2">
+								<div class="fs-5 text-light">${config.dataEncrypt}</div>
+								<div class="d-flex justify-content-center">
+									<div id="encryptButton" class="ms-3"></div>
+									<div id="decryptButton" class="me-3"></div>
+								</div>
+							</div>
+					<div class="line my-4"></div>
+							<div class="text-center mt-2">
+								<div class="fs-5 text-light">${config.dataGet}</div>
+								<div class="d-flex justify-content-center m-3">
+									<div id="getPersonalDataButton" class="mx-3"></div>
+								</div>
+							</div>
+					<div class="line my-4"></div>
+						<div class="text-center mt-2">
+							<div class="fs-5 text-light">${config.getPolicy}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="policyButton" class="mx-3"></div>
+							</div>
+						</div>
+					<div class="line my-4"></div>
+						<div class="text-center mt-2">
+							<div class="fs-3 fw-bold text-danger">${config.deleteUserTitle}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="deleteUserPassword" class="inputContainer"></div>
+							</div>
+							<div class="fs-5 text-danger">${config.deleteUserPassword}</div>
+							<div class="fs-5 text-danger">${config.deleteUserAdvert}</div>
+							<div id="deleteUserButton" class="m-3"></div>
 						</div>
 					</div>
 				</div>

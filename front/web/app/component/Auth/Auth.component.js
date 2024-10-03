@@ -5,6 +5,7 @@ import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
+import { TextButtonComponent } from "../textButton/TextButton.component.js";
 
 export class AuthComponent extends AComponent {
     username = "";
@@ -41,7 +42,7 @@ export class AuthComponent extends AComponent {
             parentSelector: this.getSelector(),
             inputType: "text",
             placeholder: "Jean-Michel",
-            onchange: (value) => this.username = value
+            onchange: (value) => {this.username = value; this.regCheck();}
         }));
         this.createSubComponent(InputComponent.create({
             name: "inputRegPass",
@@ -81,6 +82,21 @@ export class AuthComponent extends AComponent {
             onclick: () => injector[UserService].login(this.username, this.password)
         }));
 
+        this.createSubComponent(TextButtonComponent.create({
+            name: "fourtyTwoButton",
+            parentSelector: this.getSelector(),
+            langKey: "auth.42auth",
+            onclick: () => injector[UserService].auth42(),
+        }));
+
+        // this.createSubComponent(ButtonIconComponent.create({
+        //     name: "fourtyTwoButton",
+        //     parentSelector: this.getSelector(),
+        //     icon: "42",
+        //     stye: "btn",
+        //     onclick: () => injector[UserService].auth42(),
+        // }));
+
         this.setConfig({
             login: this.translate("auth.login"),
             register: this.translate("auth.register"),
@@ -94,7 +110,23 @@ export class AuthComponent extends AComponent {
         return true;
     }
 
+    passwordPolicyCheck(pwd) {
+        const commonPassword = ['password', '123456', 'qwerty', `azerty`];
+        return (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(pwd) &&
+            !commonPassword.includes(pwd.toLowerCase()) 
+        );
+    }
+
     passwordCheck() {
+        if (!this.passwordPolicyCheck(this.password)) {
+            this.subComponent["inputRegPass"].error.next(true);
+            this.subComponent["inputRegPass"].errorText.next("auth.errorPolicy");
+            this.subComponent["registerButton"].disabled.next(true);
+        } else {
+            this.subComponent["inputRegPass"].error.next(false);
+            this.regCheck();
+        }
+        
         if (this.password !== this.passwordConfirm) {
             this.subComponent["inputRegPassConfirm"].error.next(true);
             this.subComponent["inputRegPassConfirm"].errorText.next("auth.errorText");
@@ -121,10 +153,6 @@ export class AuthComponent extends AComponent {
         }
     }
 
-    getCSSPath() {
-        return "app/component/Auth/Auth.component.css"
-    }
-
     generateHtml(config) {
         this.html = `
         <div id="navbar"></div>
@@ -146,6 +174,11 @@ export class AuthComponent extends AComponent {
                             <div class="d-flex justify-content-end me-3">
                             <div id="loginButton"></div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="container col-md-1 offset-md-1 mt-5">
+                        <div class="containerBlur p-3 text-center text-info text-wrap">
+                            <a id="fourtyTwoButton"></a>
                         </div>
                     </div>
                     <div class="container col-md-4 offset-md-1 mt-5">
