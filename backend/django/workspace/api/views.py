@@ -536,39 +536,37 @@ class OAuth42Callback(APIView):
         user_info = user_info_response.json()
         username = user_info.get('login')
 
-        existing_user = CustomUser.objects.filter(username=username).first()
-        existing_user_42 = None
+        existing_user_42 = CustomUser.objects.filter(username=username + "42").first()
+        existing_user = None
 
-        if existing_user:
-            if existing_user.is_42auth:
-                login(request, existing_user)
-                existing_user.update_last_activity()
+        if existing_user_42:
+            if existing_user_42.is_42auth:
+                login(request, existing_user_42)
+                existing_user_42.update_last_activity()
             else:
-                existing_user = None
-                username_with_42 = username + "42"
-                existing_user_42 = CustomUser.objects.filter(username=username_with_42).first()
-
-                if existing_user_42:
-                    if existing_user_42.is_42auth:
-                        login(request, existing_user_42)
-                        existing_user_42.update_last_activity()
-                    else:
-                        existing_user_42 = None
-                        return JsonResponse({"ok": False, "error": "User with '42' does not have 42auth enabled."})
+                existing_user_42 = None
+                return JsonResponse({"ok": False, "error": "User with '42' does not have 42auth enabled."})
+        else:
+            existing_user = CustomUser.objects.filter(username=username).first()
+            
+            if existing_user:
+                if existing_user.is_42auth:
+                    login(request, existing_user)
+                    existing_user.update_last_activity()
                 else:
-                    user = CustomUser(username=username_with_42, lang='en', is_42auth=True)
+                    existing_user = None
+                    user = CustomUser(username=username + "42", lang='en', is_42auth=True)
                     user.save()
                     login(request, user)
                     user.update_last_activity()
-        else:
-            user = CustomUser(username=username, lang='en', is_42auth=True)
-            user.save()
-            login(request, user)
-            user.update_last_activity()
+            else:
+                user = CustomUser(username=username, lang='en', is_42auth=True)
+                user.save()
+                login(request, user)
+                user.update_last_activity()
 
         current_user = existing_user_42 if existing_user_42 else (existing_user if existing_user else user)
         refresh = RefreshToken.for_user(current_user)
-
 
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
@@ -578,6 +576,7 @@ class OAuth42Callback(APIView):
         response.set_cookie('refreshToken', refresh_token, httponly=False, secure=True)
 
         return response
+
 
 class EncryptUserDataView(APIView):
     permission_classes = [IsAuthenticated]
