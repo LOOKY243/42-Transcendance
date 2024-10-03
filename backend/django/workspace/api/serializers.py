@@ -57,7 +57,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data.get('email', ''),
             tfa=validated_data.get('tfa', False),
             pfp=validated_data.get('pfp', None),
-            lang=validated_data.pop('lang', 'en')
+            verification_code=validated_data.get('verification_code', None),
+            verification_code_created_at=validated_data.get('verification_code_created_at', None),
+            lang=validated_data.pop('language', 'en')
         )
         user.set_password(validated_data['password'])
         user.save()

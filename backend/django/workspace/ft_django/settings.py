@@ -83,7 +83,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ft_django.wsgi.application'
-
+ASGI_APPLICATION = 'ft_django.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -156,6 +156,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.CustomUser'
 
-TWO_FACTOR_EMAIL = {
-    'FROM_EMAIL': '42hess@gmail.com',
-}
+# Email Backend Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '--------------'  # Gmail address
+EMAIL_HOST_PASSWORD = '----------------' # Gmail password (Application password)

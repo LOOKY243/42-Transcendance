@@ -73,7 +73,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             return JsonResponse({"ok": True, "username": user.username})
-        return JsonResponse({"ok": False})
+        return JsonResponse({"ok": False}, status=400)
 
 
 class LoginView(APIView):
@@ -101,7 +101,8 @@ class LoginView(APIView):
             )
             return response
         else:
-            return JsonResponse({"ok": False})
+            return JsonResponse({"ok": False}, status=404)
+        
 
 
 class LogoutView(APIView):

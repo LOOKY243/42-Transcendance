@@ -2,6 +2,10 @@ body {
     --halftone: url("../../assets/img/halftone.jpg");
 }
 
+#root-window {
+    height: 100vh;
+}
+
 #root-window h1 {
     text-align: center;
     font-size: x-large;
@@ -10,14 +14,11 @@ body {
     color: white;
 }
 
-#root-window {
-    height: 100%;
-}
-
-#render-target {
+/* #render-target {
+    background-color: transparent;
     position: relative;
-    height: 100%;
-}
+    height: 100vh;
+} */
 
 #render-score {
     list-style: none;

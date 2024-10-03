@@ -20,14 +20,25 @@ export class Player
     fSpeed = 1.4;
     bCanPlay = true;
     bDied = false;
-    bIA = true;
+    bIA = false;
     nextPosition = null;
     ballSpeed = 0.1;
+    color;
+    rotationOffset;
 
-    constructor(_scene, _name, _position, _rotation, _fCap)
+    constructor(_scene, _name, _position, _rotation, _fCap, _color, _hp, _offset)
     {
+        this.rotationOffset = _offset;
         this.name = _name;
+        this.color = _color;
         this.fCap = _fCap;
+        this.iHP = _hp;
+        this.iMaxHP = _hp;
+
+        const change = 0.2;
+        this.fCap -= change;
+        this.fPaddleHeight += change * 2;
+
         this.#CreatePhysics(_scene, _position, _rotation);
         this.#UpdateHP();
         this.#GenerateScore();
@@ -35,8 +46,8 @@ export class Player
 
     #CreatePhysics(_scene, _position, _rotation)
     {
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.color});
+        material.emissive.set(this.color);
         // const capsule = new THREE.CapsuleGeometry(this.fPaddleWidth, this.fPaddleHeight, 4, 8);
         const capsule = new THREE.BoxGeometry(this.fPaddleWidth, this.fPaddleHeight, this.fPaddleWidth);
         this.mesh = new THREE.Mesh(capsule, material);
@@ -53,16 +64,16 @@ export class Player
 
     #CreateText(_scene, _position, _rotation)
     {
-        const textRotation = new THREE.Vector3(0, _rotation.z + 90 * DEG2RAD, 0);
+        const textRotation = new THREE.Vector3(0, _rotation.z + this.rotationOffset * DEG2RAD, 0);
         const textPosition = _position.clone().add(new THREE.Vector3(_position.x * 0.1, 1, _position.z * 0.1));
-        this.textName = new Text(_scene, this.name, textPosition, textRotation, 0.4, 0.02);
+        this.textName = new Text(_scene, this.name, textPosition, textRotation, 0.4, 0.02, this.color);
     }
 
     #CreateKillZone(_scene, _position, _rotation)
     {
         const scale = 8;
-        const material = new THREE.MeshLambertMaterial({color: 0xffffff});
-        material.emissive.set(0xffffff);
+        const material = new THREE.MeshLambertMaterial({color: this.color});
+        material.emissive.set(this.color);
         const capsule = new THREE.CapsuleGeometry(this.fPaddleWidth / scale, this.fPaddleHeight + this.fCap * 2, 4, 8);
         const mesh = new THREE.Mesh(capsule, material);
         mesh.rotation.set(_rotation.x, _rotation.y, _rotation.z);
@@ -97,8 +108,9 @@ export class Player
 
     #UpdateHP()
     {
+        const color = new THREE.Color(this.color);
         const colorPer = this.iHP / this.iMaxHP;
-        const colorCode = new THREE.Color(colorPer, colorPer, colorPer);
+        const colorCode = new THREE.Color(colorPer * color.r, colorPer * color.g, colorPer * color.b);
         const material = new THREE.MeshLambertMaterial({color: colorCode});
         material.emissive.set(colorCode);
         material.emissiveIntensity = colorPer;
@@ -106,11 +118,6 @@ export class Player
 
         if (this.textName.mesh)
             this.textName.mesh.material = material;
-    }
-
-    #DisplayName(_toggle)
-    {
-        this.textName.SetVisibility(_toggle);
     }
 
     Die(_scene)
@@ -213,10 +220,6 @@ export class Player
         const elem = document.createElement("ul");
         const content = `${this.name} - ${this.iHP}`;
         elem.append(content);
-
-        if (this.#IsLocalPlayer())
-            elem.id = "active";
-
         elem.setAttribute("data-id", this.name);
         elem.setAttribute("data-score", this.iHP);
         list.appendChild(elem);
@@ -236,25 +239,7 @@ export class Player
                 continue;
 
             if (this.iHP <= 0)
-            {
                 elem.id = "invisible";
-
-                if (this.#IsLocalPlayer())
-                {
-                    const text = document.getElementById("render-text");
-                    text.id -= "invisible";
-                    text.id += "red-bg";
-                    text.textContent = "You Lost";
-                }
-            }
-
-            if (elems.length == 1 && this.#IsLocalPlayer())
-            {
-                const text = document.getElementById("render-text");
-                text.id -= "invisible";
-                text.id += "green-bg";
-                text.textContent = "You Won";
-            }
 
             elem.setAttribute("data-score", this.iHP);
             elem.textContent = `${this.name} - ${this.iHP}`;
@@ -301,20 +286,7 @@ export class Player
             if (i < max)
                 continue;
 
-            if (elem.getAttribute("data-id") == this.name && this.#IsLocalPlayer())
-            {
-                elem.id = "active";
-                elems[3] = "invisible";
-            }
-            else
-                elem.id = "invisible";
+            elem.id = "invisible";
         }
-    }
-
-    #IsLocalPlayer()
-    {
-        // TODO Implement
-
-        return false;
     }
 }
