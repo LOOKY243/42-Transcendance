@@ -269,9 +269,12 @@ class UpdateUsernameView(APIView):
         user.update_last_activity()
         new_username = request.data.get('username', '').strip()
 
+        if user.is_42auth:
+            return JsonResponse({"ok": False, "error": "42 account can't change their username"})
         if not new_username:
             return JsonResponse({"ok": False, "error": "New username cannot be empty"})
-
+        if '42' in new_username:
+            return JsonResponse({"ok": False, "error": "42 is forbidden is username"})
         if len(new_username) > self.USERNAME_MAX_LENGTH:
             return JsonResponse({"ok": False, "error": f"Username cannot exceed {self.USERNAME_MAX_LENGTH} characters"})
 
@@ -536,19 +539,35 @@ class OAuth42Callback(APIView):
         existing_user = CustomUser.objects.filter(username=username).first()
 
         if existing_user:
-            if existing_user.password:
-                return HttpResponse('<script>localStorage.setItem("error", "username_taken_with_password"); window.close();</script>')
-            else:
+            if existing_user.is_42auth:
                 login(request, existing_user)
                 existing_user.update_last_activity()
+            else:
+                existing_user = None
+                username_with_42 = username + "42"
+                existing_user_42 = CustomUser.objects.filter(username=username_with_42).first()
+
+                if existing_user_42:
+                    if existing_user_42.is_42auth:
+                        login(request, existing_user_42)
+                        existing_user_42.update_last_activity()
+                    else:
+                        existing_user_42 = None
+                        return JsonResponse({"ok": False, "error": "User with '42' does not have 42auth enabled."})
+                else:
+                    user = CustomUser(username=username_with_42, lang='en', is_42auth=True)
+                    user.save()
+                    login(request, user)
+                    user.update_last_activity()
         else:
-            user = CustomUser(username=username)
-            user.lang = 'en'
+            user = CustomUser(username=username, lang='en', is_42auth=True)
             user.save()
             login(request, user)
             user.update_last_activity()
 
-        refresh = RefreshToken.for_user(existing_user if existing_user else user)
+        current_user = existing_user_42 if existing_user_42 else (existing_user if existing_user else user)
+        refresh = RefreshToken.for_user(current_user)
+
 
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)

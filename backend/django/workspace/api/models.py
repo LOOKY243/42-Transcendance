@@ -27,6 +27,7 @@ class CustomUser(AbstractBaseUser):
     is_online = models.BooleanField(default=False)
     last_activity = models.DateTimeField(null=True, blank=True)
     is_encrypted = models.BooleanField(default=False)
+    is_42auth = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []

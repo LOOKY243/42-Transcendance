@@ -9,7 +9,6 @@ import re
 
 User = get_user_model()
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8, max_length=30)
     password_confirm = serializers.CharField(write_only=True, required=True, min_length=8, max_length=30)
@@ -50,6 +49,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         username = validated_data['username']
         if len(username) > 32:
             raise serializers.ValidationError({"username": "Le nom d'utilisateur ne peut pas dépasser 32 caractères."})
+        if '42' in username:
+            raise serializers.ValidationError({"username": "cannot contain the sequence '42'."})
 
         user = CustomUser(
             username=username,
@@ -62,6 +63,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+
 
 
 class UpdatePasswordSerializer(serializers.Serializer):
