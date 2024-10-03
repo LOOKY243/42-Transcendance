@@ -89,20 +89,13 @@ export class AuthComponent extends AComponent {
             onclick: () => injector[UserService].auth42(),
         }));
 
-        // this.createSubComponent(ButtonIconComponent.create({
-        //     name: "fourtyTwoButton",
-        //     parentSelector: this.getSelector(),
-        //     icon: "42",
-        //     stye: "btn",
-        //     onclick: () => injector[UserService].auth42(),
-        // }));
-
         this.setConfig({
             login: this.translate("auth.login"),
             register: this.translate("auth.register"),
             username: this.translate("auth.username"),
             password: this.translate("auth.password"),
-            confirm: this.translate("auth.confirm")
+            confirm: this.translate("auth.confirm"),
+            usernameAdvert: this.translate("auth.usernameAdvert"),
         })
         this.logCheck();
         this.regCheck();
@@ -188,6 +181,7 @@ export class AuthComponent extends AComponent {
                                 <div class="mt-4 mb-4">
                                     <p class="fs-5 text-light">${config.username}</p>
                                     <div id="inputRegUser" class="mx-2"></div>
+                                    <p class="fs-6 m-2 text-warning-emphasis">${config.usernameAdvert}</p>
                                 </div>
                                 <div class="mb-4">
                                     <p class="fs-5 text-light">${config.password}</p>

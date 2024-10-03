@@ -26,6 +26,7 @@ export const en = {
 		"login": "Log in",
 		"register": "Register",
 		"username": "Username",
+		"usernameAdvert": '42 is forbidden in username',
 		"password": "Password",
 		"confirm": "Confirm",
 		"errorText": "Passwords are not the same",
