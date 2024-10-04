@@ -30,6 +30,7 @@ export class Map
         this.waterColor = _waterColor;
         this.color = _color;
         this.#game = _game;
+        this.name = _name;
         this.texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/halftone.jpg`);
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
@@ -148,7 +149,7 @@ export class Map
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIsland.png`);
+                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIslands.png`);
                     child.material.map = texture;
                     child.material.needsUpdate = true;
                     child.receiveShadow = true;

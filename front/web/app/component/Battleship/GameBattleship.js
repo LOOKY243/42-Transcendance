@@ -10,11 +10,6 @@ import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 
 const color = ["Black", "Blue", "Red", "Whiite"];
 
-document.addEventListener("DOMContentLoaded", () => {
-    const game = new GameBattleship();
-    game.Start(); 
-});
-
 export class GameBattleship
 {
     gameWindow;
