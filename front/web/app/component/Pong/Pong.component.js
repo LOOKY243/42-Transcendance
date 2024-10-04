@@ -1,29 +1,18 @@
-import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js"
-import { Router } from "../../../spa/Router.js";
-import { UserService } from "../../service/User.service.js";
 import { GamePong } from "./GamePong.js"
 
 export class PongComponent extends AComponent {
     game = {};
 
     onInit() {
-        // if (!injector[UserService].user) {
-        //     injector[Router].navigate("/auth");
-		// 	return false;
-        // }
-        // if (!injector[UserService].user.readyToPlay) {
-        //     injector[Router].navigate("/");
-		// 	return false;
-        // }
         super.onInit();
         this.generateHtml({});
 
         return true;
     }
 
-    static startPong(inputPoints, ballSpeed, theme) {
-        this.game = new GamePong(ballSpeed, 2, inputPoints, theme);
+    static startPong(inputPoints, ballSpeed, theme, player1, player2) {
+        this.game = new GamePong(ballSpeed, inputPoints, theme, player1, player2);
         this.game.Start();
     }
 

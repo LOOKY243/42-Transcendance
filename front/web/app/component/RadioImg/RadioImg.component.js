@@ -29,7 +29,6 @@ export class RadioImgComponent extends AComponent {
 
 	radioSelectSubscribe(func) {
 		this.radioSelectSubscription = this.radioSelect.subscribe(func);
-		this.destroy();
 	}
 	
 	getCSSPath() {

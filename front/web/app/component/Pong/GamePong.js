@@ -24,18 +24,27 @@ export class GamePong
     playerRight = "Right";
     bCalled = false;
 
-    constructor(_ballSpeed, _iPlayers, _iPoints, _theme)
+    constructor(_theme, _iPoints, _ballSpeed, _player1, _player2)
     {
         this.iPlayers = 2;
         this.iPoints = _iPoints;
         this.theme = _theme;
+        this.playerLeft = _player1;
+        this.playerRight = _player2;
 
-        if (_ballSpeed == "normal")
+        console.log(_ballSpeed, _iPoints, _theme)
+        if (_ballSpeed === "normal") {
+            console.log("slow");
             this.fBallSpeed = 0.075;
-        else if (_ballSpeed == "slow")
+        }
+        else if (_ballSpeed === "slow") {
+            console.log("normal");
             this.fBallSpeed = 0.05;
-        else
+        }
+        else {
+            console.log("fast");
             this.fBallSpeed = 0.1;
+        }
     }
 
     Start()

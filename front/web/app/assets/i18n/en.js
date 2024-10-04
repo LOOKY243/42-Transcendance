@@ -36,7 +36,7 @@ export const en = {
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
-		"inputError": "must be positive",
+		"inputError": "must be between 1 and 10",
 		"players": "Players :",
 		"ball": "Ball Speed :",
 		"points": "Points to Win :",
@@ -56,13 +56,19 @@ export const en = {
 		"getPolicy": "Download privacy policy: ",
 		"deleteUserTitle": "Account deletion",
 		"deleteUserPassword": "Enter your password to delete your account",
-		"deleteUserAdvert": "This action is irreversible and will delete all data related to your account"
+		"deleteUserAdvert": "This action is irreversible and will delete all data related to your account",
+		"getPassword" : "Enter your mail to receive a password",
+		"tfaTitle": "Enter your mail to activate Two factor authentification"
 	},
 	"publicProfile" : {
 		"noProfile": "No profile found"
 	},
 	"inputFile": {
 		"text": "No file chosen"
+	},
+	"twofa": {
+		"title": "Verification code was sent to your email",
+		"titleDanger": "An error occured"
 	},
 	"pop": {
 		"loginSuccess": "Successfuly login",
@@ -92,5 +98,10 @@ export const en = {
 		"deletePfpDanger": "Profile picture can't be delete",
 		"deleteUserSuccess": "Your account has been deleted",
 		"deleteUserDanger": "Your account can't be deleted, check your password or try later",
+		"startPongDanger": "We can't start a game with your options",
+		"mailSuccess": "Success, check your mail",
+		"mailDanger": "Failed to send you a mail, check your credentials",
+		"tfaSuccess": "TwoFa activate successfully",
+		"tfaDanger": "TwoFa activation failed, check your crendentials",
 	},
 }

@@ -21,6 +21,11 @@ from .views import (
     GetUserDataView,
     DeleteProfilePictureView,
     DeleteAccountView,
+    ValidateGameSettingsView,
+    NewMailView,
+    TwoFactorSetupView, 
+    TwoFactorVerifyView, 
+    TwoFactorActivateView,
 )
 
 urlpatterns = [
@@ -45,4 +50,9 @@ urlpatterns = [
     path('decryptUser/', DecryptUserDataView.as_view(), name='decrypt_user_data'),
     path('getUserData/', GetUserDataView.as_view(), name='get_user_data'),
     path('deleteUser/', DeleteAccountView.as_view(), name='delete-account'),
+    path('startNewPong/', ValidateGameSettingsView.as_view(), name='validatedParamsNewPong'),
+    path('newMail/', NewMailView.as_view(), name='newMail'),
+    path('2faActivate/', TwoFactorActivateView.as_view(), name='two_factor_activate'),
+    path('2faSetup/', TwoFactorSetupView.as_view(), name='two_factor_setup'),
+    path('2faVerify/', TwoFactorVerifyView.as_view(), name='two_factor_verify'),
 ]

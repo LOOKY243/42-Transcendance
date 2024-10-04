@@ -12,9 +12,11 @@ export class UserService extends AInjectable {
 	username = new ReplayObservable();
 	defaultLang = new ReplayObservable();
 	pfp = new ReplayObservable()
+	isTfa = new ReplayObservable
+	userInformationsRender = new ReplayObservable();
+	hasPassword = new ReplayObservable();
 	user = null
 	isOnline = false;
-	userInformationsRender = new ReplayObservable();
 
 	constructor() {
 		super();
@@ -65,7 +67,9 @@ export class UserService extends AInjectable {
 				}, 1000);
 			}
 		}).catch(error => {
-			console.error("Network error: ", error);
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
 		});
 	}
 	
@@ -84,7 +88,9 @@ export class UserService extends AInjectable {
 				injector[PopService].renderPop(false, "pop.registerDanger");
 			}
 		}).catch(error => {
-			console.error("Network error: ", error);
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
 		});
 	}
 
@@ -93,7 +99,9 @@ export class UserService extends AInjectable {
 			username: username,
 			password: password
 		}).then(response => {
-			if (response.ok) {
+			if (response.ok === "tfa") {
+				injector[Router].navigate("/auth/twofa");
+			} else if (response.ok) {
 				injector[Router].navigate("/");
 				injector[PopService].renderPop(true, "pop.loginSuccess");
 				this.getUser();
@@ -101,13 +109,32 @@ export class UserService extends AInjectable {
 				injector[PopService].renderPop(false, "pop.loginDanger");
 			}
 		}).catch(error => {
-			console.error("Network error: ", error);
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
 		});
 	}
 
 	logout() {
 		injector[HttpClient].post("logout/", {}, true).then(response => {
 			this.logoutManager("/", true, "pop.logout");
+		});
+	}
+
+	activateTwofa(email) {
+		injector[HttpClient].post('2faActivate/', {
+			email: email
+		}, true).then(response => {
+			if (response.ok) {
+				injector[PopService].renderPop(false, "pop.tfaSuccess");
+				this.getUser();
+			} else {
+				injector[PopService].renderPop(false, "pop.tfaDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
 		});
 	}
 
@@ -121,7 +148,9 @@ export class UserService extends AInjectable {
 				injector[PopService].renderPop(false, "pop.deleteUserDanger");
 			}
 		}).catch(error => {
-			console.error("Network error: ", error);
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
 		});
 	}
 
@@ -166,7 +195,9 @@ export class UserService extends AInjectable {
 					}
 					this.username.next(response.username);
 					this.defaultLang.next(response.lang);
-					this.pfp.next(response.pfp),
+					this.pfp.next(response.pfp);
+					this.isTfa.next(response.tfa)
+					this.hasPassword.next(response.hasPassword);
 					injector[TranslateService].setLang(response.lang);
 				}
 			}).catch(error => {
@@ -187,6 +218,24 @@ export class UserService extends AInjectable {
 		}, true).then(response => {
 			if (response.ok) {
 				this.userInformationsRender.next(response.user);
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	newMail(email) {
+		injector[HttpClient].post("newMail/", {
+			email: email
+		}, true).then(response => {
+			if (response.ok) {
+				this.hasPassword.next(true);
+				injector[PopService].renderPop(true, "pop.mailSuccess");
+				this.getUser();
+			} else {
+				injector[PopService].renderPop(false, "pop.mailDanger");
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {

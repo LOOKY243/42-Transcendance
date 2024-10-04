@@ -28,7 +28,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 # Local imports
 from .models import CustomUser
 from .serializers import RegisterSerializer, UpdatePasswordSerializer
-from .utils import check_token_status
+from .utils import check_token_status, generate_random_password, generate_verification_code
 
 # Third-party imports
 import requests
@@ -38,6 +38,13 @@ import base64
 from datetime import timedelta
 
 from cryptography.fernet import Fernet
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.conf import settings
 
 User = get_user_model() 
 
@@ -83,6 +90,8 @@ class LoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            if user.tfa:
+                return JsonResponse({"ok": 'tfa'})
             login(request, user)
 
             user.update_last_activity()
@@ -140,11 +149,15 @@ class GetUserView(APIView):
         if user.pfp:
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
 
+        has_password = user.password is not None and user.password != ""
+
         return JsonResponse({
             "ok": True,
             "username": username,
             "lang": lang,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
+            "hasPassword": has_password,
+            'tfa': user.tfa,
         })
 
 
@@ -669,3 +682,162 @@ class DeleteAccountView(APIView):
         current_user.delete()
 
         return JsonResponse({"ok": True, "message": "Your account has been successfully deleted."})
+
+class ValidateGameSettingsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        points = data.get('points')
+        ballSpeed = data.get('ballSpeed')
+        theme = data.get('theme')
+        playerOne = data.get('playerOne')
+        playerTwo = data.get('playerTwo')
+
+        try:
+            points = int(points)
+            if not (1 <= points <= 10):
+                return JsonResponse({"ok": False, "error": "Points must be an integer between 1 and 10."})
+        except (ValueError, TypeError):
+            return JsonResponse({"ok": False, "error": "Points must be a valid integer."})
+        
+        if ballSpeed not in ["slow", "normal", "fast"]:
+            return JsonResponse({"ok": False, "error": "Ball speed must be 'slow', 'normal', or 'fast'."})
+
+        valid_themes = ["theme1", "theme2", "theme3", "theme4"]
+        if theme not in valid_themes:
+            return JsonResponse({"ok": False, "error": "Theme must be one of 'theme1', 'theme2', 'theme3', 'theme4'."})
+
+        if len(playerOne) > 32:
+            return JsonResponse({"ok": False, "error": "Player One username must not exceed 32 characters."})
+        if len(playerTwo) > 32:
+            return JsonResponse({"ok": False, "error": "Player Two username must not exceed 32 characters."})
+
+        if playerOne != request.user.username and User.objects.filter(username=playerOne).exists():
+            return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
+
+        if not playerTwo:
+            playerTwo = "Donald42"
+        if User.objects.filter(username=playerTwo).exists():
+            return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
+
+        return JsonResponse({
+            "ok": True,
+            "points": points,
+            "ballSpeed": ballSpeed,
+            "theme": theme,
+            "playerOne": playerOne,
+            "playerTwo": playerTwo
+            })
+
+class NewMailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        email = request.data.get('email')
+        current_user = request.user
+
+        if not email:
+            return JsonResponse({'ok': False, 'error': 'Email is required.'})
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({'ok': False, 'error': 'Invalid email format.'})
+
+        current_user.email = email
+
+        new_password = generate_random_password()
+        current_user.set_password(new_password)
+        current_user.save()
+
+        subject = 'Your password for Transcendence'
+        message = f'Your new password: {new_password}'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [current_user.email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+            return JsonResponse({'ok': True, 'message': 'Email sent successfully.', 'pwd': current_user.password,'newpwd': new_password})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e), 'from email': from_email})
+
+class TwoFactorActivateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        email = request.data.get('email')
+        user = request.user
+
+        if not email:
+            return JsonResponse({"ok": False, "error": "Email is required"})
+        if user.email:
+            return JsonResponse({"ok": False, "error": "You already have an email"})
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({"ok": False, "error": "Invalid email address"})
+
+        user = request.user
+        
+        if user.email:
+            return JsonResponse({"ok": False, "error": "Email already exists. Cannot activate 2FA."})
+
+        user.email = email
+        user.tfa = True
+        user.save()
+
+        return JsonResponse({"ok": True, "message": "2FA activated successfully"})
+
+class TwoFactorSetupView(APIView):
+    def post(self, request):
+        user = request.user
+
+        if not user:
+            return JsonResponse({'ok': False}, status=400)
+        if not user.tfa:
+            return JsonResponse({'ok': False, 'error': '2FA not active'})
+
+        if user.verification_code_created_at:
+            time_since_last_code = timezone.now() - user.verification_code_created_at
+            if time_since_last_code.total_seconds() < 300:
+                return JsonResponse({'ok': False, 'error': 'A verification code was already sent less than 5 minutes ago.'})
+
+        verification_code = generate_verification_code()
+
+        subject = 'Your Two-Factor Authentication Verification Code'
+        message = f'Your verification code is: {verification_code}'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [user.email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+            user.verification_code = verification_code
+            user.verification_code_created_at = timezone.now()
+            user.save()
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e), 'from email': from_email})
+
+class TwoFactorVerifyView(APIView):
+    def post(self, request):
+        code = request.data.get('code')
+        
+        user = request.user
+        
+        if not user:
+            return JsonResponse({'ok': False, 'error': 'User not found'})
+        if user.verification_code != code:
+            return JsonResponse({'ok': False, 'error': 'Invalid code'})
+        
+        expiration_time = user.verification_code_created_at + timedelta(minutes=5)
+        if timezone.now() > expiration_time:
+            user.verification_code = None
+            user.verification_code_created_at = None
+            user.save()
+            return JsonResponse({'ok': False, 'error': 'Code expired'})
+        user.verification_code = None
+        user.verification_code_created_at = None
+        user.save()
+        return JsonResponse({'ok': True})

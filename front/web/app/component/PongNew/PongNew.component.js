@@ -6,41 +6,53 @@ import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
-import { PongComponent } from "../Pong/Pong.component.js";
 import { RadioComponent } from "../Radio/Radio.component.js";
 import { RadioImgComponent } from "../RadioImg/RadioImg.component.js";
 
 export class PongNewComponent extends AComponent {
-	inputPlayers = 2;
+	playerOne = "";
+	playerTwo = "";
 	inputPoints = 5;
 	ballSpeed = "normal";
 	theme = "theme1";
 	params = {
-		"players": false,
 		"points": false,
 		"theme": false,
-		"ball": false
+		"ball": false,
+		"players": false,
 	};
 
 	onInit() {
+		if (!injector[UserService].user) {
+            injector[Router].navigate("/auth");
+			return false;
+        }
 		super.onInit();
 		this.generateHtml({});
 
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
 
 		this.createSubComponent(InputComponent.create({
-			name: "playerInput",
+			name: "playerOneInput",
 			parentSelector: this.getSelector(),
-			inputType: "number",
-			placeholder: "2",
-			onchange: (value) => {this.inputPlayers = value; this.checkInputPlayer(); this.checkParams()}
+			inputType: "text",
+			placeholder: "player one",
+			onchange: (value) => {this.playerOne = value; this.checkPlayersInput(); this.checkParams();}
 		}));
+		this.createSubComponent(InputComponent.create({
+			name: "playerTwoInput",
+			parentSelector: this.getSelector(),
+			inputType: "text",
+			placeholder: "player two",
+			onchange: (value) => {this.playerTwo = value; this.checkPlayersInput(); this.checkParams();}
+		}));
+
 		this.createSubComponent(InputComponent.create({
 			name: "pointInput",
 			parentSelector: this.getSelector(),
 			inputType: "number",
 			placeholder: "5",
-			onchange: (value) => {this.inputPoints = value; this.checkInputPoint(); this.checkParams()}
+			onchange: (value) => {this.inputPoints = value;; this.checkInputPoint(); this.checkParams()}
 		}));
 		this.createSubComponent(ButtonIconComponent.create({
 			name: "startButton",
@@ -58,10 +70,13 @@ export class PongNewComponent extends AComponent {
 
 		this.setConfig({
 			pongTitle: this.translate("pongNew.pongTitle"),
-			players: this.translate("pongNew.players"),
 			ball: this.translate("pongNew.ball"),
 			points: this.translate("pongNew.points"),
 		});
+
+		if (injector[UserService].user) {
+			this.playerOne = injector[UserService].user.username
+		}
 
 		this.checkParams();
 
@@ -69,12 +84,8 @@ export class PongNewComponent extends AComponent {
 	}
 
 	startGame() {
-		// injector[GameService].pongParams(this.inputPlayers, this.inputPoints, this.ballSpeed, this.theme);
-		if (injector[UserService].user) {
-			injector[UserService].user.readyToPlay = true;
-		}
-		injector[Router].navigate("/pong");
-		PongComponent.startPong(this.inputPoints, this.ballSpeed, this.theme);
+		console.log(this.ballSpeed)
+		injector[GameService].startNewPong(this.inputPoints, this.ballSpeed, this.theme, this.playerOne, this.playerTwo);
 	}
 
 	checkParams() {
@@ -86,31 +97,25 @@ export class PongNewComponent extends AComponent {
 		this.subComponent["startButton"].disabled.next(false);
 	}
 
+	checkPlayersInput() {
+		if (this.playerOne === "" && this.playerTwo === "") {
+			this.params.players = false;
+		} else {
+			this.params.players = true;
+		}
+	}
+
 	checkInputPoint() {
 		if (this.inputPoints === "") {
 			this.subComponent["pointInput"].error.next(false);
 			this.params.points = false;
-		} else if (this.inputPoints <= 0) {
+		} else if (this.inputPoints <= 0 || this.inputPoints > 10) {
 			this.subComponent["pointInput"].error.next(true);
 			this.subComponent["pointInput"].errorText.next("pongNew.inputError");
 			this.params.points = false;
 		} else {
 			this.subComponent["pointInput"].error.next(false);
 			this.params.points = true;
-		}
-	}
-
-	checkInputPlayer() {
-		if (this.inputPlayers === "") {
-			this.subComponent["playerInput"].error.next(false);
-			this.params.players = false;
-		} else if (this.inputPlayers <= 0) {
-			this.subComponent["playerInput"].error.next(true);
-			this.subComponent["playerInput"].errorText.next("pongNew.inputError");
-			this.params.players = false;
-		} else {
-			this.subComponent["playerInput"].error.next(false);
-			this.params.players = true;
 		}
 	}
 
@@ -129,11 +134,12 @@ export class PongNewComponent extends AComponent {
 					<div class="line"></div>
 					<div class="row">
 						<div class="col-md-4 text-center my-5">
-							<div class="fs-4 fw-semibold text-light">
-								<div>${config.players}</div>
-								<div class="d-flex justify-content-center m-2">
-									<div id="playerInput" class="inputContainer"></div>
-								</div>
+							<div class="fs-4 fw-semibold text-light my-2">${config.players}</div>
+							<div class="d-flex justify-content-center m-2">
+								<div id="playerOneInput" class="inputContainer"></div>
+							</div>
+							<div class="d-flex justify-content-center m-2">
+								<div id="playerTwoInput" class="inputContainer"></div>
 							</div>
 							<div class="my-5">
 								<div class="fs-4 fw-semibold text-light my-2">${config.ball}</div>

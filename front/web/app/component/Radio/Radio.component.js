@@ -21,7 +21,6 @@ export class RadioComponent extends AComponent {
 
 	radioSelectSubscribe(func) {
 		this.radioSelectSubscription = this.radioSelect.subscribe(func);
-		this.destroy();
 	}
 
 	render() {

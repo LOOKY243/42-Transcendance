@@ -11,12 +11,16 @@ import { RadioIconComponent } from "../RadioIcon/RadioIcon.component.js";
 
 export class ProfileSettingsComponent extends AComponent {
 	username = injector[UserService].username;
+	hasPassword = injector[UserService].hasPassword;
+	hasTfa = injector[UserService].isTfa
 	newUsername = "";
 	currentPassword = "";
 	newPassword = "";
 	newPasswordConfirm = ""
 	defaultLang = "";
 	deleteUserPassword = "";
+	email = "";
+	tfamail = "";
 	pfp = null;
 
 	onInit() {
@@ -96,6 +100,21 @@ export class ProfileSettingsComponent extends AComponent {
 			onchange: (value) => {this.newPasswordConfirm = value; this.pwdInputCheck();}
 		}));
 
+		this.createSubComponent(InputComponent.create({
+			name: "mailInput",
+			parentSelector: this.getSelector(),
+			inputType: "text",
+			autocomplete: "example@gmail.com",
+			onchange: (value) => this.email = value
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "mailButton",
+			parentSelector: this.getSelector(),
+			icon: "modifier",
+			style: "btn",
+			onclick: () => injector[UserService].newMail(this.email)
+		}));
+
 		this.createSubComponent(new RadioIconComponent(this.getSelector(), "langageRadio"));
 		this.subComponent["langageRadio"].radioSelectSubscribe((value) => {
 			this.defaultLang = value;
@@ -160,7 +179,22 @@ export class ProfileSettingsComponent extends AComponent {
 			style: "btn btn-outline-danger",
 			onclick: () => injector[UserService].deleteUser(this.deleteUserPassword),
 			id: 1,
-		}))
+		}));
+
+		this.createSubComponent(InputComponent.create({
+			name: 'inputTfaMail',
+			parentSelector: this.getSelector(),
+			inputType: "text",
+			placeholder: "example@gmail.com",
+			onchange: (value) => this.tfamail = value,
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: 'tfaMailButton',
+			parentSelector: this.getSelector(),
+			style: 'btn',
+			icon: 'modifier',
+			onclick: () => injector[UserService].activateTwofa(this.tfamail),
+		}));
 
 		this.setConfig({
 			username: this.username,
@@ -174,11 +208,14 @@ export class ProfileSettingsComponent extends AComponent {
 			getPolicy: this.translate("profileSettings.getPolicy"),
 			deleteUserTitle: this.translate("profileSettings.deleteUserTitle"),
 			deleteUserPassword: this.translate("profileSettings.deleteUserPassword"),
-			deleteUserAdvert: this.translate("profileSettings.deleteUserAdvert"), 
+			deleteUserAdvert: this.translate("profileSettings.deleteUserAdvert"),
+			getPassword: this.translate("profileSettings.getPassword"),
+			hasPassword: this.hasPassword,
+			hasTfa: this.hasTfa,
+			tfaTitle: this.translate("profileSettings.tfaTitle"),
 		});
 
 		this.pwdCheck()
-
 		return true;
 	}
 
@@ -257,7 +294,7 @@ export class ProfileSettingsComponent extends AComponent {
 					</div>
 					<div class="line my-4"></div>
 					<div class="row m-3">
-						<div>
+						<div style="${config.hasPassword ? `` : `display: none;`}">
 							<form>
 								<div class="fs-3 text-light text-center">${config.currentPassword}</div>
 								<div class="d-flex justify-content-center m-3">
@@ -274,6 +311,27 @@ export class ProfileSettingsComponent extends AComponent {
 							</form>
 							<div class="text-center">
 								<div id="passwordModifier"></div>
+							</div>
+						</div>
+						<div style="${config.hasPassword ? `display: none;` : ``}">
+							<div class="fs-3 text-light text-center">${config.getPassword}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="mailInput" class="inputContainer"></div>
+							</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="mailButton"></div>
+							</div>
+						</div>
+					</div>
+					<div style="${config.hasTfa ? `display: none;` : ``}">
+						<div class="line my-4"></div>
+						<div class="row m-3">
+							<div class="fs-3 text-light text-center">${config.tfaTitle}</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="inputTfaMail" class="inputContainer"></div>
+							</div>
+							<div class="d-flex justify-content-center m-3">
+								<div id="tfaMailButton"></div>
 							</div>
 						</div>
 					</div>
