@@ -13,7 +13,9 @@ export class Map
     tiles = [];
     wall = [];
     loader;
+    ship = [];
     fMapOffset = 5.5;
+    textureLoader;
     texture;
     waterColor = 0xFFFFFF;
     color;
@@ -23,24 +25,45 @@ export class Map
     ship = [];
     otherMap;
     name;
+    cannonShot;
+    init = false;
 
-    constructor(_game, _color, _waterColor, _name)
+    constructor(_game, _color, _waterColor, _name, _cannonShot)
     {
         this.loader = new FBXLoader();
         this.waterColor = _waterColor;
         this.color = _color;
         this.#game = _game;
         this.name = _name;
-        this.texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/halftone.jpg`);
-        this.texture.wrapS = THREE.RepeatWrapping;
-        this.texture.wrapT = THREE.RepeatWrapping;
-        this.texture.repeat.set(0.5, 0.5);
-        this.GenerateMap();
+        this.cannonShot = _cannonShot;
+        this.textureLoader = new THREE.TextureLoader();
+        this.LoadSafe();
+    }
+
+    LoadSafe()
+    {
+        this.textureLoader.load(`https://${document.location.host}/app/assets/img/halftone.jpg`,
+            texture => {
+                this.texture = texture;
+                this.texture.wrapS = THREE.RepeatWrapping;
+                this.texture.wrapT = THREE.RepeatWrapping;
+                this.texture.repeat.set(0.5, 0.5);
+                this.GenerateMap();
+                this.init = true;
+            },
+            undefined, 
+            function(err) {
+                console.error("Error loading texture", err);
+            }
+        );
     }
 
     Update()
     {
         if (!this.bActive)
+            return;
+
+        if (!this.init)
             return;
 
         this.cannon.Update();
@@ -49,7 +72,7 @@ export class Map
 
     GenerateMap()
     {
-        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.name, this.#game.cameraManager, this);
+        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.name, this.#game.cameraManager, this, this.cannonShot);
         this.#GenerateAlly();
         this.#GenerateShip(this.color);
         this.#GenerateEnemy();
@@ -135,12 +158,12 @@ export class Map
         const baseRevPosition = new THREE.Vector3(6, 0, 4 + this.fMapOffset);
         const baseRotation = new THREE.Vector3(0, Math.PI * 1, 0);
         const baseScale = new THREE.Vector3(0.00055, 0.00055, 0.00055);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2));
     }
 
     #GenerateObject(_path, _position, _rotation, _scale, _offset, _size)
@@ -149,18 +172,26 @@ export class Map
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIslands.png`);
-                    child.material.map = texture;
-                    child.material.needsUpdate = true;
-                    child.receiveShadow = true;
-                    child.castShadow = true;
-                    child.userData.canBeMove = true;
-                    child.userData.offset = _offset;
-                    child.userData.size = _size;
-                    child.userData.tile = null;
-                    child.scale.copy(_scale);
-                    child.position.copy(_position);
-                    child.rotation.set(_rotation.x, _rotation.y, _rotation.z);
+                    const textureLoader = new THREE.TextureLoader();
+                    textureLoader.load(`https://${document.location.host}/app/assets/img/MiniPiratesIsland.png`,
+                        texture => {
+                            child.material.map = texture;
+                            child.material.needsUpdate = true;
+                            child.receiveShadow = true;
+                            child.castShadow = true;
+                            child.userData.canBeMove = true;
+                            child.userData.offset = _offset;
+                            child.userData.size = _size;
+                            child.userData.tile = null;
+                            child.scale.copy(_scale);
+                            child.position.copy(_position);
+                            child.rotation.set(_rotation.x, _rotation.y, _rotation.z);
+                        },
+                        undefined, 
+                        function(err) {
+                            console.error("Error loading texture", err);
+                        }
+                    );
                 }
             });
         

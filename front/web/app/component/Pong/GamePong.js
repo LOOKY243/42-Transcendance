@@ -95,48 +95,35 @@ export class GamePong
         this.renderer.setAnimationLoop(null);
     
         this.scene.traverse(function(node) {
-            this.DisposeNode(node);
+            if (node.geometry)
+                node.geometry.dispose();
+        
+            if (node.material) 
+            {
+                if (Array.isArray(node.material))
+                    node.material.forEach(material => material.dispose());
+                else
+                    node.material.dispose();
+            }
+        
+            if (node.material && node.material.map)
+                node.material.map.dispose();
         });
     
     
         window.removeEventListener("resize", () => { this.#OnResize(); });
         window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
         window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
-        this.renderer.dispose();
-        this.composer.dispose();
-        const canvas = renderer.domElement;
+        const canvas = this.renderer.domElement;
 
         if (canvas && canvas.parentElement)
             canvas.parentElement.removeChild(canvas);
     
+        this.renderer.dispose();
+        this.composer.dispose();
         this.scene = null;
         this.renderer = null;
         this.composer = null;
-    }
-
-    DisposeNode(node) {
-        if (node.geometry)
-            node.geometry.dispose();
-    
-        if (node.material) 
-        {
-            if (Array.isArray(node.material))
-                node.material.forEach(material => material.dispose());
-            else
-                node.material.dispose();
-        }
-    
-        if (node.material && node.material.map)
-            node.material.map.dispose();
-    
-        if (node.children) 
-        {
-            for (let i = node.children.length - 1; i >= 0; i--)
-            {
-                disposeNode(node.children[i]);
-                node.remove(node.children[i]);
-            }
-        }
     }
 
     #OnResize()
@@ -244,4 +231,47 @@ export class GamePong
         if (event.code === "Numpad1")
             this.map.TogglePlayerIA(1);
     }
+
+    // Button Region
+    RightMoveUp()
+    {
+        this.iPaddleDirection[0] = -1;
+    }
+
+    RightMoveDown()
+    {
+        this.iPaddleDirection[0] = 1;
+    }
+
+    RightMoveRelease()
+    {
+        this.iPaddleDirection[0] = 0;
+    }
+
+    RightIA()
+    {
+        this.map.TogglePlayerIA(1);
+    }
+
+    LeftMoveUp()
+    {
+        this.iPaddleDirection[1] = 1;
+    }
+
+    LeftMoveDown()
+    {
+        this.iPaddleDirection[1] = -1;
+    }
+
+    LeftMoveRelease()
+    {
+        this.iPaddleDirection[1] = 0;
+    }
+
+    LeftIA()
+    {
+        this.map.TogglePlayerIA(0);
+    }
+
+    
 }

@@ -22,10 +22,22 @@ export class GameBattleship
     world;
     currentPlayer = 0;
     nextPlayer = 1;
+    playerFirst = "First";
+    playerSecond = "Second";
+    colorFirst = "Blue";
+    colorSecond = "Red";
+    maxScore = 6;
+    cannonShot = 1; 
     clock;
 
-    constructor()
+    constructor(_player1, _player2, _color1, _color2, _score, _cannonShot)
     {
+        this.playerFirst = _player1;
+        this.playerSecond = _player2;
+        this.colorFirst = _color1;
+        this.colorSecond = _color2;
+        this.maxScore = _score;
+        this.cannonShot = _cannonShot;
     }
 
     Start()
@@ -44,9 +56,14 @@ export class GameBattleship
 
         this.cameraManager.Update();
         this.composer.render();
+
+        if (!this.map.init || !this.enemyMap.init)
+            return;
+
         this.map.Update();
         this.enemyMap.Update();
         this.TurnHandler();
+        this.WinChecker();
 
         if (this.currentPlayer == 0)
         {
@@ -67,51 +84,59 @@ export class GameBattleship
 
     OnDestroy()
     {
+        this.CleanThreeJS();
+        this.map.cannon.OnDestroy();
+        this.enemyMap.cannon.OnDestroy();
+    }
+
+    WinChecker()
+    {
+        if (this.map.cannon.score >= this.maxScore)
+        {
+            this.currentPlayer = -1;
+            this.OnDestroy();
+        }
+        else if (this.enemyMap.cannon.score >= this.maxScore)
+        {
+            this.currentPlayer = -1;
+            this.OnDestroy();
+        }
+    }
+
+    CleanThreeJS()
+    {
         this.renderer.setAnimationLoop(null);
     
         this.scene.traverse(function(node) {
-            this.DisposeNode(node);
+            if (node.geometry)
+                node.geometry.dispose();
+        
+            if (node.material) 
+            {
+                if (Array.isArray(node.material))
+                    node.material.forEach(material => material.dispose());
+                else
+                    node.material.dispose();
+            }
+        
+            if (node.material && node.material.map)
+                node.material.map.dispose();
         });
     
     
         window.removeEventListener("resize", () => { this.#OnResize(); });
         window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
         window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
-        this.renderer.dispose();
-        this.composer.dispose();
-        const canvas = renderer.domElement;
+        const canvas = this.renderer.domElement;
 
         if (canvas && canvas.parentElement)
             canvas.parentElement.removeChild(canvas);
     
+        this.renderer.dispose();
+        this.composer.dispose();
         this.scene = null;
         this.renderer = null;
         this.composer = null;
-    }
-
-    DisposeNode(node) {
-        if (node.geometry)
-            node.geometry.dispose();
-    
-        if (node.material) 
-        {
-            if (Array.isArray(node.material))
-                node.material.forEach(material => material.dispose());
-            else
-                node.material.dispose();
-        }
-    
-        if (node.material && node.material.map)
-            node.material.map.dispose();
-    
-        if (node.children) 
-        {
-            for (let i = node.children.length - 1; i >= 0; i--)
-            {
-                disposeNode(node.children[i]);
-                node.remove(node.children[i]);
-            }
-        }
     }
 
     TurnHandler()
@@ -196,8 +221,8 @@ export class GameBattleship
         this.gameWindow.appendChild(this.renderer.domElement);
         this.#CreateLight();
         this.cameraManager.Update();
-        this.map = new Map(this, color[1], 0xFFFFFF, "Starter");
-        this.enemyMap = new Map(this, color[2], 0xFFFFFF, "Follower");
+        this.map = new Map(this, this.colorFirst, 0xFFFFFF, this.playerFirst, this.cannonShot);
+        this.enemyMap = new Map(this, this.colorSecond, 0xFFFFFF, this.playerSecond, this.cannonShot);
         this.map.otherMap = this.enemyMap;
         this.enemyMap.otherMap = this.map;
     }

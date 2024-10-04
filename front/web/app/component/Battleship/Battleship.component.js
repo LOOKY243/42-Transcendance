@@ -12,7 +12,7 @@ export class BattleshipComponent extends AComponent {
     }
 
     static startBattleship() {
-        this.game = new GameBattleship();
+        this.game = new GameBattleship("First", "Second", "Blue", "Red", 6, 2);
         this.game.Start();
     }
     
@@ -23,7 +23,13 @@ export class BattleshipComponent extends AComponent {
     generateHtml(config) {
         this.html = `
             <div id="root-window">
-                <div id="render-target"></div>    
+                <div id="render-target"></div>
+                <div id="render-score">
+                    <li id="score-list">
+                    </li>
+                </div>
+                <div id="render-text invisible"></div>
+                <button id="rotateButton" class="btn btn-outline-primary text-light">Rotate</button>
             </div>
         `;
     }
