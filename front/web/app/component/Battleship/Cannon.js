@@ -23,8 +23,9 @@ export class Cannon
     maxShot = 2;
     score = 0;
     name = "Cannon";
+    textureLoader;
 
-    constructor(_scene, _offset, _name, _camera, _map)
+    constructor(_scene, _offset, _name, _camera, _map, _shot)
     {
         this.scene = _scene;
         this.camera = _camera;
@@ -32,10 +33,27 @@ export class Cannon
         this.raycaster = new THREE.Raycaster();
         this.map = _map;
         this.name = _name;
+        this.maxShot = _shot;
+        this.textureLoader = new THREE.TextureLoader();
         this.#GeneratePhysics(_scene, _offset);
         window.addEventListener("mousemove", (event) => this.onMouseMove(event));
         window.addEventListener("click", (event) => this.onMouseClick(event));
         window.addEventListener("keydown", (event) => this.onKeyDown(event));
+        const button = document.getElementById("rotateButton");
+
+        if (button)
+            button.addEventListener("click", this.RotateButton());
+    }
+
+    OnDestroy()
+    {
+        window.removeEventListener("mousemove", (event) => this.onMouseMove(event));
+        window.removeEventListener("click", (event) => this.onMouseClick(event));
+        window.removeEventListener("keydown", (event) => this.onKeyDown(event));
+        const button = document.getElementById("rotateButton");
+
+        if (button)
+            button.removeEventListener("click", this.RotateButton());
     }
 
     AddScore()
@@ -55,6 +73,19 @@ export class Cannon
         if (event.repeat)
             return;
 
+        if (!this.objectInHand)
+            return;
+
+        this.objectInHand.rotation.y += Math.PI / 2;
+
+        if (this.objectInHand.rotation.y == Math.PI * 2)
+            this.objectInHand.rotation.y = 0;
+
+        this.#ModifiyOffset();
+    }
+
+    RotateButton()
+    {
         if (!this.objectInHand)
             return;
 
@@ -335,6 +366,17 @@ export class Cannon
         return true;
     }
 
+    #NotOtherShip(_object)
+    {
+        for (let i = 0; i < this.map.otherMap.wall.length; i++)
+        {
+            if (this.map.otherMap.wall[i] == _object)
+                return false;
+        }
+    
+        return true;
+    }
+
     #UpdateHighlight()
     {
         this.raycaster.setFromCamera(this.mouse, this.camera.camera);
@@ -378,11 +420,19 @@ export class Cannon
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIslands.png`);
-                    child.material.map = texture;
-                    child.material.needsUpdate = true;
-                    child.receiveShadow = true;
-                    child.castShadow = true;
+                    const textureLoader = new THREE.TextureLoader();
+                    textureLoader.load(`https://${document.location.host}/app/assets/img/MiniPiratesIsland.png`, 
+                        texture => {
+                            child.material.map = texture;
+                            child.material.needsUpdate = true;
+                            child.receiveShadow = true;
+                            child.castShadow = true;
+                        }, 
+                        undefined, 
+                        function(err) {
+                            console.error("Error loading texture", err);
+                        }
+                    );
                 }
             });
 
@@ -398,15 +448,22 @@ export class Cannon
 
     #GenerateBase(_scene, _offset)
     {
-        const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/halftone.jpg`);
-        texture.repeat.set(0.5, 0.5);
-        const geometry = new THREE.CylinderGeometry(0.8, 0.8, 0.1);
-        const material = new THREE.MeshLambertMaterial({color: 0x9f8b84, map: texture});
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(0, -0.5, 6 + _offset);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        _scene.add(mesh);
-        this.base = mesh;
+        this.textureLoader.load(`https://${document.location.host}/app/assets/img/halftone.jpg`, 
+            texture => {
+                texture.repeat.set(0.5, 0.5);
+                const geometry = new THREE.CylinderGeometry(0.8, 0.8, 0.1);
+                const material = new THREE.MeshLambertMaterial({color: 0x9f8b84, map: texture});
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(0, -0.5, 6 + _offset);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                _scene.add(mesh);
+                this.base = mesh;
+            }, 
+            undefined, 
+            function(err) {
+                console.error("Error loading texture", err);
+            }
+        );
     }
 }

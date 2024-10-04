@@ -14,6 +14,7 @@ export class Map
     wall = [];
     loader;
     fMapOffset = 5.5;
+    textureLoader;
     texture;
     waterColor = 0xFFFFFF;
     color;
@@ -23,24 +24,45 @@ export class Map
     ship = [];
     otherMap;
     name;
+    cannonShot;
+    init = false;
 
-    constructor(_game, _color, _waterColor, _name)
+    constructor(_game, _color, _waterColor, _name, _cannonShot)
     {
         this.loader = new FBXLoader();
         this.waterColor = _waterColor;
         this.color = _color;
         this.#game = _game;
         this.name = _name;
-        this.texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/halftone.jpg`);
-        this.texture.wrapS = THREE.RepeatWrapping;
-        this.texture.wrapT = THREE.RepeatWrapping;
-        this.texture.repeat.set(0.5, 0.5);
-        this.GenerateMap();
+        this.cannonShot = _cannonShot;
+        this.textureLoader = new THREE.TextureLoader();
+        this.LoadSafe();
+    }
+
+    LoadSafe()
+    {
+        this.textureLoader.load(`https://${document.location.host}/app/assets/img/halftone.jpg`,
+            texture => {
+                this.texture = texture;
+                this.texture.wrapS = THREE.RepeatWrapping;
+                this.texture.wrapT = THREE.RepeatWrapping;
+                this.texture.repeat.set(0.5, 0.5);
+                this.GenerateMap();
+                this.init = true;
+            },
+            undefined, 
+            function(err) {
+                console.error("Error loading texture", err);
+            }
+        );
     }
 
     Update()
     {
         if (!this.bActive)
+            return;
+
+        if (!this.init)
             return;
 
         this.cannon.Update();
@@ -49,7 +71,7 @@ export class Map
 
     GenerateMap()
     {
-        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.name, this.#game.cameraManager, this);
+        this.cannon = new Cannon(this.#game.scene, this.fMapOffset, this.name, this.#game.cameraManager, this, this.cannonShot);
         this.#GenerateAlly();
         this.#GenerateShip(this.color);
         this.#GenerateEnemy();
@@ -149,18 +171,26 @@ export class Map
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIslands.png`);
-                    child.material.map = texture;
-                    child.material.needsUpdate = true;
-                    child.receiveShadow = true;
-                    child.castShadow = true;
-                    child.userData.canBeMove = true;
-                    child.userData.offset = _offset;
-                    child.userData.size = _size;
-                    child.userData.tile = null;
-                    child.scale.copy(_scale);
-                    child.position.copy(_position);
-                    child.rotation.set(_rotation.x, _rotation.y, _rotation.z);
+                    const textureLoader = new THREE.TextureLoader();
+                    textureLoader.load(`https://${document.location.host}/app/assets/img/MiniPiratesIsland.png`,
+                        texture => {
+                            child.material.map = texture;
+                            child.material.needsUpdate = true;
+                            child.receiveShadow = true;
+                            child.castShadow = true;
+                            child.userData.canBeMove = true;
+                            child.userData.offset = _offset;
+                            child.userData.size = _size;
+                            child.userData.tile = null;
+                            child.scale.copy(_scale);
+                            child.position.copy(_position);
+                            child.rotation.set(_rotation.x, _rotation.y, _rotation.z);
+                        },
+                        undefined, 
+                        function(err) {
+                            console.error("Error loading texture", err);
+                        }
+                    );
                 }
             });
         
