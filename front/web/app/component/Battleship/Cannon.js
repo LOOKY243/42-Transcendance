@@ -337,7 +337,7 @@ export class Cannon
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load("./public/textures/MiniPiratesIsland.png");
+                    const texture = new THREE.TextureLoader().load("https://${document.location.host}/app/assets/img/MiniPiratesIsland.png");
                     child.material.map = texture;
                     child.material.needsUpdate = true;
                     child.receiveShadow = true;

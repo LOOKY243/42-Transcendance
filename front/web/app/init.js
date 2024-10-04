@@ -1,4 +1,5 @@
 import { AuthComponent } from "./component/Auth/Auth.component.js";
+import { BattleshipComponent } from "./component/Battleship/Battleship.component.js";
 import { FriendsComponent } from "./component/Friends/Friends.component.js";
 import { HomeComponent } from "./component/Home/Home.component.js";
 import { NotFoundComponent } from "./component/NotFound/NotFound.component.js";
@@ -37,6 +38,10 @@ export function initRouter() {
 		path: "/pong",
 		selector: "pong",
 		component: PongComponent
+	}, {
+		path: "/battleship",
+		selector: "battleship",
+		component: BattleshipComponent
 	}, {
 		path: "/friends",
 		selector: "friends",

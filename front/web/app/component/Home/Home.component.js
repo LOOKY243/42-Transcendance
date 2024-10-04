@@ -1,6 +1,7 @@
 import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js"
 import { Router } from "../../../spa/Router.js";
+import { BattleshipComponent } from "../Battleship/Battleship.component.js";
 import { ButtonComponent } from "../Button/Button.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
 
@@ -25,7 +26,7 @@ export class HomeComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			style: "btn btn-outline-success",
 			content: "PLAY",
-			onclick: () => injector[Router].navigate("/battle/create")
+			onclick: () => {injector[Router].navigate("/battleship"); BattleshipComponent.startBattleship();}
 		}));
 
 		this.setConfig({

@@ -28,7 +28,7 @@ export class Map
         this.loader = new FBXLoader();
         this.color = _color;
         this.#game = _game;
-        this.texture = new THREE.TextureLoader().load("./public/textures/halftone.jpg");
+        this.texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/halftone.jpg`);
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
         this.texture.repeat.set(0.5, 0.5);
@@ -132,12 +132,12 @@ export class Map
         const baseRevPosition = new THREE.Vector3(6, 0, 4 + this.fMapOffset);
         const baseRotation = new THREE.Vector3(0, Math.PI * 1, 0);
         const baseScale = new THREE.Vector3(0.00055, 0.00055, 0.00055);
-        this.#GenerateObject(`./public/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`./public/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`./public/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
-        this.#GenerateObject(`./public/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`./public/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`./public/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
+        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
     }
 
     #GenerateObject(_path, _position, _rotation, _scale, _offset, _size)
@@ -146,7 +146,7 @@ export class Map
             object.traverse(function (child) {
                 if (child.isMesh)
                 {
-                    const texture = new THREE.TextureLoader().load("./public/textures/MiniPiratesIsland.png");
+                    const texture = new THREE.TextureLoader().load(`https://${document.location.host}/app/assets/img/MiniPiratesIsland.png`);
                     child.material.map = texture;
                     child.material.needsUpdate = true;
                     child.receiveShadow = true;
