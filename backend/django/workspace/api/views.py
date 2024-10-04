@@ -91,7 +91,7 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             if user.tfa:
-                return JsonResponse({"ok": 'tfa'})
+                return JsonResponse({"ok": 'tfa', 'username': username, 'password': password})
             login(request, user)
 
             user.update_last_activity()
@@ -111,8 +111,6 @@ class LoginView(APIView):
             return response
         else:
             return JsonResponse({"ok": False}, status=404)
-        
-
 
 class LogoutView(APIView):
     def post(self, request):
@@ -150,6 +148,7 @@ class GetUserView(APIView):
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
 
         has_password = user.password is not None and user.password != ""
+        has_mail = user.email is not None and user.email != ""
 
         return JsonResponse({
             "ok": True,
@@ -158,6 +157,7 @@ class GetUserView(APIView):
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
             "hasPassword": has_password,
             'tfa': user.tfa,
+            'mail': has_mail,
         })
 
 
@@ -746,6 +746,9 @@ class NewMailView(APIView):
             return JsonResponse({'ok': False, 'error': 'Invalid email format.'})
 
         current_user.email = email
+        if current_user.is_encrypted:
+            current_user.email = current_user.encrypt_data(email)
+
 
         new_password = generate_random_password()
         current_user.set_password(new_password)
@@ -758,7 +761,7 @@ class NewMailView(APIView):
 
         try:
             send_mail(subject, message, from_email, recipient_list)
-            return JsonResponse({'ok': True, 'message': 'Email sent successfully.', 'pwd': current_user.password,'newpwd': new_password})
+            return JsonResponse({'ok': True, 'message': 'Email sent successfully.'})
         except Exception as e:
             return JsonResponse({'ok': False, 'error': str(e), 'from email': from_email})
 
@@ -771,7 +774,9 @@ class TwoFactorActivateView(APIView):
 
         if not email:
             return JsonResponse({"ok": False, "error": "Email is required"})
-        if user.email:
+        if email == "currentMail":
+            email = user.email
+        elif user.email:
             return JsonResponse({"ok": False, "error": "You already have an email"})
 
         try:
@@ -785,6 +790,8 @@ class TwoFactorActivateView(APIView):
             return JsonResponse({"ok": False, "error": "Email already exists. Cannot activate 2FA."})
 
         user.email = email
+        if user.is_encrypted:
+            user.email = user.encrypt_data(email)
         user.tfa = True
         user.save()
 
@@ -792,24 +799,22 @@ class TwoFactorActivateView(APIView):
 
 class TwoFactorSetupView(APIView):
     def post(self, request):
-        user = request.user
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
 
         if not user:
-            return JsonResponse({'ok': False}, status=400)
+            return JsonResponse({'ok': False})
         if not user.tfa:
             return JsonResponse({'ok': False, 'error': '2FA not active'})
-
-        if user.verification_code_created_at:
-            time_since_last_code = timezone.now() - user.verification_code_created_at
-            if time_since_last_code.total_seconds() < 300:
-                return JsonResponse({'ok': False, 'error': 'A verification code was already sent less than 5 minutes ago.'})
 
         verification_code = generate_verification_code()
 
         subject = 'Your Two-Factor Authentication Verification Code'
-        message = f'Your verification code is: {verification_code}'
+        message = f'Your verification has a 5 min duration : {verification_code}'
         from_email = settings.EMAIL_HOST_USER
-        recipient_list = [user.email]
+        recipient_list = [user.decrypt_data(user.email)]
 
         try:
             send_mail(subject, message, from_email, recipient_list)
@@ -824,7 +829,10 @@ class TwoFactorVerifyView(APIView):
     def post(self, request):
         code = request.data.get('code')
         
-        user = request.user
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=username, password=password)
         
         if not user:
             return JsonResponse({'ok': False, 'error': 'User not found'})
@@ -840,4 +848,19 @@ class TwoFactorVerifyView(APIView):
         user.verification_code = None
         user.verification_code_created_at = None
         user.save()
-        return JsonResponse({'ok': True})
+        login(request, user)
+        user.update_last_activity()
+        refresh = RefreshToken.for_user(user)
+        response =  JsonResponse({
+            "ok": True,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "token_refresh_required": False,
+        })
+        response.set_cookie(
+            'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
+        )
+        response.set_cookie(
+            'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
+        )
+        return response

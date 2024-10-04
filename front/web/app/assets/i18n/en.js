@@ -66,7 +66,7 @@ export const en = {
 	"inputFile": {
 		"text": "No file chosen"
 	},
-	"twofa": {
+	"twoFa": {
 		"title": "Verification code was sent to your email",
 		"titleDanger": "An error occured"
 	},
@@ -74,6 +74,7 @@ export const en = {
 		"loginSuccess": "Successfuly login",
 		"loginDanger": "Failed to login: invalid credentials",
 		"registerDanger": "Failed to register: invalid credentials",
+		"registerDangerTfa": "Failed to send the verification code, try again",
 		"registerUsernameDanger": "Failed to register: Username already in use",
 		"logout": "successfully logout",
 		"reconnect": "Please reconnect",
@@ -103,5 +104,6 @@ export const en = {
 		"mailDanger": "Failed to send you a mail, check your credentials",
 		"tfaSuccess": "TwoFa activate successfully",
 		"tfaDanger": "TwoFa activation failed, check your crendentials",
+		'codeDangerTfa': "Invalid code"
 	},
 }

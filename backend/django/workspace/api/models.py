@@ -47,8 +47,7 @@ class CustomUser(AbstractBaseUser):
             return cipher_suite.decrypt(decoded_data).decode()
         except Exception as e:
             return encrypted_data
-
-
+    
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
     

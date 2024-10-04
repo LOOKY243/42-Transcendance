@@ -12,7 +12,8 @@ import { RadioIconComponent } from "../RadioIcon/RadioIcon.component.js";
 export class ProfileSettingsComponent extends AComponent {
 	username = injector[UserService].username;
 	hasPassword = injector[UserService].hasPassword;
-	hasTfa = injector[UserService].isTfa
+	hasTfa = injector[UserService].isTfa;
+	hasMail = injector[UserService].hasMail;
 	newUsername = "";
 	currentPassword = "";
 	newPassword = "";
@@ -210,9 +211,10 @@ export class ProfileSettingsComponent extends AComponent {
 			deleteUserPassword: this.translate("profileSettings.deleteUserPassword"),
 			deleteUserAdvert: this.translate("profileSettings.deleteUserAdvert"),
 			getPassword: this.translate("profileSettings.getPassword"),
+			tfaTitle: this.translate("profileSettings.tfaTitle"),
 			hasPassword: this.hasPassword,
 			hasTfa: this.hasTfa,
-			tfaTitle: this.translate("profileSettings.tfaTitle"),
+			hasMail: this.hasMail,
 		});
 
 		this.pwdCheck()
@@ -327,8 +329,10 @@ export class ProfileSettingsComponent extends AComponent {
 						<div class="line my-4"></div>
 						<div class="row m-3">
 							<div class="fs-3 text-light text-center">${config.tfaTitle}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="inputTfaMail" class="inputContainer"></div>
+							<div style="${config.hasMail ? `display: none;` : ``}">
+								<div class="d-flex justify-content-center m-3">
+									<div id="inputTfaMail" class="inputContainer"></div>
+								</div>
 							</div>
 							<div class="d-flex justify-content-center m-3">
 								<div id="tfaMailButton"></div>

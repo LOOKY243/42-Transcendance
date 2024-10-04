@@ -12,11 +12,15 @@ export class UserService extends AInjectable {
 	username = new ReplayObservable();
 	defaultLang = new ReplayObservable();
 	pfp = new ReplayObservable()
-	isTfa = new ReplayObservable
+	isTfa = new ReplayObservable();
+	tfaAccess = new ReplayObservable();
 	userInformationsRender = new ReplayObservable();
 	hasPassword = new ReplayObservable();
+	hasMail = new ReplayObservable();
 	user = null
 	isOnline = false;
+	tempUsername = "";
+	tempPassword = "";
 
 	constructor() {
 		super();
@@ -35,6 +39,7 @@ export class UserService extends AInjectable {
 				this.user.pfp = value;
 			}
 		});
+		this.tfaAccess.next(false)
 	}
 
 	init() {
@@ -100,7 +105,7 @@ export class UserService extends AInjectable {
 			password: password
 		}).then(response => {
 			if (response.ok === "tfa") {
-				injector[Router].navigate("/auth/twofa");
+				this.sendVerifyCode(response.username, response.password);
 			} else if (response.ok) {
 				injector[Router].navigate("/");
 				injector[PopService].renderPop(true, "pop.loginSuccess");
@@ -121,12 +126,51 @@ export class UserService extends AInjectable {
 		});
 	}
 
+	sendVerifyCode(username, password) {
+		injector[HttpClient].post("2faSetup/", {
+			username: username,
+			password: password
+		}).then(response => {
+			if (response.ok) {
+				this.tempPassword = password;
+				this.tempUsername = username;
+				this.tfaAccess.next(true)
+				injector[Router].navigate("/auth/twofa");
+			} else {
+				injector[PopService].renderPop(false, "pop.loginDangerTfa");
+			}
+		}).catch(error => {
+			return ;
+		})
+	}
+
+	verifyCode(code) {
+		injector[HttpClient].post('2faVerify/', {
+			code: code,
+			username: this.tempUsername,
+			password: this.tempPassword,
+		}).then(response => {
+			if (response.ok) {
+				this.tempPassword = "";
+				this.tempUsername = "";
+				injector[Router].navigate("/");
+				injector[PopService].renderPop(true, "pop.loginSuccess");
+				this.getUser();
+			} else {
+				injector[PopService].renderPop(false, "pop.codeDangerTfa");
+			}
+		}).catch(error => {
+			return ;
+		});
+	}
+
 	activateTwofa(email) {
+		email = this.hasMail.isEmpty() ? email : "currentMail";
 		injector[HttpClient].post('2faActivate/', {
 			email: email
 		}, true).then(response => {
 			if (response.ok) {
-				injector[PopService].renderPop(false, "pop.tfaSuccess");
+				injector[PopService].renderPop(true, "pop.tfaSuccess");
 				this.getUser();
 			} else {
 				injector[PopService].renderPop(false, "pop.tfaDanger");
@@ -198,6 +242,7 @@ export class UserService extends AInjectable {
 					this.pfp.next(response.pfp);
 					this.isTfa.next(response.tfa)
 					this.hasPassword.next(response.hasPassword);
+					this.hasMail.next(response.hasMail);
 					injector[TranslateService].setLang(response.lang);
 				}
 			}).catch(error => {
