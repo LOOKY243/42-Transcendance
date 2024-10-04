@@ -15,6 +15,6 @@
 | `Minor` | Accessibility                         | [Expanding Browser Compatibility] | 0.5 | &#9989; |
 | `Minor` | Accessibility                         | [Multiple language supports] | 0.5 | &#9989; |
 | `Major` | Graphics                         | [ Use of advanced 3D techniques] | 1 | &#9989; |
-| `Major` | Cybersecurity | [ Implement Two-Factor Authentication (2FA) and JWT.] | 1 | WIP |
+| `Major` | Cybersecurity | [ Implement Two-Factor Authentication (2FA) and JWT.] | 1 | &#9989; |
 | `Minor` | Cybersecurity | [ GDPR Compliance Options with User Anonymization, LocalData Management, and Account Deletion.] | 0.5 | &#9989; |
-| | | | 9.5/9.5 | 6.5/9.5 |
+| | | | 9.5/9.5 | 7.5/9.5 |
