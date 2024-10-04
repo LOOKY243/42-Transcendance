@@ -19,18 +19,29 @@ export class Cannon
     turn = true;
     bActive = true;
     bNeedSwitch = false;
+    shot = 0;
+    maxShot = 2;
+    score = 0;
+    name = "Cannon";
 
-    constructor(_scene, _offset, _camera, _map)
+    constructor(_scene, _offset, _name, _camera, _map)
     {
         this.scene = _scene;
         this.camera = _camera;
         this.loader = new FBXLoader();
         this.raycaster = new THREE.Raycaster();
         this.map = _map;
+        this.name = _name;
         this.#GeneratePhysics(_scene, _offset);
         window.addEventListener("mousemove", (event) => this.onMouseMove(event));
         window.addEventListener("click", (event) => this.onMouseClick(event));
         window.addEventListener("keydown", (event) => this.onKeyDown(event));
+    }
+
+    AddScore()
+    {
+        this.score++;
+        console.log(this.name, this.score);
     }
 
     onKeyDown(event)
@@ -261,7 +272,7 @@ export class Cannon
         if (!this.intersectedObject.userData.hit)
             return;
 
-        const shooted = this.ball.Shoot(this.mesh.position.clone().add(new THREE.Vector3(0, 1, 0)), this.intersectedObject.position, this.intersectedObject, this.#GetTileStatus(this.intersectedObject.userData.x, this.intersectedObject.userData.y));
+        const shooted = this.ball.Shoot(this.mesh.position.clone().add(new THREE.Vector3(0, 1, 0)), this.intersectedObject.position, this.intersectedObject, this.#GetOtherTileStatus(this.intersectedObject.userData.x, this.intersectedObject.userData.y));
         
         if (!shooted)
             return;
@@ -269,7 +280,13 @@ export class Cannon
         this.map.ShootHere(this.intersectedObject.userData.x, this.intersectedObject.userData.y);
         this.intersectedObject.userData.hit = false;
         this.intersectedObject.userData.canBeHighlight = false;
-        this.bNeedSwitch = true;
+        this.shot++;
+
+        if (this.shot == this.maxShot)
+        {
+            this.bNeedSwitch = true;
+            this.shot = 0;
+        }
     }
 
     #GetTileStatus(_x, _y)
@@ -277,6 +294,19 @@ export class Cannon
         for (let i = 0; i < this.map.tiles.length; i++)
         {
             const tile = this.map.tiles[i];
+
+            if (tile.userData.x == _x && tile.userData.y == _y)
+                return tile.userData.used;
+        }
+
+        return false;
+    }
+
+    #GetOtherTileStatus(_x, _y)
+    {
+        for (let i = 0; i < this.map.otherMap.tiles.length; i++)
+        {
+            const tile = this.map.otherMap.tiles[i];
 
             if (tile.userData.x == _x && tile.userData.y == _y)
                 return tile.userData.used;
@@ -294,11 +324,22 @@ export class Cannon
         this.mesh.rotation.y = Math.min(Math.PI * 1.3, Math.max(y, Math.PI * 0.7));
     }
 
+    #NotOtherMap(_object)
+    {
+        for (let i = 0; i < this.map.otherMap.wall.length; i++)
+        {
+            if (this.map.otherMap.wall[i] == _object)
+                return false;
+        }
+    
+        return true;
+    }
+
     #UpdateHighlight()
     {
         this.raycaster.setFromCamera(this.mouse, this.camera.camera);
         const objectsToCheck = this.scene.children.filter(obj => {
-            return obj !== this.objectInHand && !this.ball.particles.includes(obj);
+            return obj !== this.objectInHand && !this.ball.particles.includes(obj) && this.#NotOtherMap(obj);
         });
         const intersects = this.raycaster.intersectObjects(objectsToCheck, true);
     

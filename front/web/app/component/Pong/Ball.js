@@ -32,7 +32,7 @@ export class Ball
         this.fMaxSpeed = this.fInitialSpeed * 2.5;
         this.fSpeedIncrement = (this.fMaxSpeed - this.fInitialSpeed) / this.fSpeedStep;
         this.velocity = new THREE.Vector3(Math.random() * 2 - 1, 0,  Math.random() * 2 - 1);
-        this.#UpdateSpeed();
+        this.#FixDirection();
         const geometry = new THREE.SphereGeometry(this.fRadius); 
         const material = new THREE.MeshLambertMaterial({color: this.color, transparent: true});
         material.emissive.set(this.color);
@@ -63,6 +63,20 @@ export class Ball
         this.bCanRespawn = false;
     }
 
+    #FixDirection()
+    {
+        const limit = 0.25;
+
+        this.velocity.normalize();
+
+        if (this.velocity.x > -limit && this.velocity.x <= 0)
+            this.velocity.x = -limit;
+        else if (this.velocity.x >= 0 && this.velocity.x < limit)
+            this.velocity.x = limit;
+
+        this.#UpdateSpeed();
+    }
+
     #Respawn(_scene)
     {
         this.mesh.visible = false;
@@ -79,7 +93,7 @@ export class Ball
         this.mesh.position.set(0, this.fRadius, 0);
         this.fSpeed = this.fInitialSpeed;
         this.velocity = new THREE.Vector3(Math.random() * 2 - 1, 0,  Math.random() * 2 - 1);
-        this.#UpdateSpeed();
+        this.#FixDirection();
         this.mesh.visible = true;
     }
 
@@ -130,12 +144,29 @@ export class Ball
         if (intersection.object.userData.isPlayer)
             this.game.cameraManager.Shake(0.1 * this.fSpeed, 20);
 
-        const collisionNormal = intersection.face.normal.clone().applyMatrix4(intersection.object.matrixWorld).normalize();
+        this.#ManualCollision(intersection.object);
+        // this.#CalculatedCollision(intersection);
+        return true;
+    }
+
+    #ManualCollision(_object)
+    {
+        if (_object.userData.isPlayer)
+            this.velocity.x = -this.velocity.x;
+        else
+            this.velocity.z = -this.velocity.z;
+
+        this.#FixDirection();
+        this.fSpeed = Math.min(this.fSpeed + this.fSpeedIncrement, this.fMaxSpeed);
+    }
+
+    #CalculatedCollision(_intersection)
+    {
+        const collisionNormal = _intersection.face.normal.clone().applyMatrix4(_intersection.object.matrixWorld).normalize();
         this.velocity.reflect(collisionNormal);
         this.velocity.y = 0;
-        this.#UpdateSpeed();
+        this.#FixDirection();
         this.fSpeed = Math.min(this.fSpeed + this.fSpeedIncrement, this.fMaxSpeed);
-        return true;
     }
 
     #UpdateSpeed()

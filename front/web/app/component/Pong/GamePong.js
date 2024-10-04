@@ -65,7 +65,7 @@ export class GamePong
         this.composer.render();
 
         if (this.map.init && !this.map.start && !this.bCalled)
-            this.StopGame();
+            this.OnDestroy();
     }
 
     StopGame()
@@ -77,6 +77,57 @@ export class GamePong
 
     OnDestroy()
     {
+        this.StopGame();
+        this.CleanThreeJS();
+    }
+
+    CleanThreeJS()
+    {
+        this.renderer.setAnimationLoop(null);
+    
+        this.scene.traverse(function(node) {
+            this.DisposeNode(node);
+        });
+    
+    
+        window.removeEventListener("resize", () => { this.#OnResize(); });
+        window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
+        window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
+        this.renderer.dispose();
+        this.composer.dispose();
+        const canvas = renderer.domElement;
+
+        if (canvas && canvas.parentElement)
+            canvas.parentElement.removeChild(canvas);
+    
+        this.scene = null;
+        this.renderer = null;
+        this.composer = null;
+    }
+
+    DisposeNode(node) {
+        if (node.geometry)
+            node.geometry.dispose();
+    
+        if (node.material) 
+        {
+            if (Array.isArray(node.material))
+                node.material.forEach(material => material.dispose());
+            else
+                node.material.dispose();
+        }
+    
+        if (node.material && node.material.map)
+            node.material.map.dispose();
+    
+        if (node.children) 
+        {
+            for (let i = node.children.length - 1; i >= 0; i--)
+            {
+                disposeNode(node.children[i]);
+                node.remove(node.children[i]);
+            }
+        }
     }
 
     #OnResize()
