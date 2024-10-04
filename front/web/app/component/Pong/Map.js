@@ -182,6 +182,7 @@ export class Map
         mesh.position.set(_x, this.iPaddleWidth * 2, _y);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
+        mesh.userData.isPlayer = false;
         this.#game.scene.add(mesh);
         this.#CreateSimpleKillZone(_x * 1.5, _y * 1.5, _width * 2);
         return mesh;
