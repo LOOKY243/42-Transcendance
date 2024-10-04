@@ -222,4 +222,47 @@ export class GamePong
         if (event.code === "Numpad1")
             this.map.TogglePlayerIA(1);
     }
+
+    // Button Region
+    RightMoveUp()
+    {
+        this.iPaddleDirection[0] = -1;
+    }
+
+    RightMoveDown()
+    {
+        this.iPaddleDirection[0] = 1;
+    }
+
+    RightMoveRelease()
+    {
+        this.iPaddleDirection[0] = 0;
+    }
+
+    RightIA()
+    {
+        this.map.TogglePlayerIA(1);
+    }
+
+    LeftMoveUp()
+    {
+        this.iPaddleDirection[1] = 1;
+    }
+
+    LeftMoveDown()
+    {
+        this.iPaddleDirection[1] = -1;
+    }
+
+    LeftMoveRelease()
+    {
+        this.iPaddleDirection[1] = 0;
+    }
+
+    LeftIA()
+    {
+        this.map.TogglePlayerIA(0);
+    }
+
+    
 }

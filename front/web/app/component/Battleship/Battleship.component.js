@@ -24,7 +24,12 @@ export class BattleshipComponent extends AComponent {
         this.html = `
             <div id="root-window">
                 <div id="render-target"></div>
-                <button id="rotateButton">Rotate</button>
+                <div id="render-score">
+                    <li id="score-list">
+                    </li>
+                </div>
+                <div id="render-text invisible"></div>
+                <button id="rotateButton" class="btn btn-outline-primary text-light">Rotate</button>
             </div>
         `;
     }

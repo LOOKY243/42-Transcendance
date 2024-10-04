@@ -63,6 +63,7 @@ export class GameBattleship
         this.map.Update();
         this.enemyMap.Update();
         this.TurnHandler();
+        this.WinChecker();
 
         if (this.currentPlayer == 0)
         {
@@ -88,53 +89,54 @@ export class GameBattleship
         this.enemyMap.cannon.OnDestroy();
     }
 
+    WinChecker()
+    {
+        if (this.map.cannon.score >= this.maxScore)
+        {
+            this.currentPlayer = -1;
+            this.OnDestroy();
+        }
+        else if (this.enemyMap.cannon.score >= this.maxScore)
+        {
+            this.currentPlayer = -1;
+            this.OnDestroy();
+        }
+    }
+
     CleanThreeJS()
     {
         this.renderer.setAnimationLoop(null);
     
         this.scene.traverse(function(node) {
-            this.DisposeNode(node);
+            if (node.geometry)
+                node.geometry.dispose();
+        
+            if (node.material) 
+            {
+                if (Array.isArray(node.material))
+                    node.material.forEach(material => material.dispose());
+                else
+                    node.material.dispose();
+            }
+        
+            if (node.material && node.material.map)
+                node.material.map.dispose();
         });
     
     
         window.removeEventListener("resize", () => { this.#OnResize(); });
         window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
         window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
-        this.renderer.dispose();
-        this.composer.dispose();
-        const canvas = renderer.domElement;
+        const canvas = this.renderer.domElement;
 
         if (canvas && canvas.parentElement)
             canvas.parentElement.removeChild(canvas);
     
+        this.renderer.dispose();
+        this.composer.dispose();
         this.scene = null;
         this.renderer = null;
         this.composer = null;
-    }
-
-    DisposeNode(node) {
-        if (node.geometry)
-            node.geometry.dispose();
-    
-        if (node.material) 
-        {
-            if (Array.isArray(node.material))
-                node.material.forEach(material => material.dispose());
-            else
-                node.material.dispose();
-        }
-    
-        if (node.material && node.material.map)
-            node.material.map.dispose();
-    
-        if (node.children) 
-        {
-            for (let i = node.children.length - 1; i >= 0; i--)
-            {
-                disposeNode(node.children[i]);
-                node.remove(node.children[i]);
-            }
-        }
     }
 
     TurnHandler()

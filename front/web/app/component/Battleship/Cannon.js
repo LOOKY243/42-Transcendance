@@ -39,10 +39,7 @@ export class Cannon
         window.addEventListener("mousemove", (event) => this.onMouseMove(event));
         window.addEventListener("click", (event) => this.onMouseClick(event));
         window.addEventListener("keydown", (event) => this.onKeyDown(event));
-        const button = document.getElementById("rotateButton");
-
-        if (button)
-            button.addEventListener("click", this.RotateButton());
+        this.#GenerateScore();
     }
 
     OnDestroy()
@@ -50,16 +47,12 @@ export class Cannon
         window.removeEventListener("mousemove", (event) => this.onMouseMove(event));
         window.removeEventListener("click", (event) => this.onMouseClick(event));
         window.removeEventListener("keydown", (event) => this.onKeyDown(event));
-        const button = document.getElementById("rotateButton");
-
-        if (button)
-            button.removeEventListener("click", this.RotateButton());
     }
 
     AddScore()
     {
         this.score++;
-        console.log(this.name, this.score);
+        this.#UpdateScore();
     }
 
     onKeyDown(event)
@@ -73,19 +66,6 @@ export class Cannon
         if (event.repeat)
             return;
 
-        if (!this.objectInHand)
-            return;
-
-        this.objectInHand.rotation.y += Math.PI / 2;
-
-        if (this.objectInHand.rotation.y == Math.PI * 2)
-            this.objectInHand.rotation.y = 0;
-
-        this.#ModifiyOffset();
-    }
-
-    RotateButton()
-    {
         if (!this.objectInHand)
             return;
 
@@ -368,9 +348,9 @@ export class Cannon
 
     #NotOtherShip(_object)
     {
-        for (let i = 0; i < this.map.otherMap.wall.length; i++)
+        for (let i = 0; i < this.map.otherMap.ship.length; i++)
         {
-            if (this.map.otherMap.wall[i] == _object)
+            if (this.map.otherMap.ship[i] == _object)
                 return false;
         }
     
@@ -381,7 +361,7 @@ export class Cannon
     {
         this.raycaster.setFromCamera(this.mouse, this.camera.camera);
         const objectsToCheck = this.scene.children.filter(obj => {
-            return obj !== this.objectInHand && !this.ball.particles.includes(obj) && this.#NotOtherMap(obj);
+            return obj !== this.objectInHand && !this.ball.particles.includes(obj) && this.#NotOtherMap(obj) && this.#NotOtherShip(obj);
         });
         const intersects = this.raycaster.intersectObjects(objectsToCheck, true);
     
@@ -465,5 +445,95 @@ export class Cannon
                 console.error("Error loading texture", err);
             }
         );
+    }
+
+    #GenerateScore()
+    {
+        const list = document.getElementById("score-list");
+        const elem = document.createElement("ul");
+        const content = `${this.name} - ${this.score}`;
+        elem.append(content);
+        elem.setAttribute("data-id", this.name);
+        elem.setAttribute("data-score", this.score);
+        list.appendChild(elem);
+    }
+
+    #UpdateScore()
+    {
+        const list = document.getElementById("score-list");
+        const elems = list.getElementsByTagName("ul");
+
+        for (let i = 0; i < elems.length; i++)
+        {
+            const elem = elems[i];
+            const id = elem.getAttribute("data-id");
+
+            if (id != this.name)
+                continue;
+
+            if (this.score <= 0)
+                elem.id = "invisible";
+
+            elem.setAttribute("data-score", this.score);
+            elem.textContent = `${this.name} - ${this.score}`;
+            break;
+        }
+
+        this.#SortScore();
+    }
+
+    #SortScore()
+    {
+        const max = 4;
+        let list = document.getElementById("score-list");
+        let switching = true;
+
+        while (switching)
+        {
+            switching = false;
+            const elems = Array.from(list.getElementsByTagName("ul"));
+
+            for (let i = 0; i < elems.length - 1; i++)
+            {
+                const currentScore = parseInt(elems[i].getAttribute("data-score"), 10);
+                const nextScore = parseInt(elems[i + 1].getAttribute("data-score"), 10);
+
+                if (currentScore < nextScore)
+                {
+                    list.insertBefore(elems[i + 1], elems[i]);
+                    switching = true;
+                    break;
+                }
+            }
+        }
+
+        const elems = Array.from(list.getElementsByTagName("ul"));
+
+        if (elems.length <= max)
+            return;
+
+        for (let i = 0; i < elems.length; i++)
+        {
+            const elem = elems[i];
+
+            if (i < max)
+                continue;
+
+            elem.id = "invisible";
+        }
+    }
+
+    // Button Rotation
+    RotateButton()
+    {
+        if (!this.objectInHand)
+            return;
+
+        this.objectInHand.rotation.y += Math.PI / 2;
+
+        if (this.objectInHand.rotation.y == Math.PI * 2)
+            this.objectInHand.rotation.y = 0;
+
+        this.#ModifiyOffset();
     }
 }

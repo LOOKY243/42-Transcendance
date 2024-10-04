@@ -13,6 +13,7 @@ export class Map
     tiles = [];
     wall = [];
     loader;
+    ship = [];
     fMapOffset = 5.5;
     textureLoader;
     texture;
@@ -157,12 +158,12 @@ export class Map
         const baseRevPosition = new THREE.Vector3(6, 0, 4 + this.fMapOffset);
         const baseRotation = new THREE.Vector3(0, Math.PI * 1, 0);
         const baseScale = new THREE.Vector3(0.00055, 0.00055, 0.00055);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3);
-        this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2);
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, basePosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, basePosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})01.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -7)), baseRotation, baseScale.clone().multiplyScalar(1.1), offset1, 4));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})02.fbx`, baseRevPosition.clone().add(new THREE.Vector3(0, 0, -3)), baseRotation, baseScale, offset2, 3));
+        this.ship.push(this.#GenerateObject(`https://${document.location.host}/app/assets/models/Ship(${_color})03.fbx`, baseRevPosition, baseRotation, baseScale.clone().multiplyScalar(0.9), offset3, 2));
     }
 
     #GenerateObject(_path, _position, _rotation, _scale, _offset, _size)
