@@ -14,12 +14,6 @@ body {
     color: white;
 }
 
-/* #render-target {
-    background-color: transparent;
-    position: relative;
-    height: 100vh;
-} */
-
 #render-score {
     list-style: none;
     position: absolute;

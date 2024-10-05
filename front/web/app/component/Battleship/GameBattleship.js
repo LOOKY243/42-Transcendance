@@ -7,11 +7,14 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+import { GameService } from "../../service/Game.service.js";
+import { injector } from "../../../spa/Bootstrap.js";
 
 const color = ["Black", "Blue", "Red", "Whiite"];
 
 export class GameBattleship
 {
+    inGame = false;
     gameWindow;
     scene;
     renderer;
@@ -37,17 +40,29 @@ export class GameBattleship
         this.colorFirst = _color1;
         this.colorSecond = _color2;
         this.maxScore = _score;
-        this.cannonShot = _cannonShot;
+        if (_cannonShot === '1') {
+            this.cannonShot = 1;
+        } else if (_cannonShot === '2') {
+            this.cannonShot = 2;
+        } else {
+            this.cannonShot = 3
+        }
     }
 
     Start()
     {
+        this.inGame = true;
         this.clock = new THREE.Clock();
         this.#CreateScene();
         this.#PostProcess();
-        window.addEventListener("resize", () => { this.#OnResize(); });
-        window.addEventListener("keydown", (event) => this.#OnKeyDown(event));
-        window.addEventListener("keyup", (event) => this.#OnKeyUp(event));
+        this.resizeHandler = this.#OnResize.bind(this);
+        this.keyDownHandler = this.#OnKeyDown.bind(this);
+        this.keyUpHandler = this.#OnKeyUp.bind(this);
+        
+        window.addEventListener("resize", this.resizeHandler);
+        window.addEventListener("keydown", this.keyDownHandler);
+        window.addEventListener("keyup", this.keyUpHandler);
+        
         this.renderer.setAnimationLoop(() => this.#Draw());
     }
 
@@ -82,11 +97,26 @@ export class GameBattleship
         }
     }
 
+    StopGame()
+    {
+        injector[GameService].currentGame = null;
+        injector[GameService].sendResult(this.score, false, false);
+    }
+
     OnDestroy()
     {
-        this.CleanThreeJS();
-        this.map.cannon.OnDestroy();
-        this.enemyMap.cannon.OnDestroy();
+        if (this.inGame) {
+            this.score = {
+                "winner": this.map.paddles[0].name,
+                "winnerScore": this.map.paddles[0].iHP,
+                "looserScore": this.map.paddles[1].iHP
+            }
+            this.inGame = false;
+            this.bCalled = true;
+            this.CleanThreeJS();
+            this.map.cannon.OnDestroy();
+            this.enemyMap.cannon.OnDestroy();
+        }
     }
 
     WinChecker()
@@ -123,10 +153,9 @@ export class GameBattleship
                 node.material.map.dispose();
         });
     
-    
-        window.removeEventListener("resize", () => { this.#OnResize(); });
-        window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
-        window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
+        window.removeEventListener("resize", this.resizeHandler);
+        window.removeEventListener("keydown", this.keyDownHandler);
+        window.removeEventListener("keyup", this.keyUpHandler);
         const canvas = this.renderer.domElement;
 
         if (canvas && canvas.parentElement)

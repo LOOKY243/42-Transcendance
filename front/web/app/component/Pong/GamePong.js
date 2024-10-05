@@ -9,6 +9,7 @@ import { GameService } from "../../service/Game.service.js";
 
 export class GamePong
 {
+    inGame = false;
     gameWindow;
     scene;
     renderer;
@@ -26,14 +27,16 @@ export class GamePong
     playerRight = "Right";
     bCalled = false;
     score;
+    isTournament = false;
 
-    constructor(_theme, _iPoints, _ballSpeed, _player1, _player2)
+    constructor(_theme, _iPoints, _ballSpeed, _player1, _player2, isTournament = false)
     {
         this.iPlayers = 2;
         this.iPoints = _iPoints;
         this.theme = _theme;
         this.playerLeft = _player1;
         this.playerRight = _player2;
+        this.isTournament = isTournament;
 
         if (_ballSpeed === "normal") {
             this.fBallSpeed = 0.075;
@@ -48,13 +51,20 @@ export class GamePong
 
     Start()
     {
+        this.inGame = true;
         this.#CreateScene();
         this.#PostProcess();
         this.iPaddleDirection[0] = 0;
         this.iPaddleDirection[1] = 0;
-        window.addEventListener("resize", () => { this.#OnResize(); });
-        window.addEventListener("keydown", (event) => this.#OnKeyDown(event));
-        window.addEventListener("keyup", (event) => this.#OnKeyUp(event));
+
+        this.resizeHandler = this.#OnResize.bind(this);
+        this.keyDownHandler = this.#OnKeyDown.bind(this);
+        this.keyUpHandler = this.#OnKeyUp.bind(this);
+        
+        window.addEventListener("resize", this.resizeHandler);
+        window.addEventListener("keydown", this.keyDownHandler);
+        window.addEventListener("keyup", this.keyUpHandler);
+
         this.renderer.setAnimationLoop(() => this.#Draw());
     }
 
@@ -78,18 +88,25 @@ export class GamePong
 
     StopGame()
     {
-        this.bCalled = true;
-        injector[GameService].sendResult(this.score, true, false);
+        injector[GameService].currentGame = null;
+        injector[GameService].sendResult(this.score, true, this.isTournament);
     }
 
-    OnDestroy()
+    OnDestroy(fromRouter = false)
     {
-        this.score = {
-            "winner": this.map.paddles[0].name,
-            "score": this.map.paddles[0].iHP,
-        };
-        this.StopGame();
-        this.CleanThreeJS();
+        if (this.inGame) {
+            this.score = {
+                "winner": this.map.paddles[0].name,
+                "winnerScore": this.map.paddles[0].iHP,
+                "looserScore": 0,
+            };
+            this.inGame = false;
+            this.bCalled = true;
+            this.CleanThreeJS();
+            if (!fromRouter) {
+                this.StopGame();
+            }
+        }
     }
 
     CleanThreeJS()
@@ -112,10 +129,10 @@ export class GamePong
                 node.material.map.dispose();
         });
     
+        window.removeEventListener("resize", this.resizeHandler);
+        window.removeEventListener("keydown", this.keyDownHandler);
+        window.removeEventListener("keyup", this.keyUpHandler);
     
-        window.removeEventListener("resize", () => { this.#OnResize(); });
-        window.removeEventListener("keydown", (event) => this.#OnKeyDown(event));
-        window.removeEventListener("keyup", (event) => this.#OnKeyUp(event));
         const canvas = this.renderer.domElement;
 
         if (canvas && canvas.parentElement)

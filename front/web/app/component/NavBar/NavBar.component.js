@@ -107,7 +107,6 @@ export class NavBarComponent extends AComponent {
             		<span class="navbar-toggler-icon"></span>
         		</button>
 				<div class="navbarCollapse d-flex justify-content-between">
-					<a id="friendsIcon" class="nav-item navbar-brand" style="${config.auth ? `` : `display: none;`};"></a>
 				</div>
         		<div class="collapse navbar-collapse" id="navbarNavDropdown">
 					<div class="btn-group">
@@ -129,6 +128,7 @@ export class NavBarComponent extends AComponent {
 							</div>
 							</ul>
 						</div>
+						<a id="friendsIcon" class="navbar-brand nav-item me-5" style="${config.auth ? `` : `display: none;`};"></a>
 						<a id="profileButton" class="navbar-brand navText nav-item me-5" ${config.auth ? `title="${config.auth}"` : `` }></a>
 						<a id="logoutButton" class="navbar-brand nav-item me-5" style="${config.auth ? `` : `display: none;`};"></a>
 					</div>

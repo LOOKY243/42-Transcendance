@@ -1,10 +1,18 @@
+import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js"
+import { Router } from "../../../spa/Router.js";
+import { GameService } from "../../service/Game.service.js";
 import { GamePong } from "./GamePong.js"
 
 export class PongComponent extends AComponent {
-    game = {};
+    inGame = false
 
     onInit() {
+        if (!injector[GameService].inGame) {
+            injector[Router].navigate('/');
+            return false;
+        }
+
         super.onInit();
         this.generateHtml({});
 
@@ -12,8 +20,8 @@ export class PongComponent extends AComponent {
     }
 
     static startPong(inputPoints, ballSpeed, theme, player1, player2) {
-        this.game = new GamePong(ballSpeed, inputPoints, theme, player1, player2);
-        this.game.Start();
+        this.inGame = true;
+        return new GamePong(ballSpeed, inputPoints, theme, player1, player2);
     }
 
     getCSSPath() {

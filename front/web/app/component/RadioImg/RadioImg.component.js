@@ -39,22 +39,22 @@ export class RadioImgComponent extends AComponent {
 		this.html = `
 			<div class="radioDiv col-md-6 my-2">
 				<input type="radio" class="btn-check radioInput" name="themeRadio" id="theme1" autocomplete="off">
-				<label class="btn radioLabel" for="theme1"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme.png"></label>
+				<label class="btn radioLabel" for="theme1"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme1.png"></label>
 			</div>
 
 			<div class="radioDiv col-md-6 my-2">
 				<input type="radio" class="btn-check radioInput" name="themeRadio" id="theme2" autocomplete="off">
-				<label class="btn radioLabel" for="theme2"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme.png"></label>
+				<label class="btn radioLabel" for="theme2"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme2.png"></label>
 			</div>
 
 			<div class="radioDiv col-md-6 my-2">
 				<input type="radio" class="btn-check radioInput" name="themeRadio" id="theme3" autocomplete="off">
-				<label class="btn radioLabel" for="theme3"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme.png"></label>
+				<label class="btn radioLabel" for="theme3"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme3.png"></label>
 			</div>
 			
 			<div class="radioDiv col-md-6 my-2">
 				<input type="radio" class="btn-check radioInput" name="themeRadio" id="theme4" autocomplete="off">
-				<label class="btn radioLabel" for="theme4"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme.png"></label>
+				<label class="btn radioLabel" for="theme4"><img class="radioImg" src="https://${document.location.host}/app/assets/img/theme4.png"></label>
 			</div>	
 			`;
 	}

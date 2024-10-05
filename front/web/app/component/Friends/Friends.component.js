@@ -53,7 +53,6 @@ export class FriendsComponent extends AComponent {
 			noFriends: this.translate("friends.noFriends"),
 			addFriends: this.translate("friends.addFriends"),
 			friendsListTitle: this.translate("friends.friendsListTitle"),
-			friendsAdvertiser: this.translate("friends.advertiser"),
 			renderSearchList: this.renderSearchBool,
 			renderFriendsListBool : this.renderFriendsListBool
 		});
@@ -89,7 +88,6 @@ export class FriendsComponent extends AComponent {
 							<div id="searchInput" class="col-10"></div>
 							<div id="searchButton" class="col-2"></div>
 						</div>
-						<div class="fs-5 text-danger my-2">${config.friendsAdvertiser}</div>
 						<div id="searchUserList" style="${config.renderSearchList ? `` : `display: none;`};"></div>
 					</div>
 				</div>

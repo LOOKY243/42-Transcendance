@@ -5,6 +5,7 @@ import { AInjectable } from "../../spa/service/AInjectable.js";
 import { HttpClient } from "../../spa/service/HttpClient.js";
 import { TokenService } from "../../spa/service/Token.service.js";
 import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
+import { BattleshipComponent } from "../component/Battleship/Battleship.component.js";
 import { PongComponent } from "../component/Pong/Pong.component.js";
 import { PopService } from "./Pop.service.js";
 
@@ -17,22 +18,46 @@ export class GameService extends AInjectable {
 	isBattleship = new ReplayObservable();
 	isTournement = new ReplayObservable();
 	lastMatch = new ReplayObservable();
+	currentGame = null;
 
 	constructor() {
 		super();
 	}
 
-	startNewPong(points, ballSpeed, theme, player1, player2) {
+	startNewPong(points, ballSpeed, theme, player1, player2, is_tournament) {
 		injector[HttpClient].post("startNewPong/", {
 			points: points,
 			ballSpeed: ballSpeed,
 			theme: theme,
 			playerOne: player1,
-			playerTwo: player2
+			playerTwo: player2,
+			is_tournament: is_tournament,
 		}, true).then(response => {
 			if (response.ok) {
 				injector[Router].navigate('/pong');
-				PongComponent.startPong(response.points, response.theme, response.ballSpeed, response.playerOne, response.playerTwo);
+				this.currentGame = PongComponent.startPong(response.points, response.theme, response.ballSpeed, response.playerOne, response.playerTwo, response.isTournament);
+				this.currentGame.Start();
+			} else {
+				injector[PopService].renderPop(false, "pop.startPongDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	startNewBattleship(points, shot, theme, player1, player2) {
+		injector[HttpClient].post("startNewBattle/", {
+			points: points,
+			shot: shot,
+			theme: theme,
+			playerOne: player1,
+			playerTwo: player2,
+		}, true).then(response => {
+			if (response.ok) {
+				injector[Router].navigate('/battleship');
+				this.currentGame = BattleshipComponent.startBattleship(response.points, response.shot, response.theme, response.playerOne, response.playerTwo);
 			} else {
 				injector[PopService].renderPop(false, "pop.startPongDanger");
 			}
@@ -46,7 +71,8 @@ export class GameService extends AInjectable {
 	sendResult(score, isPong, isTournement) {
 		injector[HttpClient].post('recordGame/', {
 			winner: score.winner,
-			score: score.score,
+			winner_score: score.winnerScore,
+			looser_score: score.looserScore,
 			is_pong: isPong,
 			is_tournement: isTournement
 		}, true).then(response => {
@@ -75,6 +101,7 @@ export class GameService extends AInjectable {
 					this.isBattleship.next(true);
 				}
 				this.lastMatch.next(true);
+				this.isTournement.next(response.is_tournement);
 				injector[Router].navigate('/result');
 			} else {
 				this.lastMatch.next(false);

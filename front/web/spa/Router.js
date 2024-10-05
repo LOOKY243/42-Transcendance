@@ -4,6 +4,7 @@ import { injector } from "./Bootstrap.js";
 import { BackgroundComponent } from "../app/component/Background/Background.component.js";
 import { AInjectable } from "./service/AInjectable.js";
 import { Observable } from "./utils/Observable.js";
+import { GameService } from "../app/service/Game.service.js";
 
 export class Router extends AInjectable {
 	routes = initRouter();
@@ -15,6 +16,9 @@ export class Router extends AInjectable {
 
 	start() {
 		this.windowPath.subscribe((path) => {
+			if (injector[GameService].currentGame) {
+				injector[GameService].currentGame.OnDestroy(true);
+			}
 			let splitPath = path.split('/');
 			const route = this.routes.find((value) => {
 					let splitValuePath = value.path.split('/');

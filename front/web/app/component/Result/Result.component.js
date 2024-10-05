@@ -64,7 +64,7 @@ export class ResultComponent extends AComponent {
 				<div class="container">
 					<div class="containerBlur">
 						<div style="${config.isMatch ? `` : `display: none;`}">
-							<div class="fs-1 text-light fw-bold text-center mt-3">${!config.isPong ? config.pongTitle : config.battleshipTitle}</div>
+							<div class="fs-1 text-light fw-bold text-center mt-3">${config.isPong ? config.pongTitle : config.battleshipTitle}</div>
 							<div class="line mt-4"></div>
 							<div class="d-flex justify-content-center">
 								<div class="m-5 text-center text-light">

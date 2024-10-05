@@ -227,26 +227,30 @@ export class Player
 
     #UpdateScore()
     {
-        const list = document.getElementById("score-list");
-        const elems = list.getElementsByTagName("ul");
+        try {
+            const list = document.getElementById("score-list");
+            const elems = list.getElementsByTagName("ul");
 
-        for (let i = 0; i < elems.length; i++)
-        {
-            const elem = elems[i];
-            const id = elem.getAttribute("data-id");
+            for (let i = 0; i < elems.length; i++)
+            {
+                const elem = elems[i];
+                const id = elem.getAttribute("data-id");
 
-            if (id != this.name)
-                continue;
+                if (id != this.name)
+                    continue;
 
-            if (this.iHP <= 0)
-                elem.id = "invisible";
+                if (this.iHP <= 0)
+                    elem.id = "invisible";
 
-            elem.setAttribute("data-score", this.iHP);
-            elem.textContent = `${this.name} - ${this.iHP}`;
-            break;
+                elem.setAttribute("data-score", this.iHP);
+                elem.textContent = `${this.name} - ${this.iHP}`;
+                break;
+            }
+
+            this.#SortScore();
+        } catch (error) {
+            return;
         }
-
-        this.#SortScore();
     }
 
     #SortScore()

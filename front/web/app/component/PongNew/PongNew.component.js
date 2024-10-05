@@ -2,6 +2,7 @@ import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
 import { Router } from "../../../spa/Router.js";
 import { GameService } from "../../service/Game.service.js";
+import { TournamentService } from "../../service/Tournament.service.js";
 import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
@@ -61,6 +62,20 @@ export class PongNewComponent extends AComponent {
 			style: "btn btn-outline-info",
 			onclick: () => this.startGame()
 		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "defaultButton",
+			parentSelector: this.getSelector(),
+			icon: "arrow",
+			style: "btn btn-outline-success",
+			onclick: () => this.startGame(true)
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: 'tournamentButton',
+			parentSelector: this.getSelector(),
+			icon: 'arrow',
+			style: 'btn btn-outline-light-emphasis',
+			onclick: () => injector[TournamentService].createTournament(this.playerOne, this.playerTwo, this.inputPoints, this.ballSpeed, this.theme),
+		}));
 
 		this.createSubComponent(new RadioComponent(this.getSelector(), "ballRadio"));
 		this.subComponent["ballRadio"].radioSelectSubscribe((value) => {this.ballSpeed = value; this.params.ball = true; this.checkParams()});
@@ -72,6 +87,10 @@ export class PongNewComponent extends AComponent {
 			pongTitle: this.translate("pongNew.pongTitle"),
 			ball: this.translate("pongNew.ball"),
 			points: this.translate("pongNew.points"),
+			players: this.translate('pongNew.players'),
+			default: this.translate('pongNew.default'),
+			tournamentTitle: this.translate('pongNew.tournamentTitle'),
+			start: this.translate('pongNew.start')
 		});
 
 		if (injector[UserService].user) {
@@ -83,16 +102,24 @@ export class PongNewComponent extends AComponent {
 		return true;
 	}
 
-	startGame() {
-		injector[GameService].startNewPong(this.inputPoints, this.ballSpeed, this.theme, this.playerOne, this.playerTwo);
+	startGame(defaultparams = false, is_tournament = false) {
+		injector[GameService].inGame = true;
+		if (defaultparams) {
+			injector[GameService].startNewPong('5', 'normal', 'theme1', injector[UserService].user.username, '', is_tournament);
+		} else {
+			injector[GameService].startNewPong(this.inputPoints, this.ballSpeed, this.theme, this.playerOne, this.playerTwo, is_tournament);
+		}
 	}
 
 	checkParams() {
 		if (Object.values(this.params).some(value => value === false)) {
 			this.subComponent["startButton"].disabled.next(true);
+			this.subComponent["tournamentButton"].disabled.next(true);
 		} else {
 			this.subComponent["startButton"].disabled.next(false);
+			this.subComponent["tournamentButton"].disabled.next(false);
 		}
+		this.subComponent["tournamentButton"].disabled.next(false);
 		this.subComponent["startButton"].disabled.next(false);
 	}
 
@@ -156,7 +183,16 @@ export class PongNewComponent extends AComponent {
 								</div>
 							</div>
 							<div class="mt-5 pt-4">
+								<div class='fs-5 text-light fw-semibold'>${config.start}</div>
 								<div id="startButton"></div
+							</div>
+							<div class='m-3 pt-4'>
+								<div class='fs-5 text-light fw-semibold'>${config.tournamentTitle}</div>
+								<div id='tournamentButton'></div>
+							</div>
+							<div class="m-3 pt-4">
+                                <div class='text-success fw-semibold fs-5'>${config.default}</div>
+								<div id="defaultButton"></div
 							</div>
 						</div>
 					</div>

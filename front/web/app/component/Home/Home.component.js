@@ -4,6 +4,7 @@ import { Router } from "../../../spa/Router.js";
 import { BattleshipComponent } from "../Battleship/Battleship.component.js";
 import { ButtonComponent } from "../Button/Button.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js"
+import { TextButtonComponent } from "../textButton/TextButton.component.js";
 
 export class HomeComponent extends AComponent {
 	inputId = "";
@@ -26,7 +27,14 @@ export class HomeComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			style: "btn btn-outline-success",
 			content: "PLAY",
-			onclick: () => {injector[Router].navigate("/battleship"); BattleshipComponent.startBattleship();}
+			onclick: () => injector[Router].navigate("/battleship/new")
+		}));
+
+		this.createSubComponent(TextButtonComponent.create({
+			name: 'tournamentButton',
+			parentSelector: this.getSelector(),
+			langKey: "home.tournamentButton",
+			onclick: () => injector[Router].navigate('/tournament'),
 		}));
 
 		this.setConfig({
@@ -63,6 +71,10 @@ export class HomeComponent extends AComponent {
 							<p class="fs-5 text-light">${config.battleContentBis}</p>
 							<div id="battleButton"></div>
 						</div>
+					</div>
+					<div class='line my-4'></div>
+					<div class='text-center text-info fs-4 m-5'>
+						<div id='tournamentButton'></div>
 					</div>
 				</div>
 			</div>

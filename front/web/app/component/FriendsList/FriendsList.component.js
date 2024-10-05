@@ -23,6 +23,8 @@ export class FriendsListComponent extends AComponent {
 				}));
 			});
 		}
+
+		return true;
 	}
 
 	generateHtml(config) {

@@ -18,9 +18,8 @@ down:
 	@docker compose -p $(NAME) -f $(COMPOSE) down --volumes
 
 clean: down
-	rm -rf data/postgres
-	rm -rf data/django
-	rm -rf nginx/cert
+	rm -rf data/postgres/
+	rm -rf data/django/
 
 re: clean all
 

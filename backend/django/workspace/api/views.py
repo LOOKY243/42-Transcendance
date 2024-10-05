@@ -26,7 +26,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 # Local imports
-from .models import CustomUser, Match
+from .models import CustomUser, Match, Tournament
 from .serializers import RegisterSerializer, UpdatePasswordSerializer
 from .utils import check_token_status, generate_random_password, generate_verification_code
 
@@ -45,6 +45,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.conf import settings
+import random
 
 User = get_user_model() 
 
@@ -73,8 +74,11 @@ class RegisterView(APIView):
     def put(self, request):
         username = request.data.get('username')
         
-        if CustomUser.objects.filter(username=username).exists():
-            return JsonResponse({"ok": False, "error": "usernameError"})
+        user = CustomUser()
+        for user in CustomUser.objects.all():
+            decrypted_username = user.decrypt_data(user.username)
+            if decrypted_username == username:
+                return JsonResponse({"ok": False, "error": "Username already exists."})
 
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -88,29 +92,44 @@ class LoginView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if user.tfa:
-                return JsonResponse({"ok": 'tfa', 'username': username, 'password': password})
-            login(request, user)
+        try:
+            user = None
+            for u in CustomUser.objects.all():
+                decrypted_username = u.decrypt_data(u.username)
+                if decrypted_username == username:
+                    user = u
+                    break
+            if user is None:
+                return JsonResponse({"ok": False, "error": "Invalid credentials"})
 
-            user.update_last_activity()
-            refresh = RefreshToken.for_user(user)
-            response =  JsonResponse({
-                "ok": True,
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-                "token_refresh_required": False,
-            })
-            response.set_cookie(
-                'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
-            )
-            response.set_cookie(
-                'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
-            )
-            return response
-        else:
-            return JsonResponse({"ok": False})
+            if user.check_password(password):
+                if user.tfa:
+                    return JsonResponse({"ok": 'tfa', 'username': username, 'password': password})
+
+                login(request, user)
+                user.update_last_activity()
+
+                refresh = RefreshToken.for_user(user)
+                response = JsonResponse({
+                    "ok": True,
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "token_refresh_required": False,
+                })
+
+                response.set_cookie(
+                    'accessToken', str(refresh.access_token), max_age=3600, secure=True, samesite='Lax'
+                )
+                response.set_cookie(
+                    'refreshToken', str(refresh), max_age=86400, secure=True, samesite='Lax'
+                )
+                return response
+            else:
+                return JsonResponse({"ok": False, "error": "Invalid credentials"})
+
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)})
+
 
 class LogoutView(APIView):
     def post(self, request):
@@ -148,7 +167,19 @@ class GetUserView(APIView):
             encoded_pfp = base64.b64encode(user.pfp).decode('utf-8')
 
         has_password = user.password is not None and user.password != ""
-        has_mail = user.email is not None and user.email != ""
+        has_tournament = user.tournament is not None
+
+        isStarted = False
+        if has_tournament:
+            isStarted = user.tournament.isStarted
+
+        has_mail = False
+        if user.email is not None and user.email != "":
+            try:
+                validate_email(user.decrypt_data(user.email))
+                has_mail = True
+            except ValidationError:
+                has_mail = False
 
         return JsonResponse({
             "ok": True,
@@ -158,6 +189,8 @@ class GetUserView(APIView):
             "hasPassword": has_password,
             'tfa': user.tfa,
             'mail': has_mail,
+            'isTournament': has_tournament,
+            'isStarted': isStarted,
         })
 
 
@@ -292,8 +325,13 @@ class UpdateUsernameView(APIView):
         if len(new_username) > self.USERNAME_MAX_LENGTH:
             return JsonResponse({"ok": False, "error": f"Username cannot exceed {self.USERNAME_MAX_LENGTH} characters"})
 
-        if new_username == user.username:
+        if new_username == user.decrypt_data(user.username):
             return JsonResponse({"ok": False, "error": "New username cannot be the same as the current username"})
+
+        for user in CustomUser.objects.all():
+            decrypted_username = user.decrypt_data(user.username)
+            if decrypted_username == new_username:
+                return JsonResponse({"ok": False, "error": "Username already exists."})
 
         if CustomUser.objects.filter(username=new_username).exists():
             return JsonResponse({"ok": False, "error": "Username already taken"})
@@ -305,7 +343,7 @@ class UpdateUsernameView(APIView):
 
         user.save()
 
-        return JsonResponse({"ok": True, "username": user.username})
+        return JsonResponse({"ok": True, "username": new_username})
 
 class UpdateProfilePictureView(APIView):
     permission_classes = [IsAuthenticated]
@@ -369,25 +407,31 @@ class SearchUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        search_string = request.data.get('search_string', '')
+        search_string = request.data.get('search_string', '').lower()
         current_user = request.user
         current_user.update_last_activity()
         friends = current_user.friends.all()
 
-        users = CustomUser.objects.filter(
-            username__icontains=search_string
-        ).exclude(
+        all_users = CustomUser.objects.exclude(
             id__in=friends.values_list('id', flat=True)
-        ).exclude(
-            id=current_user.id
-        )[:5]
+        ).exclude(id=current_user.id)
 
-        user_list = [{"id": user.id, "username": user.decrypt_data(user.username) if user.is_encrypted else user.username} for user in users]
+        matching_users = []
+        for user in all_users:
+            decrypted_username = user.decrypt_data(user.username) if user.is_encrypted else user.username
+            if search_string in decrypted_username.lower():
+                matching_users.append({
+                    "id": user.id,
+                    "username": decrypted_username
+                })
+            if len(matching_users) >= 5:
+                break
 
         return JsonResponse({
             "ok": True,
-            "users": user_list
+            "users": matching_users
         })
+
 
 class AddFriendView(APIView):
     permission_classes = [IsAuthenticated]
@@ -568,13 +612,20 @@ class OAuth42Callback(APIView):
                     login(request, existing_user)
                     existing_user.update_last_activity()
                 else:
-                    existing_user = None
-                    user = CustomUser(username=username + "42", lang='en', is_42auth=True)
+                    user = CustomUser(
+                        lang='en',
+                        is_42auth=True
+                    )
+                    user.username = user.encrypt_data(username + "42")
                     user.save()
                     login(request, user)
                     user.update_last_activity()
             else:
-                user = CustomUser(username=username, lang='en', is_42auth=True)
+                user = CustomUser(
+                    lang='end',
+                    is_42auth=True
+                )
+                user = CustomUser(username=user.encrypt_data(username), lang='en', is_42auth=True)
                 user.save()
                 login(request, user)
                 user.update_last_activity()
@@ -716,20 +767,17 @@ class TwoFactorActivateView(APIView):
         if CustomUser.objects.filter(email=email).exists():
             return JsonResponse({"ok": False, "error": "This email is already in use."})
         if email == "currentMail":
-            email = user.email
-        elif user.email:
-            return JsonResponse({"ok": False, "error": "You already have an email"})
-
+            email = user.decrypt_data(user.email)
+        elif user.email is not None and user.decrypt_data(user.email) != "":
+            try:
+                validate_email(user.decrypt_data(user.email))
+            except ValidationError:
+                return JsonResponse({'ok': False, 'error': 'you already have a mail'})
 
         try:
             validate_email(email)
         except ValidationError:
             return JsonResponse({"ok": False, "error": "Invalid email address"})
-
-        user = request.user
-        
-        if user.email:
-            return JsonResponse({"ok": False, "error": "Email already exists. Cannot activate 2FA."})
 
         user.email = email
         if user.is_encrypted:
@@ -836,14 +884,21 @@ class ValidateGameSettingsView(APIView):
             return JsonResponse({"ok": False, "error": "Player One username must not exceed 32 characters."})
         if len(playerTwo) > 32:
             return JsonResponse({"ok": False, "error": "Player Two username must not exceed 32 characters."})
-
-        if playerOne != request.user.username and CustomUser.objects.filter(username=playerOne).exists():
-            return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
+            
+        if playerOne != request.user.decrypt_data(request.user.username):
+            user = CustomUser()
+            for user in CustomUser.objects.all():
+                decrypted_username = user.decrypt_data(user.username)
+                if decrypted_username == playerOne:
+                    return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
 
         if not playerTwo:
             playerTwo = "Donald42"
-        if CustomUser.objects.filter(username=playerTwo).exists():
-            return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
+        user = CustomUser()
+        for user in CustomUser.objects.all():
+            decrypted_username = user.decrypt_data(user.username)
+            if decrypted_username == playerTwo:
+                return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
 
         match = Match.objects.create(
             player1_username=playerOne,
@@ -851,7 +906,7 @@ class ValidateGameSettingsView(APIView):
             player2_username=playerTwo,
             player2_score=0,
             is_pong=True,
-            is_tournament=False,
+            is_tournament=request.data.get('is_tournament'),
             date_played = timezone.now,
         )
 
@@ -866,7 +921,78 @@ class ValidateGameSettingsView(APIView):
             "theme": theme,
             "playerOne": playerOne,
             "playerTwo": playerTwo,
-            "match_id": match.id
+            "isTournament": False,
+        })
+
+class ValidateBattleSettingsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        points = data.get('points')
+        shot = data.get('shot')
+        theme = data.get('theme')
+        playerOne = data.get('playerOne')
+        playerTwo = data.get('playerTwo')
+
+        try:
+            points = int(points)
+            if not (1 <= points <= 6):
+                return JsonResponse({"ok": False, "error": "Points must be an integer between 1 and 6."})
+        except (ValueError, TypeError):
+            return JsonResponse({"ok": False, "error": "Points must be a valid integer."})
+        
+        try:
+            shot = int(shot)
+            if not (1 <= shot <= 3):
+                return JsonResponse({"ok": False, "error": "Shots must be an integer between 1 and 3."})
+        except (ValueError, TypeError):
+            return JsonResponse({"ok": False, "error": "Shots must be a valid integer."})
+
+        valid_themes = ["one", "two", "tree"]
+        if theme not in valid_themes:
+            return JsonResponse({"ok": False, "error": "Theme must be one of 'one', 'two', 'tree'."})
+
+        if len(playerOne) > 32:
+            return JsonResponse({"ok": False, "error": "Player One username must not exceed 32 characters."})
+        if len(playerTwo) > 32:
+            return JsonResponse({"ok": False, "error": "Player Two username must not exceed 32 characters."})
+
+        if playerOne != request.user.decrypt_data(request.user.username):
+            user = CustomUser()
+            for user in CustomUser.objects.all():
+                decrypted_username = user.decrypt_data(user.username)
+                if decrypted_username == playerOne:
+                    return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
+
+        if not playerTwo:
+            playerTwo = "Donald42"
+        user = CustomUser()
+        for user in CustomUser.objects.all():
+            decrypted_username = user.decrypt_data(user.username)
+            if decrypted_username == playerTwo:
+                return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
+
+        match = Match.objects.create(
+            player1_username=playerOne,
+            player1_score=0,
+            player2_username=playerTwo,
+            player2_score=0,
+            is_pong=False,
+            date_played = timezone.now,
+        )
+
+        user = request.user
+        user.last_match = match
+        user.save()
+
+        return JsonResponse({
+            "ok": True,
+            "points": points,
+            "shot": shot,
+            "theme": theme,
+            "playerOne": playerOne,
+            "playerTwo": playerTwo,
         })
 
 class RecordMatchResultView(APIView):
@@ -875,9 +1001,9 @@ class RecordMatchResultView(APIView):
     def post(self, request):
         user = request.user
         winner = request.data.get('winner')
-        winner_score = request.data.get('score')
-        looser_score = 0
-        looser = None
+        winner_score = request.data.get('winner_score')
+        looser_score = request.data.get('looser_score')
+        is_tournament = request.data.get('is_tournament', False)
 
         if winner == user.last_match.player1_username:
             looser = user.last_match.player2_username
@@ -886,11 +1012,12 @@ class RecordMatchResultView(APIView):
         
         match = Match.objects.create(
             is_pong=request.data.get('is_pong'),
-            is_tournament=request.data.get('is_tournement'),
+            is_tournament=is_tournament,
             winner=winner,
             winner_score=winner_score,
             looser=looser,
             looser_score=looser_score,
+            is_end=True,
         )
         
         if user.match_history.count() > 10:
@@ -900,6 +1027,23 @@ class RecordMatchResultView(APIView):
         user.match_history.add(match)
         user.last_match = match
         user.save()
+
+        if is_tournament:
+            tournament = user.tournament
+            first_match = tournament.matches_to_play.filter(is_end=False).first()
+
+            if first_match:
+                first_match.is_pong=request.data.get('is_pong'),
+                first_match.winner = winner
+                first_match.winner_score = winner_score
+                first_match.looser = looser
+                first_match.looser_score = looser_score
+                first_match.is_end = True
+                first_match.save()
+            if not first_match:
+                return JsonResponse({"ok": False, "error": "No matches to play in this tournament"})
+            user.tournament = tournament
+            user.save()
 
         return JsonResponse({'ok': True})
 
@@ -918,7 +1062,180 @@ class LastMatchInfoView(APIView):
                 "looser": match.looser,
                 "looser_score": match.looser_score,
                 "is_pong": match.is_pong,
+                'is_tournement': match.is_tournament,
             }
             return Response({"ok": True, "last_match": match_info})
         
         return Response({"ok": False, "error": "No last match found."})
+
+class CreateTournamentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+        ball_speed = data.get('ballSpeed')
+        theme = data.get('theme')
+        points = data.get('points')
+        
+        if ball_speed not in ['slow', 'normal', 'fast']:
+            return JsonResponse({"ok": False, "error": "Invalid ball speed"})
+        if theme not in ['theme1', 'theme2', 'theme3', 'theme4']:
+            return JsonResponse({"ok": False, "error": "Invalid theme"})
+        if not isinstance(points, int) or points < 1 or points > 10:
+            return JsonResponse({"ok": False, "error": "Points must be between 1 and 10"})
+
+        user.tournament = Tournament.objects.create(
+            ball_speed=ball_speed,
+            theme=theme,
+            points=points
+        )
+        user.save()
+
+        return JsonResponse({"ok": True, "message": "Tournament created successfully"})
+
+class AddUsersAndGenerateMatchesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_id):
+        user = request.user
+        data = request.data
+        usernames = data.get('usernames', [])
+
+        if len(usernames) not in [4, 8, 16]:
+            return JsonResponse({"ok": False, "error": "Number of players must be 4, 8, or 16"})
+
+        if len(usernames) != len(set(usernames)):
+            return JsonResponse({"ok": False, "error": "Usernames must be unique."})
+
+        existing_encrypted_usernames = CustomUser.objects.values_list('username', flat=True)
+
+        for username in usernames:
+            if username == user.username:
+                continue
+            encrypted_username = user.encrypt_data(decrypted_username)
+            if username in existing_encrypted_usernames:
+                return JsonResponse({"ok": False, "error": f"Username '{username}' already exists."})
+
+
+        
+        try:
+            tournament = user.tournament
+        except Tournament.DoesNotExist:
+            return JsonResponse({"ok": False, "error": "Tournament not found"})
+
+        for user in users:
+            tournament.usernames.add(user)
+
+        tournament.generate_matches()
+        user.tournament = tournament
+        user.tournament.isStarted = True
+        user.save()
+
+        matches_list = [{
+            "match_id": match.id,
+            "player1": match.player1_username,
+            "player2": match.player2_username,
+        } for match in tournament.matches_to_play.all()]
+
+        return JsonResponse({"ok": True, "matches": matches_list})
+
+class NextMatchesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tournament_id):
+        user = request.user
+        try:
+            tournament = user.tournament
+        except Tournament.DoesNotExist:
+            return JsonResponse({"ok": False, "error": "Tournament not found"})
+
+        first_match = tournament.matches_to_play.filter(is_end=False).first()
+
+        if not first_match:
+            return JsonResponse({"ok": False, "error": "No matches to play in this tournament"})
+
+        return JsonResponse({
+            "ok": True,
+            "ballSpeed": tournament.ball_speed,
+            "theme": tournament.theme,
+            "points": tournament.points,
+            "player1": first_match.player1_username,
+            "player2": first_match.player2_username,
+            "isTournament": True,
+        })
+
+class NextRoundView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_id):
+        user = request.user
+        tournament = get_object_or_404(Tournament, id=tournament_id)
+        
+        matches = tournament.matches_to_play.all()
+        
+        if not matches:
+            return JsonResponse({"ok": False, "error": "No matches to process"})
+
+        losers = [match.looser for match in matches]
+        
+        remaining_usernames = list(set(tournament.usernames.all()) - set(losers))
+
+        tournament.matches_to_play.clear()
+
+        if len(remaining_usernames) == 1:
+            return JsonResponse({
+                "ok": True,
+                "winner": remaining_usernames[0]
+            })
+        elif len(remaining_usernames) == 0:
+            return JsonResponse({"ok": False, "error": "No remaining players"})
+        
+        tournament.generate_matches(remaining_usernames)
+        user.tournament = tournament
+        user.save()
+        
+        return JsonResponse({
+            "ok": True,
+            "matches": [{
+                "player1": match.player1_username,
+                "player2": match.player2_username,
+            } for match in tournament.matches_to_play.all()]
+        })
+
+class MatchListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tournament_id):
+        user = request.user
+        tournament = user.tournament
+        
+        matches = tournament.matches_to_play.all()
+
+        match_list = []
+        for match in matches:
+            match_list.append({
+                "isEnd": match.is_end,
+                "player1": match.player1_username,
+                "player2": match.player2_username,
+                "winner": match.winner,
+                "winner_score": match.winner_score,
+                "looser": match.looser,
+                "looser_score": match.looser_score,
+            })
+
+        return JsonResponse({
+            "ok": True,
+            "matches": match_list
+        })
+
+class CloseTournamentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        user.tournament.delete()
+        user.tournament = None
+        
+
+        return JsonResponse({"ok": True, "message": "Tournament closed successfully"})

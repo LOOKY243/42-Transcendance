@@ -7,6 +7,7 @@ import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
 import { TokenError} from "../../spa/error/TokenError.js"
 import { PopService } from "./Pop.service.js";
 import { TranslateService } from "../../spa/service/Translate.service.js";
+import { TournamentService } from "./Tournament.service.js";
 
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
@@ -228,6 +229,10 @@ export class UserService extends AInjectable {
 					this.isTfa.next(response.tfa)
 					this.hasPassword.next(response.hasPassword);
 					this.hasMail.next(response.mail);
+					injector[TournamentService].isTournament.next(response.isTournament);
+					if (response.isStarted) {
+						injector[TournamentService].isStarted.next(response.isStarted);
+					}
 					injector[TranslateService].setLang(response.lang);
 				}
 			}).catch(error => {

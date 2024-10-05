@@ -52,15 +52,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         if '42' in username:
             raise serializers.ValidationError({"username": "cannot contain the sequence '42'."})
 
-        user = CustomUser(
-            username=username,
-            email=validated_data.get('email', ''),
-            tfa=validated_data.get('tfa', False),
-            pfp=validated_data.get('pfp', None),
-            verification_code=validated_data.get('verification_code', None),
-            verification_code_created_at=validated_data.get('verification_code_created_at', None),
-            lang=validated_data.pop('language', 'en')
+        temp_user = self.Meta.model()
+
+        encrypted_username = temp_user.encrypt_data(username)
+        encrypted_email = temp_user.encrypt_data(validated_data.get('email', ''))
+
+        user = self.Meta.model(
+        username=encrypted_username,
+        email=encrypted_email,
+        tfa=validated_data.get('tfa', False),
+        pfp=validated_data.get('pfp', None),
+        lang=validated_data.get('lang', 'en')
         )
+        
         user.set_password(validated_data['password'])
         user.save()
         

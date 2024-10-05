@@ -28,6 +28,13 @@ from .views import (
     DeleteEmailView,
     RecordMatchResultView,
     LastMatchInfoView,
+    ValidateBattleSettingsView,
+    CreateTournamentView,
+    AddUsersAndGenerateMatchesView,
+    NextMatchesView,
+    NextRoundView,
+    MatchListView,
+    CloseTournamentView,
 )
 
 urlpatterns = [
@@ -50,7 +57,6 @@ urlpatterns = [
     path('42auth/callback/', OAuth42Callback.as_view(), name='oauth42_callback'),
     path('getUserData/', GetUserDataView.as_view(), name='get_user_data'),
     path('deleteUser/', DeleteAccountView.as_view(), name='delete-account'),
-    path('startNewPong/', ValidateGameSettingsView.as_view(), name='validatedParamsNewPong'),
     path('newMail/', NewMailView.as_view(), name='newMail'),
     path('patchMail/', UpdateEmailView.as_view(), name='patchMail'),
     path('2faActivate/', TwoFactorActivateView.as_view(), name='two_factor_activate'),
@@ -59,4 +65,13 @@ urlpatterns = [
     path('deleteMail/', DeleteEmailView.as_view(), name='deleteMail'),
     path('recordGame/', RecordMatchResultView.as_view(), name='recordGame'),
     path('lastMatchInformations/', LastMatchInfoView.as_view(), name='lastMatchInformations'),
+    path('startNewPong/', ValidateGameSettingsView.as_view(), name='validatedParamsNewPong'),
+    path('startNewBattle/', ValidateBattleSettingsView.as_view(), name='validatedParamsNewBattle'),
+    path('tournament/create/', CreateTournamentView.as_view(), name='create-tournament'),
+    path('tournament/addUsers/', AddUsersAndGenerateMatchesView.as_view(), name='add-users-and-generate-matches'),
+    path('tournament/nextMatches/', NextMatchesView.as_view(), name='next-matches'),
+    path('tournament/nextRound/', NextRoundView.as_view(), name='next-round'),
+    path('tournament/matchList/', MatchListView.as_view(), name='match-list'),
+    path('tournament/close/', CloseTournamentView.as_view(), name='close-tournament'),
+
 ]

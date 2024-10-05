@@ -7,7 +7,8 @@ export const en = {
 		"pongContentBis": "game custom",
 		"battleContent": "remote player, 3D",
 		"battleContentBis": "1v1",
-		"errorText": "Id must be positive"
+		"errorText": "Id must be positive",
+		'tournamentButton': "See the current tournament"
 	},
 	"notFound": {
 		"text": "Page not found"
@@ -20,7 +21,12 @@ export const en = {
 		"noFriends": "You dont have a single friend",
 		"addFriends": "Add friends",
 		"friendsListTitle": "Friends List",
-		"advertiser": "User with protected personal data will possibly not appear on this research, you can add them on their profile page",
+	},
+	'tournament': {
+		'noTournament': "No tournament found",
+		'tournamentAdvert': "To create a new tournament, head to /pong and press the tournament button",
+		'inputTitle': 'Enter players list',
+		'inputAdvert': 'You can be 4, 8 or 16 players to start a tournament, each username must be unique',
 	},
 	"auth": {
 		"login": "Log in",
@@ -32,7 +38,7 @@ export const en = {
 		"errorText": "Passwords are not the same",
 		"errorPolicy": "Password must be 8-30 characters, contain: 1 uppercase, 1 lowercase, 1 digit, 1 special character, and cannot be a common password",
 		"errorUsername": "This username is already in use",
-		"42auth": "42 Auth",
+		"42auth": "42",
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
@@ -40,6 +46,19 @@ export const en = {
 		"players": "Players :",
 		"ball": "Ball Speed :",
 		"points": "Points to Win :",
+		'default': 'default mode :',
+		'tournamentTitle': 'Tournament',
+		'start': 'Custom game'
+	},
+	'battleship': {
+		'battleshipTitle': 'Battleship',
+		'shot': 'cannon shot by turn :',
+		'points': 'points to win :',
+		'players': 'players :',
+		'theme': 'Theme :',
+		'default': 'default mode :',
+		'pointsError': "must be between 1 and 6",
+		'shotError': "must be between 1 and 3",
 	},
 	"tables": {
 		"score": "Score",
@@ -117,5 +136,7 @@ export const en = {
 		'patchMailSuccess': 'Mail update Successfully',
 		'patchMailDanger': 'Mail update failed, check your credentials',
 		'deleteMailSuccess': 'Mail deleted Successfully and tfa disabled.',
+		'startTournSuccess': 'New Tournament !',
+		'startTournDanger': 'We cant start a tournament with your options',
 	},
 }
