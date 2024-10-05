@@ -51,14 +51,23 @@ export const en = {
 		"currentPassword": "Current Password",
 		"newPassword": "New password",
 		"newPasswordConfirm": "Confirm new password",
-		"dataEncrypt": "Anonymize my personal data: ",
 		"dataGet": "Get my personal data: ",
 		"getPolicy": "Download privacy policy: ",
 		"deleteUserTitle": "Account deletion",
 		"deleteUserPassword": "Enter your password to delete your account",
 		"deleteUserAdvert": "This action is irreversible and will delete all data related to your account",
-		"getPassword" : "Enter your mail to receive a password",
-		"tfaTitle": "Enter your mail to activate Two factor authentification"
+		"getPassword" : "Get a password, send to your mail",
+		"tfaTitle": "Activate Two factor authentification",
+		"patchMail": "Change your mail",
+		'dataEncrypt': "Anonymize your data (it will disabled TwoFa)",
+		'maxFileSize': '1 Mo maximum',
+	}, 
+	'result' : {
+		'pongTitle': 'Pong',
+		'battleshipTitle': 'Battleship',
+		'winner': 'winner',
+		'looser': 'looser',
+		'noMatch': 'No match found',
 	},
 	"publicProfile" : {
 		"noProfile": "No profile found"
@@ -104,6 +113,9 @@ export const en = {
 		"mailDanger": "Failed to send you a mail, check your credentials",
 		"tfaSuccess": "TwoFa activate successfully",
 		"tfaDanger": "TwoFa activation failed, check your crendentials",
-		'codeDangerTfa': "Invalid code"
+		'codeDangerTfa': "Invalid code",
+		'patchMailSuccess': 'Mail update Successfully',
+		'patchMailDanger': 'Mail update failed, check your credentials',
+		'deleteMailSuccess': 'Mail deleted Successfully and tfa disabled.',
 	},
 }

@@ -198,26 +198,11 @@ export class UserService extends AInjectable {
 		});
 	}
 
-	encryptUser() {
-		injector[HttpClient].post("encryptUser/", {}, true).then(response => {
+	deleteMail() {
+		injector[HttpClient].post("deleteMail/", {}, true).then(response => {
 			if (response.ok) {
-				injector[PopService].renderPop(true, "pop.encryptSuccess");
-			} else {
-				injector[PopService].renderPop(false, "pop.encryptDanger");
-			}
-		}).catch(error => {
-			if (error instanceof TokenError) {
-				injector[TokenService].deleteCookie();
-			}
-		});
-	}
-
-	decryptUser() {
-		injector[HttpClient].post("decryptUser/", {}, true).then(response => {
-			if (response.ok) {
-				injector[PopService].renderPop(true, "pop.decryptSuccess");
-			} else {
-				injector[PopService].renderPop(false, "pop.decryptDanger");
+				injector[PopService].renderPop(true, "pop.deleteMailSuccess");
+				this.getUser();
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {
@@ -242,7 +227,7 @@ export class UserService extends AInjectable {
 					this.pfp.next(response.pfp);
 					this.isTfa.next(response.tfa)
 					this.hasPassword.next(response.hasPassword);
-					this.hasMail.next(response.hasMail);
+					this.hasMail.next(response.mail);
 					injector[TranslateService].setLang(response.lang);
 				}
 			}).catch(error => {
@@ -272,6 +257,7 @@ export class UserService extends AInjectable {
 	}
 
 	newMail(email) {
+		email = this.hasMail.isEmpty() ? email : "currentMail";
 		injector[HttpClient].post("newMail/", {
 			email: email
 		}, true).then(response => {
@@ -281,6 +267,23 @@ export class UserService extends AInjectable {
 				this.getUser();
 			} else {
 				injector[PopService].renderPop(false, "pop.mailDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	patchMail(email) {
+		injector[HttpClient].post("patchMail/", {
+			email: email
+		}, true).then(response => {
+			if (response.ok) {
+				this.hasMail.next(true);
+				injector[PopService].renderPop(true, "pop.patchMailSuccess");
+			} else {
+				injector[PopService].renderPop(false, "pop.patchMailDanger");
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {

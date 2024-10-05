@@ -16,8 +16,6 @@ from .views import (
     GetUserInformations, 
     OAuth42Login, 
     OAuth42Callback, 
-    EncryptUserDataView,
-    DecryptUserDataView,
     GetUserDataView,
     DeleteProfilePictureView,
     DeleteAccountView,
@@ -26,6 +24,10 @@ from .views import (
     TwoFactorSetupView, 
     TwoFactorVerifyView, 
     TwoFactorActivateView,
+    UpdateEmailView,
+    DeleteEmailView,
+    RecordMatchResultView,
+    LastMatchInfoView,
 )
 
 urlpatterns = [
@@ -46,13 +48,15 @@ urlpatterns = [
     path('getUserInformations/', GetUserInformations.as_view(), name='getUserInformations'),
     path('42auth/login/', OAuth42Login.as_view(), name='oauth42_login'),
     path('42auth/callback/', OAuth42Callback.as_view(), name='oauth42_callback'),
-    path('encryptUser/', EncryptUserDataView.as_view(), name='encrypt_user_data'),
-    path('decryptUser/', DecryptUserDataView.as_view(), name='decrypt_user_data'),
     path('getUserData/', GetUserDataView.as_view(), name='get_user_data'),
     path('deleteUser/', DeleteAccountView.as_view(), name='delete-account'),
     path('startNewPong/', ValidateGameSettingsView.as_view(), name='validatedParamsNewPong'),
     path('newMail/', NewMailView.as_view(), name='newMail'),
+    path('patchMail/', UpdateEmailView.as_view(), name='patchMail'),
     path('2faActivate/', TwoFactorActivateView.as_view(), name='two_factor_activate'),
     path('2faSetup/', TwoFactorSetupView.as_view(), name='two_factor_setup'),
     path('2faVerify/', TwoFactorVerifyView.as_view(), name='two_factor_verify'),
+    path('deleteMail/', DeleteEmailView.as_view(), name='deleteMail'),
+    path('recordGame/', RecordMatchResultView.as_view(), name='recordGame'),
+    path('lastMatchInformations/', LastMatchInfoView.as_view(), name='lastMatchInformations'),
 ]

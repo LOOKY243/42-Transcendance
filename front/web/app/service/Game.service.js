@@ -4,10 +4,20 @@ import { Router } from "../../spa/Router.js";
 import { AInjectable } from "../../spa/service/AInjectable.js";
 import { HttpClient } from "../../spa/service/HttpClient.js";
 import { TokenService } from "../../spa/service/Token.service.js";
+import { ReplayObservable } from "../../spa/utils/ReplayObservable.js";
 import { PongComponent } from "../component/Pong/Pong.component.js";
 import { PopService } from "./Pop.service.js";
 
 export class GameService extends AInjectable {
+	winner = new ReplayObservable();
+	winnerScore = new ReplayObservable();
+	looser = new ReplayObservable();
+	looserScore = new ReplayObservable();
+	isPong = new ReplayObservable();
+	isBattleship = new ReplayObservable();
+	isTournement = new ReplayObservable();
+	lastMatch = new ReplayObservable();
+
 	constructor() {
 		super();
 	}
@@ -25,6 +35,49 @@ export class GameService extends AInjectable {
 				PongComponent.startPong(response.points, response.theme, response.ballSpeed, response.playerOne, response.playerTwo);
 			} else {
 				injector[PopService].renderPop(false, "pop.startPongDanger");
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	sendResult(score, isPong, isTournement) {
+		injector[HttpClient].post('recordGame/', {
+			winner: score.winner,
+			score: score.score,
+			is_pong: isPong,
+			is_tournement: isTournement
+		}, true).then(response => {
+			if (response.ok) {
+				this.lastMatchInformations();
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+	}
+
+	lastMatchInformations() {
+		injector[HttpClient].get('lastMatchInformations/', {}, true).then(response => {
+			if (response.ok) {
+				this.winner.next(response.last_match.winner);
+				this.winnerScore.next(response.last_match.winner_score);
+				this.looser.next(response.last_match.looser);
+				this.looserScore.next(response.last_match.looser_score);
+				if (response.last_match.is_pong) {
+					this.isPong.next(true);
+					this.isBattleship.next(false);
+				} else {
+					this.isPong.next(false);
+					this.isBattleship.next(true);
+				}
+				this.lastMatch.next(true);
+				injector[Router].navigate('/result');
+			} else {
+				this.lastMatch.next(false);
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {

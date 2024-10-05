@@ -22,6 +22,7 @@ export class ProfileSettingsComponent extends AComponent {
 	deleteUserPassword = "";
 	email = "";
 	tfamail = "";
+	patchMail = "";
 	pfp = null;
 
 	onInit() {
@@ -105,7 +106,7 @@ export class ProfileSettingsComponent extends AComponent {
 			name: "mailInput",
 			parentSelector: this.getSelector(),
 			inputType: "text",
-			autocomplete: "example@gmail.com",
+			placeholder: "example@gmail.com",
 			onchange: (value) => this.email = value
 		}));
 		this.createSubComponent(ButtonIconComponent.create({
@@ -136,15 +137,8 @@ export class ProfileSettingsComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: "check",
 			style: "btn",
-			onclick: () => injector[UserService].encryptUser(),
+			onclick: () => injector[UserService].deleteMail(),
 			id: 0,
-		}));
-		this.createSubComponent(ButtonIconComponent.create({
-			name: "decryptButton",
-			parentSelector: this.getSelector(),
-			icon: "notCheck",
-			style: "btn",
-			onclick: () => injector[UserService].decryptUser(),
 		}));
 
 		this.createSubComponent(ButtonIconComponent.create({
@@ -197,6 +191,29 @@ export class ProfileSettingsComponent extends AComponent {
 			onclick: () => injector[UserService].activateTwofa(this.tfamail),
 		}));
 
+		this.createSubComponent(InputComponent.create({
+			name: 'patchMailInput',
+			parentSelector: this.getSelector(),
+			inputType: "text",
+			placeholder: "example@gmail.com",
+			onchange: (value) => this.patchMail = value,
+		}));
+		this.createSubComponent(ButtonIconComponent.create({
+			name: 'patchMailButton',
+			parentSelector: this.getSelector(),
+			style: 'btn',
+			icon: 'modifier',
+			onclick: () => injector[UserService].patchMail(this.patchMail),
+		}));
+
+		this.createSubComponent(ButtonIconComponent.create({
+			name: "deleteMail",
+			parentSelector: this.getSelector(),
+			icon: "delete",
+			style: "btn btn-outline-danger",
+			onclick: () => injector[UserService].deleteMail()
+		}));
+
 		this.setConfig({
 			username: this.username,
 			currentPassword: this.translate("profileSettings.currentPassword"),
@@ -212,6 +229,8 @@ export class ProfileSettingsComponent extends AComponent {
 			deleteUserAdvert: this.translate("profileSettings.deleteUserAdvert"),
 			getPassword: this.translate("profileSettings.getPassword"),
 			tfaTitle: this.translate("profileSettings.tfaTitle"),
+			patchMail: this.translate("profileSettings.patchMail"),
+			maxFileSize: this.translate('profileSettings.maxFileSize'),
 			hasPassword: this.hasPassword,
 			hasTfa: this.hasTfa,
 			hasMail: this.hasMail,
@@ -278,6 +297,7 @@ export class ProfileSettingsComponent extends AComponent {
 							<div class="d-flex justify-content-center m-3">
 								<div id="inputPP"></div>
 							</div>
+							<div class='fs-5 text-warning-emphasis'>${config.maxFileSize}</div>
 							<div id="profilePictureModifier"></div>
 							<div id="deletePP"></div>
 						</div>
@@ -317,8 +337,10 @@ export class ProfileSettingsComponent extends AComponent {
 						</div>
 						<div style="${config.hasPassword ? `display: none;` : ``}">
 							<div class="fs-3 text-light text-center">${config.getPassword}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="mailInput" class="inputContainer"></div>
+							<div style="${config.hasMail ? `display: none;` : ``}">
+								<div class="d-flex justify-content-center m-3">
+									<div id="mailInput" class="inputContainer"></div>
+								</div>
 							</div>
 							<div class="d-flex justify-content-center m-3">
 								<div id="mailButton"></div>
@@ -334,11 +356,26 @@ export class ProfileSettingsComponent extends AComponent {
 									<div id="inputTfaMail" class="inputContainer"></div>
 								</div>
 							</div>
-							<div class="d-flex justify-content-center m-3">
+							<div class="text-center">
 								<div id="tfaMailButton"></div>
 							</div>
 						</div>
 					</div>
+					<div style="${config.hasMail ? `` : `display: none;`}">
+						<div class="line my-4"></div>
+							<div class="row m-3">
+								<div>
+									<div class="fs-3 text-light text-center">${config.patchMail}</div>
+									<div class="d-flex justify-content-center m-3">
+										<div id="patchMailInput" class="inputContainer"></div>
+									</div>
+									<div class="text-center">
+										<div id="patchMailButton" class="m-2"></div>
+										<div id="deleteMail"></div>
+									</div>
+								</div>
+							</div>
+						</div>
 					<div class="line my-4"></div>
 						<div class="row m-3">
 							<div>
@@ -357,7 +394,6 @@ export class ProfileSettingsComponent extends AComponent {
 								<div class="fs-5 text-light">${config.dataEncrypt}</div>
 								<div class="d-flex justify-content-center">
 									<div id="encryptButton" class="ms-3"></div>
-									<div id="decryptButton" class="me-3"></div>
 								</div>
 							</div>
 					<div class="line my-4"></div>
@@ -377,9 +413,11 @@ export class ProfileSettingsComponent extends AComponent {
 					<div class="line my-4"></div>
 						<div class="text-center mt-2">
 							<div class="fs-3 fw-bold text-danger">${config.deleteUserTitle}</div>
-							<div class="d-flex justify-content-center m-3">
-								<div id="deleteUserPassword" class="inputContainer"></div>
-							</div>
+							<form>
+								<div class="d-flex justify-content-center m-3">
+									<div id="deleteUserPassword" class="inputContainer"></div>
+								</div>
+							</form>
 							<div class="fs-5 text-danger">${config.deleteUserPassword}</div>
 							<div class="fs-5 text-danger">${config.deleteUserAdvert}</div>
 							<div id="deleteUserButton" class="m-3"></div>

@@ -28,6 +28,7 @@ export class IconComponent extends AComponent {
 		"notCheck": "notCheck.svg",
 		"download": "download.svg",
 		"delete": "delete.svg",
+		'return': 'return.svg',
 	}
 
 	initConfig() {

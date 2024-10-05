@@ -84,7 +84,6 @@ export class PongNewComponent extends AComponent {
 	}
 
 	startGame() {
-		console.log(this.ballSpeed)
 		injector[GameService].startNewPong(this.inputPoints, this.ballSpeed, this.theme, this.playerOne, this.playerTwo);
 	}
 

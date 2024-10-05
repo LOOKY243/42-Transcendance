@@ -4,15 +4,11 @@ COMPOSE_BACK = docker-compose.backend.yml
 
 all: build up
 
-cert:
-	@mkdir -p nginx/cert
-	@openssl req -x509 -newkey rsa:2048 -keyout nginx/cert/transcendance.key -out nginx/cert/transcendance.crt -days 365 -nodes -subj "/C=FR/ST=FRANCE/L=ANGOULEME/CN=KBUTOR-B"
-
 volume:
 	@mkdir -p data/postgres
 	@mkdir -p data/django
 
-build: volume cert
+build: volume
 	@docker compose -p $(NAME) -f $(COMPOSE) build
 
 up: 

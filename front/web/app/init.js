@@ -8,6 +8,7 @@ import { PongNewComponent } from "./component/PongNew/PongNew.component.js";
 import { ProfileComponent } from "./component/Profile/Profile.component.js";
 import { ProfileSettingsComponent } from "./component/ProfileSettings/ProfileSettings.component.js";
 import { PublicProfileComponent } from "./component/PublicProfile/PublicProfile.component.js";
+import { ResultComponent } from "./component/Result/Result.component.js";
 import { twoFaComponent } from "./component/twoFa/twoFa.component.js";
 import { FriendsService } from "./service/Friends.service.js";
 import { GameService } from "./service/Game.service.js";
@@ -55,6 +56,10 @@ export function initRouter() {
 		path: '/profile/:username',
 		selector: "publicProfile",
 		component: PublicProfileComponent
+	}, {
+		path: '/result',
+		selector: 'result',
+		component: ResultComponent
 	}];
 }
 

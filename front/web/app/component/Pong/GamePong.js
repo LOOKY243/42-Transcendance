@@ -4,6 +4,8 @@ import { Map } from "./Map.js";
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { injector } from "../../../spa/Bootstrap.js";
+import { GameService } from "../../service/Game.service.js";
 
 export class GamePong
 {
@@ -23,6 +25,7 @@ export class GamePong
     playerLeft = "Left";
     playerRight = "Right";
     bCalled = false;
+    score;
 
     constructor(_theme, _iPoints, _ballSpeed, _player1, _player2)
     {
@@ -32,17 +35,13 @@ export class GamePong
         this.playerLeft = _player1;
         this.playerRight = _player2;
 
-        console.log(_ballSpeed, _iPoints, _theme)
         if (_ballSpeed === "normal") {
-            console.log("slow");
             this.fBallSpeed = 0.075;
         }
         else if (_ballSpeed === "slow") {
-            console.log("normal");
             this.fBallSpeed = 0.05;
         }
         else {
-            console.log("fast");
             this.fBallSpeed = 0.1;
         }
     }
@@ -80,12 +79,15 @@ export class GamePong
     StopGame()
     {
         this.bCalled = true;
-        
-        console.log("game finished");
+        injector[GameService].sendResult(this.score, true, false);
     }
 
     OnDestroy()
     {
+        this.score = {
+            "winner": this.map.paddles[0].name,
+            "score": this.map.paddles[0].iHP,
+        };
         this.StopGame();
         this.CleanThreeJS();
     }

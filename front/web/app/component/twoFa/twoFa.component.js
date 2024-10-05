@@ -4,6 +4,7 @@ import { Router } from "../../../spa/Router.js";
 import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { InputComponent } from "../Input/Input.Component.js";
+import { NavBarComponent } from "../NavBar/NavBar.component.js";
 
 export class twoFaComponent extends AComponent {
     code = "";
@@ -16,6 +17,8 @@ export class twoFaComponent extends AComponent {
         }
         super.onInit();
 
+		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
+       
         this.createSubComponent(InputComponent.create({
             name: 'codeInput',
             parentSelector: this.getSelector(),

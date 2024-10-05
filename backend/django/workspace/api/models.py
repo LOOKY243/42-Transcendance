@@ -15,6 +15,19 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+class Match(models.Model):
+    player1_username = models.CharField(max_length=150)
+    player1_score = models.IntegerField(default=0)
+    player2_username = models.CharField(max_length=150)
+    player2_score = models.IntegerField(default=0)
+    is_pong = models.BooleanField(default=False)
+    is_tournament = models.BooleanField(default=False)
+    date_played = models.DateTimeField(auto_now_add=True)
+    winner = models.CharField(max_length=150)
+    winner_score = models.IntegerField(default=0)
+    looser = models.CharField(max_length=150)
+    looser_score = models.IntegerField(default=0)
+
 class CustomUser(AbstractBaseUser):
     username = models.CharField(unique=True)
     email = models.EmailField(blank=True, null=True)
@@ -26,8 +39,10 @@ class CustomUser(AbstractBaseUser):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friends_of', blank=True)
     is_online = models.BooleanField(default=False)
     last_activity = models.DateTimeField(null=True, blank=True)
-    is_encrypted = models.BooleanField(default=False)
+    is_encrypted = models.BooleanField(default=True)
     is_42auth = models.BooleanField(default=False)
+    last_match = models.ForeignKey(Match, on_delete=models.SET_NULL, null=True, blank=True, related_name="last_match_of_user")
+    match_history = models.ManyToManyField(Match, related_name='user_history', blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
