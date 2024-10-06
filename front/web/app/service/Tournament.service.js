@@ -83,7 +83,6 @@ export class TournamentService extends AInjectable {
                 this.isTournament.next(false);
             }
         }).catch(error => {
-            console.log(error)
 			if (error instanceof TokenError) {
 				injector[TokenService].deleteCookie();
 			}
@@ -100,7 +99,6 @@ export class TournamentService extends AInjectable {
                 injector[PopService].renderPop(true, 'pop.nextRound');
             }
         }).catch(error => {
-            console.log(error)
 			if (error instanceof TokenError) {
 				injector[TokenService].deleteCookie();
 			}
@@ -116,7 +114,6 @@ export class TournamentService extends AInjectable {
                 injector[GameService].startNewPong(response.points, response.ballSpeed, response.theme, response.player1, response.player2, response.isTournament)
             }
         }).catch(error => {
-            console.log(error)
 			if (error instanceof TokenError) {
 				injector[TokenService].deleteCookie();
 			}
@@ -134,7 +131,6 @@ export class TournamentService extends AInjectable {
                 injector[PopService].renderPop(false, 'pop.tournamentCloseDanger');
             }
         }).catch(error => {
-            console.log(error)
 			if (error instanceof TokenError) {
 				injector[TokenService].deleteCookie();
 			}

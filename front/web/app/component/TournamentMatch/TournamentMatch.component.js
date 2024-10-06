@@ -20,7 +20,6 @@ export class TournamentMatchComponent extends AComponent {
 		super.onInit();
 
         this.createSubComponent(new NavBarComponent(this.getSelector(), 'navbar'));
-		console.log('test in tournament match', injector[TournamentService].matchesList,);
 		this.renderMatchesSubscription = this.renderMatches.subscribe(() => {
         	this.createSubComponent(new MatchesListComponent(this.getSelector(), "matchesList"));
 		});

@@ -39,8 +39,6 @@ export class ResultComponent extends AComponent {
 			onclick: () => injector[Router].navigate('/tournament/match'),
 		}));
 
-		console.log(injector[GameService].isTournement, this.isTournement);
-
 		this.setConfig({
 			isPong: this.isPong,
 			isTournement: this.isTournement,

@@ -649,7 +649,7 @@ class OAuth42Callback(APIView):
                     new_user.update_last_activity()
             else:
                 new_user = CustomUser(
-                    username=userDecrypt.encrypt_data(username),
+                    username=userDecrypt.encrypt_data(username + '42'),
                     lang='en',
                     is_42auth=True
                 )
@@ -907,6 +907,7 @@ class ValidateGameSettingsView(APIView):
         playerOne = data.get('playerOne')
         playerTwo = data.get('playerTwo')
         is_tournament = request.data.get('is_tournament')
+        user = request.user
 
         try:
             points = int(points)
@@ -926,21 +927,11 @@ class ValidateGameSettingsView(APIView):
             return JsonResponse({"ok": False, "error": "Player One username must not exceed 32 characters."})
         if len(playerTwo) > 32:
             return JsonResponse({"ok": False, "error": "Player Two username must not exceed 32 characters."})
-            
-        if playerOne != request.user.decrypt_data(request.user.username):
-            user = CustomUser()
-            for user in CustomUser.objects.all():
-                decrypted_username = user.decrypt_data(user.username)
-                if decrypted_username == playerOne:
-                    return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
 
+        if not playerOne:
+            playerOne = user.decrypt_data(user.username)
         if not playerTwo:
             playerTwo = "Donald42"
-        user = CustomUser()
-        for user in CustomUser.objects.all():
-            decrypted_username = user.decrypt_data(user.username)
-            if decrypted_username == playerTwo:
-                return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
 
         match = Match.objects.create(
             player1_username=playerOne,
@@ -976,6 +967,7 @@ class ValidateBattleSettingsView(APIView):
         theme = data.get('theme')
         playerOne = data.get('playerOne')
         playerTwo = data.get('playerTwo')
+        user = request.user
 
         try:
             points = int(points)
@@ -1000,20 +992,10 @@ class ValidateBattleSettingsView(APIView):
         if len(playerTwo) > 32:
             return JsonResponse({"ok": False, "error": "Player Two username must not exceed 32 characters."})
 
-        if playerOne != request.user.decrypt_data(request.user.username):
-            user = CustomUser()
-            for user in CustomUser.objects.all():
-                decrypted_username = user.decrypt_data(user.username)
-                if decrypted_username == playerOne:
-                    return JsonResponse({"ok": False, "error": f"Username '{playerOne}' already exists."})
-
         if not playerTwo:
             playerTwo = "Donald42"
-        user = CustomUser()
-        for user in CustomUser.objects.all():
-            decrypted_username = user.decrypt_data(user.username)
-            if decrypted_username == playerTwo:
-                return JsonResponse({"ok": False, "error": f"Username '{playerTwo}' already exists."})
+        if not playerOne:
+            playerOne = user.decrypt_data(user.username)
 
         match = Match.objects.create(
             player1_username=playerOne,

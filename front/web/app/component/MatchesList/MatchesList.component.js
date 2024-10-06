@@ -9,10 +9,7 @@ export class MatchesListComponent extends AComponent {
 		super.onInit();
 		this.generateHtml({});
 
-		console.log('test in component', injector[TournamentService].matchesList);
-
 		Object.keys(injector[TournamentService].matchesList).forEach(id => {
-			console.log('generate match', id)
 			const match = injector[TournamentService].matchesList[id];
 			if (!match.isEnd) {
 				document.querySelector(this.getSelector()).innerHTML += `

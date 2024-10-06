@@ -10,7 +10,6 @@ export class InputListComponent extends AComponent {
 		this.generateHtml({});
 
         for (let i = 0; i < 16; i++) {
-            console.log('create input:' + i);
             document.querySelector(this.getSelector()).innerHTML += `
                 <div class='d-flex justify-content-center'>
                     <div id="${"input" + i}" class='inputContainer m-2'></div>

@@ -11,7 +11,6 @@ export class TablesRowComponent extends AComponent {
 
 		if (injector[UserService].history) {
 			Object.keys(injector[UserService].history).forEach(id => {
-				console.log('generate history match', id)
 				const match = injector[UserService].history[id];
 				document.querySelector(this.getSelector()).innerHTML += `
 					<tr>
