@@ -34,8 +34,8 @@ export class GameService extends AInjectable {
 			is_tournament: is_tournament,
 		}, true).then(response => {
 			if (response.ok) {
-				injector[Router].navigate('/pong');
 				this.currentGame = PongComponent.startPong(response.points, response.theme, response.ballSpeed, response.playerOne, response.playerTwo, response.isTournament);
+				injector[Router].navigate('/pong');
 				this.currentGame.Start();
 			} else {
 				injector[PopService].renderPop(false, "pop.startPongDanger");
@@ -101,7 +101,7 @@ export class GameService extends AInjectable {
 					this.isBattleship.next(true);
 				}
 				this.lastMatch.next(true);
-				this.isTournement.next(response.is_tournement);
+				this.isTournement.next(response.last_match.is_tournement);
 				injector[Router].navigate('/result');
 			} else {
 				this.lastMatch.next(false);

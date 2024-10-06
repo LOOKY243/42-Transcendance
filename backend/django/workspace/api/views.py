@@ -879,6 +879,7 @@ class ValidateGameSettingsView(APIView):
         theme = data.get('theme')
         playerOne = data.get('playerOne')
         playerTwo = data.get('playerTwo')
+        is_tournament = request.data.get('is_tournament')
 
         try:
             points = int(points)
@@ -920,8 +921,8 @@ class ValidateGameSettingsView(APIView):
             player2_username=playerTwo,
             player2_score=0,
             is_pong=True,
-            is_tournament=request.data.get('is_tournament'),
-            date_played = timezone.now,
+            is_tournament=is_tournament,
+            date_played=timezone.now,
         )
 
         user = request.user
@@ -935,7 +936,7 @@ class ValidateGameSettingsView(APIView):
             "theme": theme,
             "playerOne": playerOne,
             "playerTwo": playerTwo,
-            "isTournament": False,
+            "isTournament": is_tournament,
         })
 
 class ValidateBattleSettingsView(APIView):
@@ -1017,7 +1018,7 @@ class RecordMatchResultView(APIView):
         winner = request.data.get('winner')
         winner_score = request.data.get('winner_score')
         looser_score = request.data.get('looser_score')
-        is_tournament = request.data.get('is_tournament', False)
+        is_tournament = request.data.get('is_tournement', False)
 
         if winner == user.last_match.player1_username:
             looser = user.last_match.player2_username
@@ -1047,7 +1048,7 @@ class RecordMatchResultView(APIView):
             first_match = tournament.matches_to_play.filter(is_end=False).first()
 
             if first_match:
-                first_match.is_pong=request.data.get('is_pong'),
+                first_match.is_pong= True
                 first_match.winner = winner
                 first_match.winner_score = winner_score
                 first_match.looser = looser
@@ -1092,12 +1093,18 @@ class CreateTournamentView(APIView):
         theme = data.get('theme')
         points = data.get('points')
         
+        if user.tournament:
+            return JsonResponse({"ok": False, "error": "you already have a tournament"})
         if ball_speed not in ['slow', 'normal', 'fast']:
             return JsonResponse({"ok": False, "error": "Invalid ball speed"})
         if theme not in ['theme1', 'theme2', 'theme3', 'theme4']:
             return JsonResponse({"ok": False, "error": "Invalid theme"})
-        if not isinstance(points, int) or points < 1 or points > 10:
-            return JsonResponse({"ok": False, "error": "Points must be between 1 and 10"})
+        try:
+            points = int(points)
+            if not (1 <= points <= 10):
+                return JsonResponse({"ok": False, "error": "Points must be an integer between 1 and 10."})
+        except (ValueError, TypeError):
+            return JsonResponse({"ok": False, "error": "Points must be a valid integer."})
 
         user.tournament = Tournament.objects.create(
             ball_speed=ball_speed,
@@ -1161,7 +1168,7 @@ class NextMatchesView(APIView):
         first_match = tournament.matches_to_play.filter(is_end=False).first()
 
         if not first_match:
-            return JsonResponse({"ok": False, "error": "No matches to play in this tournament"})
+            return JsonResponse({"ok": "noMatch", "error": "No matches to play in this tournament"})
 
         return JsonResponse({
             "ok": True,
@@ -1186,21 +1193,25 @@ class NextRoundView(APIView):
             return JsonResponse({"ok": False, "error": "No matches to process"})
 
         losers = [match.looser for match in matches]
-        
-        remaining_usernames = list(set(tournament.usernames.all()) - set(losers))
+
+        remaining_usernames = list(set(tournament.usernames) - set(losers))
 
         tournament.matches_to_play.clear()
 
         if len(remaining_usernames) == 1:
+            tournament.winner = remaining_usernames[0]
+            tournament.save()
             return JsonResponse({
                 "ok": True,
                 "winner": remaining_usernames[0]
             })
         elif len(remaining_usernames) == 0:
             return JsonResponse({"ok": False, "error": "No remaining players"})
-        
-        tournament.generate_matches(remaining_usernames)
+
+        tournament.usernames = remaining_usernames
+        tournament.generate_matches()
         tournament.save()
+
         user.tournament = tournament
         user.save()
         
@@ -1221,6 +1232,8 @@ class TournamentStateView(APIView):
 
         if not tournament:
             return JsonResponse({'ok': False, 'needPlayers': False, 'message': 'no tournament'})
+        if tournament.winner:
+            return JsonResponse({'ok': True, 'winner': tournament.winner})
         if tournament.needPlayers:
             return JsonResponse({'ok': True, 'needPlayers': True, 'message': 'not started, need players list'})
         

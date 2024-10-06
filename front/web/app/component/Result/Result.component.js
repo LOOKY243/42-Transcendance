@@ -36,8 +36,10 @@ export class ResultComponent extends AComponent {
 			parentSelector: this.getSelector(),
 			icon: 'return',
 			style: 'btn',
-			onclick: () => injector[Router].navigate('/tournement'),
+			onclick: () => injector[Router].navigate('/tournament/match'),
 		}));
+
+		console.log(injector[GameService].isTournement, this.isTournement);
 
 		this.setConfig({
 			isPong: this.isPong,

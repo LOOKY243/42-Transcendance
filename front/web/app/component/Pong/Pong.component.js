@@ -19,9 +19,9 @@ export class PongComponent extends AComponent {
         return true;
     }
 
-    static startPong(inputPoints, ballSpeed, theme, player1, player2) {
+    static startPong(inputPoints, ballSpeed, theme, player1, player2, isTournament) {
         this.inGame = true;
-        return new GamePong(ballSpeed, inputPoints, theme, player1, player2);
+        return new GamePong(ballSpeed, inputPoints, theme, player1, player2, isTournament);
     }
 
     getCSSPath() {

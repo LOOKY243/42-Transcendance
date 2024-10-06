@@ -53,6 +53,7 @@ class Tournament(models.Model):
     matches_to_play = models.ManyToManyField('Match', blank=True)
     isStarted = models.BooleanField(default=False)
     needPlayers = models.BooleanField(default=False)
+    winner = models.CharField(max_length=100, null=True, blank=True)
 
     def clean(self):
         if not (1 <= self.points <= 10):

@@ -11,3 +11,17 @@
 	background-size: 500% auto;
 	animation: shine 4s infinite alternate;
 }
+
+.winner {
+	background: linear-gradient(
+			to right,
+			#9e940a	 20%,
+			#756104	 30%,
+			#eeec8e 70%,
+			#eff306 80%
+	);
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-size: 500% auto;
+	animation: shine 4s infinite alternate;
+}
