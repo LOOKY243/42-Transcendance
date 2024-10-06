@@ -52,8 +52,8 @@ export class Router extends AInjectable {
 		}
 	}
 
-	async navigate(path) {
-		if (path === window.location.pathname) {
+	async navigate(path, byPass = false) {
+		if (!byPass && (path === window.location.pathname)) {
 			return ;
 		}
 

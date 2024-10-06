@@ -63,9 +63,15 @@ export const en = {
 		'shotError': "must be between 1 and 3",
 	},
 	"tables": {
-		"score": "Score",
-		"opponent": "Opponent",
-		"date": "Date"
+		"date": "Date",
+		'battle': 'Battleship',
+		'pong': 'Pong',
+		'game': 'Game',
+		'noHistory': 'No match history',
+		'winner': 'Winner',
+		'winnerScore': 'Winner Score',
+		'looser': 'Looser',
+		'looserScore': 'Looser Score',
 	},
 	"profileSettings": {
 		"lang": "default language",

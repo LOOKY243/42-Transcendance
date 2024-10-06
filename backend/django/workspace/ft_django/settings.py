@@ -14,11 +14,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+7_-gxz=$3t1c_^$%l1_oyty)m0=k-m6lp%_^cyw18vgrw7+6i'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -107,9 +106,9 @@ OAUTH2_PROVIDER = {
     },
 }
 
-CLIENT_ID = 'u-s4t2ud-ea774500e1f28d65e410d9dc0839d513379ae33b8be1870ac2987f76ec197b68'
-CLIENT_SECRET = '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'
-REDIRECT_URI = 'https://localhost:8443/api/42auth/callback/'
+CLIENT_ID = config('CLIENT_ID')
+CLIENT_SECRET = config('CLIENT_SECRET')
+REDIRECT_URI = config('REDIRECT_URI')
 
 SECRET_KEY = Fernet.generate_key().decode()
 
@@ -138,7 +137,7 @@ AUTH_USER_MODEL = 'api.CustomUser'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 
@@ -160,7 +159,7 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')

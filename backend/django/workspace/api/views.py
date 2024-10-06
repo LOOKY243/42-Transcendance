@@ -46,6 +46,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.conf import settings
 import random
+from django.utils.timezone import localtime
 
 User = get_user_model() 
 
@@ -234,9 +235,22 @@ class GetUserInformations(APIView):
         if target_user.pfp:
             encoded_pfp = base64.b64encode(target_user.pfp).decode('utf-8')
 
+        match_history = []
+        for match in target_user.match_history.all():
+            match_history.append({
+                "is_pong": match.is_pong,
+                "is_tournament": match.is_tournament,
+                "date_played": match.date_played.strftime("%d/%m/%Y %H:%M"),
+                "winner": match.winner,
+                "winner_score": match.winner_score,
+                "looser": match.looser,
+                "looser_score": match.looser_score,
+            })
+
         user_info = {
             "username": username,
             "pfp": f"data:image/png;base64,{encoded_pfp}" if encoded_pfp else None,
+            "match_history": match_history
         }
 
         return Response({
@@ -1241,3 +1255,29 @@ class CloseTournamentView(APIView):
         
 
         return JsonResponse({"ok": True, "message": "Tournament closed successfully"})
+
+class MatchHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        match_history = user.match_history.all()
+
+        match_list = []
+        for match in match_history:
+            match_data = {
+                'is_pong': match.is_pong,
+                'is_tournament': match.is_tournament,
+                'date_played': localtime(match.date_played).strftime("%d/%m/%Y %H:%M"),
+                'winner': match.winner,
+                'winner_score': match.winner_score,
+                'looser': match.looser,
+                'looser_score': match.looser_score,
+            }
+            match_list.append(match_data)
+
+        return JsonResponse({
+            'ok': True,
+            'match_history': match_list
+        })

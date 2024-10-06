@@ -2,12 +2,16 @@
 	width: 85%;
 }
 
-.win {
-	background: rgb(5,139,40);
-	background: linear-gradient(142deg, rgba(5,139,40,0) 3%, rgba(5,139,40,0.80015756302521) 20%, rgba(5,139,40,0) 60%);
-}
-
-.loose {
-	background: rgb(142,15,15);
-	background: linear-gradient(325deg, rgba(142,15,15,0) 3%, rgba(142,15,15,1) 20%, rgba(142,15,15,0) 60%);
+.gameTitle {
+	background: linear-gradient(
+			to right,
+			#24bceb	 20%,
+			#9a66e0	 30%,
+			#3133ec 70%,
+			#c02ae7 80%
+	);
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-size: 500% auto;
+	animation: shine 4s infinite alternate;
 }

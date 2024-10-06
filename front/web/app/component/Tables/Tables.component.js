@@ -1,17 +1,40 @@
+import { injector } from "../../../spa/Bootstrap.js";
 import { AComponent } from "../../../spa/component/AComponent.js";
+import { UserService } from "../../service/User.service.js";
+import { TablesRowComponent } from "./TablesRow.component.js";
 
 export class TablesComponent extends AComponent {
-	initConfig() {
+	renderHistory = injector[UserService].renderHistory;
+	renderHistorySubscription = "";
+
+	onInit() {
+		super.onInit();
+
+		this.renderHistorySubscription = this.renderHistory.subscribe(() => {
+			this.createSubComponent(new TablesRowComponent(this.getSelector(), 'historyList'));
+		});
+		
 		this.setConfig({
-			score: this.translate("tables.score"),
-			opponent: this.translate("tables.opponent"),
+			renderHistory: this.renderHistory,
+			noHistory: this.translate('tables.noHistory'),
+			game: this.translate('tables.game'),
+			pong: this.translate('tables.pong'),
+			battle: this.translate('tables.battle'),
+			winner: this.translate("tables.winner"),
+			winnerScore: this.translate("tables.winnerScore"),
+			looser: this.translate("tables.looser"),
+			looserScore: this.translate("tables.looserScore"),
 			date: this.translate("tables.date")
 		});
+
+		return true;
 	}
-	
-	static create(value) {
-		let ret = new TablesComponent(value.parentSelector, value.name);
-		return ret;
+
+	destroy() {
+		super.destroy();
+		if (this.renderHistorySubscription) {
+			this.renderHistory.unsubscribe(this.renderHistorySubscription);
+		}
 	}
 	
 	getCSSPath() {
@@ -20,27 +43,25 @@ export class TablesComponent extends AComponent {
 
 	generateHtml(config) {
 		this.html = `
+		<div style="${config.renderHistory ? `` : `display: none;`}">
 			<table class="text-light fs-5">
 				<thead class="text-center">
 					<tr>
-						<th scope="col" class="px-3 py-1">${config.score}</th>
-						<th scope="col" class="px-3 py-1">${config.opponent}</th>
+						<th scope="col" class="px-3 py-1">${config.winner}</th>
+						<th scope="col" class="px-3 py-1">${config.winnerScore}</th>
+						<th scope="col" class="px-3 py-1">${config.looserScore}</th>
+						<th scope="col" class="px-3 py-1">${config.looser}</th>
 						<th scope="col" class="px-3 py-1">${config.date}</th>
+						<th scope="col" class="px-3 py-1">${config.game}</div>
 					</tr>
 				</thead>
-				<tbody class="table-group-divider text-center">
-					<tr class="win">
-						<td class="px-3">5 - 2</td>
-						<td class="px-3">Username</td>
-						<td class="px-3">06/09/2024 - 16:25</td>
-					</tr>
-					<tr class="loose">
-						<td class="px-3">5 - 2</td>
-						<td class="px-3">Username</td>
-						<td class="px-3">06/09/2024 - 16:25</td>
-					</tr>
+				<tbody id='historyList' class="table-group-divider text-center">
 				</tbody>
 			</table>
+		</div>
+		<div style="${config.renderHistory ? `display: none;` : ``}">
+			<div class='fs-3 text-danger text-center m-5'>${config.noHistory}</div>
+		</div>
 		`;
 	}
 }

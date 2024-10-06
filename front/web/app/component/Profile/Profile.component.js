@@ -9,7 +9,6 @@ import { TablesComponent } from "../Tables/Tables.component.js";
 
 export class ProfileComponent extends AComponent {
 	username = injector[UserService].username;
-	// history = injector[UserService].history;
 
 	onInit() {
 		if (!injector[UserService].user) {
@@ -33,15 +32,13 @@ export class ProfileComponent extends AComponent {
 			onclick: () => injector[Router].navigate("/profile/settings")
 		}));
 
-		this.createSubComponent(TablesComponent.create({
-			name: "history",
-			parentSelector: this.getSelector(),
-			// history: this.history
-		}));
+		this.createSubComponent(new TablesComponent(this.getSelector(), 'history'));
 
 		this.setConfig({
 			username: this.username,
 		});
+
+		injector[UserService].getHistory();
 
 		return true;
 	}

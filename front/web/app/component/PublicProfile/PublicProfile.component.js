@@ -7,6 +7,7 @@ import { UserService } from "../../service/User.service.js";
 import { ButtonIconComponent } from "../ButtonIcon/ButtonIcon.component.js";
 import { NavBarComponent } from "../NavBar/NavBar.component.js";
 import { profilePictureComponent } from "../ProfilePicture/ProfilePicture.component.js";
+import { TablesComponent } from "../Tables/Tables.component.js";
 
 export class PublicProfileComponent extends AComponent {
 	renderProfile = injector[UserService].userInformationsRender
@@ -32,6 +33,7 @@ export class PublicProfileComponent extends AComponent {
 				}));
 				this.username.next(value.username);
 			}
+			// this.createSubComponent(new TablesComponent(this.getSelector(), 'history'));
 		});
 
 		this.createSubComponent(new NavBarComponent(this.getSelector(), "navbar"));
@@ -44,6 +46,8 @@ export class PublicProfileComponent extends AComponent {
 			onclick: () => injector[FriendsService].addFriend(this.pathArgument),
 		}));
 
+		this.createSubComponent(new TablesComponent(this.getSelector(), 'history'));
+
 		this.setConfig({
 			renderProfile: this.renderProfile,
 			noProfile: this.translate("publicProfile.noProfile"),
@@ -55,7 +59,9 @@ export class PublicProfileComponent extends AComponent {
 
 	destroy() {
 		super.destroy();
-		this.renderProfile.unsubscribe(this.renderProfileSubscription);
+		if (this.renderProfileSubscription) {
+			this.renderProfile.unsubscribe(this.renderProfileSubscription);
+		}
 	}
 
 	getCSSPath() {
@@ -78,6 +84,10 @@ export class PublicProfileComponent extends AComponent {
 						<div class="col-md-4 offset-md-4 d-flex align-items-center justify-content-center">
 							<div id="addFriendButton"></div>
 						</div>
+						<div class="line m-3"></div>
+						<div class="m-3 d-flex justify-content-center">
+							<div id="history" class="tablesContainer d-flex justify-content-center"></div>
+						</div>	
 					</div>
 				</div>
 			</div>

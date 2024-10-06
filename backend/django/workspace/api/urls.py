@@ -35,6 +35,7 @@ from .views import (
     NextRoundView,
     TournamentStateView,
     CloseTournamentView,
+    MatchHistoryView,
 )
 
 urlpatterns = [
@@ -73,5 +74,6 @@ urlpatterns = [
     path('tournament/nextRound/', NextRoundView.as_view(), name='next-round'),
     path('tournament/state/', TournamentStateView.as_view(), name='match-list'),
     path('tournament/close/', CloseTournamentView.as_view(), name='close-tournament'),
+    path('getHistory/', MatchHistoryView.as_view(), name='getHistory'),
 
 ]

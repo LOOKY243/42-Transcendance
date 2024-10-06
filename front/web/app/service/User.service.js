@@ -8,6 +8,7 @@ import { TokenError} from "../../spa/error/TokenError.js"
 import { PopService } from "./Pop.service.js";
 import { TranslateService } from "../../spa/service/Translate.service.js";
 import { TournamentService } from "./Tournament.service.js";
+import { Observable } from "../../spa/utils/Observable.js";
 
 export class UserService extends AInjectable {
 	username = new ReplayObservable();
@@ -16,8 +17,11 @@ export class UserService extends AInjectable {
 	isTfa = new ReplayObservable();
 	tfaAccess = new ReplayObservable();
 	userInformationsRender = new ReplayObservable();
+	userProfileRender = new ReplayObservable();
 	hasPassword = new ReplayObservable();
 	hasMail = new ReplayObservable();
+	renderHistory = new Observable();
+	history = {};
 	user = null
 	isOnline = false;
 	tempUsername = "";
@@ -247,12 +251,40 @@ export class UserService extends AInjectable {
 		}
 	}
 
+	getHistory() {
+		injector[HttpClient].get('getHistory/', {}, true).then(response => {
+			if (response.ok) {
+				this.userProfileRender.next(true, true, true);
+				if (response.match_history.length > 0) {
+					this.history = response.match_history;
+					this.renderHistory.next(response.match_history, true, true)
+				} else {
+					this.history = null;
+					this.renderHistory.next(false, true, true);
+				}
+			}
+		}).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			} else {
+				injector[Router].navigate('/profile', true);
+			}
+		});
+	}
+
 	getUserInformations(username) {
 		injector[HttpClient].post("getUserInformations/", {
 			username: username
 		}, true).then(response => {
 			if (response.ok) {
 				this.userInformationsRender.next(response.user);
+				if (response.user.match_history.length > 0) {
+					this.history = response.user.match_history;
+					this.renderHistory.next(response.user.match_history, true, true)
+				} else {
+					this.history = null;
+					this.renderHistory.next(false, true, true);
+				}
 			}
 		}).catch(error => {
 			if (error instanceof TokenError) {
