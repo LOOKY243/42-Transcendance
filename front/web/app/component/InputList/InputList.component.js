@@ -9,14 +9,17 @@ export class InputListComponent extends AComponent {
 		super.onInit();
 		this.generateHtml({});
 
-        for (let i = 1; i <= 16; i++) {
+        for (let i = 0; i < 16; i++) {
             console.log('create input:' + i);
-            document.querySelector(this.getSelector()).innerHTML += `<div id="${"input" + i}" class='inputContainer m-2'>$</div>`;
+            document.querySelector(this.getSelector()).innerHTML += `
+                <div class='d-flex justify-content-center'>
+                    <div id="${"input" + i}" class='inputContainer m-2'></div>
+                </div>`;
             this.createSubComponent(InputComponent.create({
                 name: `${'input' + i}`,
                 parentSelector: this.getSelector(),
                 inputType: 'text',
-                placeholder: `${'player ' + i}`,
+                placeholder: `${'player ' + (i + 1)}`,
                 onchange: (value) => this.usernameList[i] = value,
             }));
         }

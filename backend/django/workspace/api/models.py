@@ -6,6 +6,7 @@ from cryptography.fernet import Fernet
 import base64
 from django.conf import settings
 import random
+from django.contrib.postgres.fields import ArrayField
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -39,13 +40,19 @@ class Tournament(models.Model):
         (16, '16 Players'),
     ]
 
-    usernames = models.ManyToManyField('CustomUser', related_name='tournaments')
+    usernames = ArrayField(
+        models.CharField(max_length=150),
+        size=16,
+        blank=True,
+        null=True,
+    )
     ball_speed = models.CharField(max_length=6, choices=BALL_SPEED_CHOICES, default='normal')
-    points = models.IntegerField(default=1)  # Points between 1 and 10
+    points = models.IntegerField(default=1)
     theme = models.CharField(max_length=6, choices=THEME_CHOICES, default='theme1')
     number_of_players = models.IntegerField(choices=PLAYER_COUNT_CHOICES, default=4)
     matches_to_play = models.ManyToManyField('Match', blank=True)
     isStarted = models.BooleanField(default=False)
+    needPlayers = models.BooleanField(default=False)
 
     def clean(self):
         if not (1 <= self.points <= 10):
@@ -55,21 +62,24 @@ class Tournament(models.Model):
             raise ValidationError(f"Number of players must be {self.number_of_players}.")
 
     def generate_matches(self):
-        users = list(self.usernames.all())
-        
+        users = list(self.usernames)
+
         if len(users) % 2 != 0:
             raise ValidationError("The number of players must be even to generate matches.")
-        
+
         self.matches_to_play.clear()
+
         random.shuffle(users)
 
         for i in range(0, len(users), 2):
             player1 = users[i]
             player2 = users[i + 1]
+            
             match = Match.objects.create(
-                player1_username=player1.username,
-                player2_username=player2.username
+                player1_username=player1,
+                player2_username=player2
             )
+            
             self.matches_to_play.add(match)
 
         self.save()

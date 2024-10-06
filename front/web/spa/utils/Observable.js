@@ -18,8 +18,8 @@ export class Observable {
 		this.func = this.func.filter(element => element.id !== id);
 	}
 
-	next(newValue, normalized = true) {
-		if (newValue == this.value) {
+	next(newValue, normalized = true, repeat = false) {
+		if (newValue == this.value && !repeat) {
 			return ;
 		}
 		this.value = newValue;

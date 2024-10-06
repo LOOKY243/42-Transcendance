@@ -12,6 +12,8 @@ export class TournamentService extends AInjectable {
     isTournament = new ReplayObservable();
     isStarted = new ReplayObservable();
     renderInput = new Observable();
+    renderMatches = new Observable();
+    matchesList = "";
     playerOne = "";
     playerTwo = "";
     points = "";
@@ -20,7 +22,7 @@ export class TournamentService extends AInjectable {
     
     constructor() {
 		super();
-        this.isTournament.next(null);
+        this.isTournament.next(false);
 	}
 
     createTournament(playerOne, playerTwo, points, ballSpeed, theme) {
@@ -32,9 +34,8 @@ export class TournamentService extends AInjectable {
             points: points,
         }, true).then(response => {
             if (response.ok) {
-                this.isTournament.next(true),
+                this.isTournament.next(true);
                 injector[Router].navigate('/tournament');
-                this.renderInput.next(true);
             } else {
                 injector[PopService].renderPop(false, "pop.startTournDanger");
             }
@@ -46,7 +47,42 @@ export class TournamentService extends AInjectable {
     }
 
     sendList(usernameList) {
-        console.log(usernameList);
+        injector[HttpClient].post('tournament/addUsers/', {
+            usernames: usernameList
+        }, true).then(response => {
+            if (response.ok) {
+                this.getState();
+            } else {
+                injector[PopService].renderPop(false, 'pop.tournamentListDanger');
+            }
+        }).catch(error => {
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
+    }
+
+    getState() {
+        injector[HttpClient].get('tournament/state/', {}, true).then(response => {
+            if (response.ok) {
+                if (response.needPlayers) {
+                    this.isStarted.next(false, true, true);
+                    this.renderInput.next(true, true, true);
+                }
+                if (response.matches) {
+                    this.matchesList = response.matches;
+                    injector[Router].navigate('/tournament/match');
+                    this.renderMatches.next(true, true, true)
+                }
+            } else {
+                this.isTournament.next(false);
+            }
+        }).catch(error => {
+            console.log(error)
+			if (error instanceof TokenError) {
+				injector[TokenService].deleteCookie();
+			}
+		});
     }
 
 }

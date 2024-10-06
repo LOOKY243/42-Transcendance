@@ -26,7 +26,8 @@ export const en = {
 		'noTournament': "No tournament found",
 		'tournamentAdvert': "To create a new tournament, head to /pong and press the tournament button",
 		'inputTitle': 'Enter players list',
-		'inputAdvert': 'You can be 4, 8 or 16 players to start a tournament, each username must be unique',
+		'inputAdvert': 'You can be 4, 8 or 16 players to start a tournament, each username must be unique and 8 max characters',
+		'playingTitle': 'Tournament in progress !'
 	},
 	"auth": {
 		"login": "Log in",
@@ -39,6 +40,7 @@ export const en = {
 		"errorPolicy": "Password must be 8-30 characters, contain: 1 uppercase, 1 lowercase, 1 digit, 1 special character, and cannot be a common password",
 		"errorUsername": "This username is already in use",
 		"42auth": "42",
+		'toMatch': 'Tournament in progress, get to the match !'
 	},
 	"pongNew": {
 		"pongTitle": "Pong",
@@ -138,5 +140,6 @@ export const en = {
 		'deleteMailSuccess': 'Mail deleted Successfully and tfa disabled.',
 		'startTournSuccess': 'New Tournament !',
 		'startTournDanger': 'We cant start a tournament with your options',
+		'tournamentListDanger': 'We cant create a tournament with these usernames'
 	},
 }

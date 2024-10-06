@@ -1088,7 +1088,8 @@ class CreateTournamentView(APIView):
         user.tournament = Tournament.objects.create(
             ball_speed=ball_speed,
             theme=theme,
-            points=points
+            points=points,
+            needPlayers=True,
         )
         user.save()
 
@@ -1097,10 +1098,15 @@ class CreateTournamentView(APIView):
 class AddUsersAndGenerateMatchesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, tournament_id):
+    def post(self, request):
         user = request.user
         data = request.data
         usernames = data.get('usernames', [])
+
+        if not isinstance(usernames, list):
+            return JsonResponse({"ok": False, "error": "Usernames must be a list."})
+
+        usernames = [username.strip() for username in usernames if isinstance(username, str) and username.strip()]
 
         if len(usernames) not in [4, 8, 16]:
             return JsonResponse({"ok": False, "error": "Number of players must be 4, 8, or 16"})
@@ -1108,15 +1114,9 @@ class AddUsersAndGenerateMatchesView(APIView):
         if len(usernames) != len(set(usernames)):
             return JsonResponse({"ok": False, "error": "Usernames must be unique."})
 
-        existing_encrypted_usernames = CustomUser.objects.values_list('username', flat=True)
-
         for username in usernames:
-            if username == user.username:
-                continue
-            encrypted_username = user.encrypt_data(decrypted_username)
-            if username in existing_encrypted_usernames:
-                return JsonResponse({"ok": False, "error": f"Username '{username}' already exists."})
-
+            if len(username) > 8:
+                return JsonResponse({"ok": False, "error": "Usernames must be 8 characters or less."})
 
         
         try:
@@ -1124,26 +1124,20 @@ class AddUsersAndGenerateMatchesView(APIView):
         except Tournament.DoesNotExist:
             return JsonResponse({"ok": False, "error": "Tournament not found"})
 
-        for user in users:
-            tournament.usernames.add(user)
-
+        tournament.usernames = usernames
         tournament.generate_matches()
+        tournament.needPlayers = False
+        tournament.isStarted = True
+        tournament.save()
         user.tournament = tournament
-        user.tournament.isStarted = True
         user.save()
 
-        matches_list = [{
-            "match_id": match.id,
-            "player1": match.player1_username,
-            "player2": match.player2_username,
-        } for match in tournament.matches_to_play.all()]
-
-        return JsonResponse({"ok": True, "matches": matches_list})
+        return JsonResponse({"ok": True})
 
 class NextMatchesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, tournament_id):
+    def get(self, request):
         user = request.user
         try:
             tournament = user.tournament
@@ -1168,9 +1162,9 @@ class NextMatchesView(APIView):
 class NextRoundView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, tournament_id):
+    def post(self, request):
         user = request.user
-        tournament = get_object_or_404(Tournament, id=tournament_id)
+        tournament = user.tournament
         
         matches = tournament.matches_to_play.all()
         
@@ -1192,6 +1186,7 @@ class NextRoundView(APIView):
             return JsonResponse({"ok": False, "error": "No remaining players"})
         
         tournament.generate_matches(remaining_usernames)
+        tournament.save()
         user.tournament = tournament
         user.save()
         
@@ -1203,12 +1198,17 @@ class NextRoundView(APIView):
             } for match in tournament.matches_to_play.all()]
         })
 
-class MatchListView(APIView):
+class TournamentStateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, tournament_id):
+    def get(self, request):
         user = request.user
         tournament = user.tournament
+
+        if not tournament:
+            return JsonResponse({'ok': False, 'needPlayers': False, 'message': 'no tournament'})
+        if tournament.needPlayers:
+            return JsonResponse({'ok': True, 'needPlayers': True, 'message': 'not started, need players list'})
         
         matches = tournament.matches_to_play.all()
 
@@ -1226,7 +1226,8 @@ class MatchListView(APIView):
 
         return JsonResponse({
             "ok": True,
-            "matches": match_list
+            'needPlayers': False,
+            "matches": match_list,
         })
 
 class CloseTournamentView(APIView):
@@ -1236,6 +1237,7 @@ class CloseTournamentView(APIView):
         user = request.user
         user.tournament.delete()
         user.tournament = None
+        user.save()
         
 
         return JsonResponse({"ok": True, "message": "Tournament closed successfully"})

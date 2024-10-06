@@ -11,6 +11,7 @@ import { ProfileSettingsComponent } from "./component/ProfileSettings/ProfileSet
 import { PublicProfileComponent } from "./component/PublicProfile/PublicProfile.component.js";
 import { ResultComponent } from "./component/Result/Result.component.js";
 import { TournamentComponent } from "./component/Tournament/Tournament.component.js";
+import { TournamentMatchComponent } from "./component/TournamentMatch/TournamentMatch.component.js";
 import { twoFaComponent } from "./component/twoFa/twoFa.component.js";
 import { FriendsService } from "./service/Friends.service.js";
 import { GameService } from "./service/Game.service.js";
@@ -71,6 +72,10 @@ export function initRouter() {
 		path: '/tournament',
 		selector: 'tournament',
 		component: TournamentComponent
+	}, {
+		path: '/tournament/match',
+		selector: 'tournamentMatchComponent',
+		component: TournamentMatchComponent
 	}];
 }
 

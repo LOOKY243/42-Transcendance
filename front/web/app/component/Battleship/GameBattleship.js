@@ -107,15 +107,16 @@ export class GameBattleship
     {
         if (this.inGame) {
             this.score = {
-                "winner": this.map.paddles[0].name,
-                "winnerScore": this.map.paddles[0].iHP,
-                "looserScore": this.map.paddles[1].iHP
+                "winner": this.map.cannon.name,
+                "winnerScore": this.map.cannon.score,
+                "looserScore": this.enemyMap.cannon.score,
             }
             this.inGame = false;
             this.bCalled = true;
             this.CleanThreeJS();
             this.map.cannon.OnDestroy();
             this.enemyMap.cannon.OnDestroy();
+            this.StopGame();
         }
     }
 

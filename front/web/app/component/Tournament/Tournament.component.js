@@ -11,7 +11,7 @@ export class TournamentComponent extends AComponent {
     isTournament = injector[TournamentService].isTournament;
     isStarted = injector[TournamentService].isStarted;
     renderInput = injector[TournamentService].renderInput;
-    renderSubscription = null;
+    renderInputSubscription = null;
     usernameList = [];
 
     onInit() {
@@ -22,18 +22,25 @@ export class TournamentComponent extends AComponent {
         super.onInit();
 
         this.createSubComponent(new NavBarComponent(this.getSelector(), 'navbar'));
-
-        this.renderSubscription = this.renderInput.subscribe(() => {
-            this.createSubComponent(new InputListComponent(this.getSelector(), "inputList"));
-        });
         
         this.createSubComponent(ButtonIconComponent.create({
             name: 'sendListButton',
             parentSelector: this.getSelector(),
             style: 'btn btn-outline-success',
             icon: 'modifier',
-            onclick: () => injector[TournamentService].sendList(this.usernameList),
+            onclick: () => injector[TournamentService].sendList(this.subComponent['inputList'].usernameList),
         }));
+        this.createSubComponent(ButtonIconComponent.create({
+            name: 'toMatchButton',
+            parentSelector: this.getSelector(),
+            style: 'btn btn-outline-success',
+            icon: 'arrow',
+            onclick: () => injector[Router].navigate('/tournament/match'),
+        }));
+
+        this.renderInputSubscription = this.renderInput.subscribe(() => {
+            this.createSubComponent(new InputListComponent(this.getSelector(), "inputList"));
+        });
 
         this.setConfig({
             isTournament: this.isTournament,
@@ -42,10 +49,24 @@ export class TournamentComponent extends AComponent {
             noTournament: this.translate('tournament.noTournament'),
             tournamentAdvert: this.translate('tournament.tournamentAdvert'),
             inputTitle: this.translate('tournament.inputTitle'),
-            inputAdvert: this.translate('tournament.inputAdvert')
+            inputAdvert: this.translate('tournament.inputAdvert'),
+            toMatch: this.translate('tournament.toMatch'),
         });
 
+        injector[TournamentService].getState();
+
         return true;
+    }
+
+    destroy() {
+		super.destroy();
+		if (this.renderInputSubscription) {
+			this.renderInput.unsubscribe(this.renderInputSubscription);
+		}
+	}
+
+    getCSSPath() {
+        return "app/component/Tournament/Tournament.component.css";
     }
 
     generateHtml(config) {
@@ -55,7 +76,7 @@ export class TournamentComponent extends AComponent {
                 <div class='containerBlur mt-5'>
                     <div style="${config.isTournament ? `` : `display: none;`}">
                         <div style="${config.isStarted ? `display: none;` : ``}">
-                            <div class='fs-3 fw-bold text-center text-light'>${config.inputTitle}</div>
+                            <div class='fs-3 fw-bold text-center text-light tournamentTitle'>${config.inputTitle}</div>
                             <div class='fs-5 fw-bold text-center text-warning-emphasis'>${config.inputAdvert}</div>
                             <div class='text-center m-3'>
                                 <div id='inputList'></div>
@@ -65,7 +86,8 @@ export class TournamentComponent extends AComponent {
                             </div>
                         </div>
                         <div style="${config.isStarted ? `` : `display: none;`}">
-
+                            <div class='fs-3 fw-semibold text-success text-center m-2'>${config.toMatch}</div>
+                            <div id='toMatchButton'></div>
                         </div>
                     </div>
                     <div style="${config.isTournament ? `display: none;` : ``}">

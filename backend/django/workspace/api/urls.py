@@ -33,7 +33,7 @@ from .views import (
     AddUsersAndGenerateMatchesView,
     NextMatchesView,
     NextRoundView,
-    MatchListView,
+    TournamentStateView,
     CloseTournamentView,
 )
 
@@ -71,7 +71,7 @@ urlpatterns = [
     path('tournament/addUsers/', AddUsersAndGenerateMatchesView.as_view(), name='add-users-and-generate-matches'),
     path('tournament/nextMatches/', NextMatchesView.as_view(), name='next-matches'),
     path('tournament/nextRound/', NextRoundView.as_view(), name='next-round'),
-    path('tournament/matchList/', MatchListView.as_view(), name='match-list'),
+    path('tournament/state/', TournamentStateView.as_view(), name='match-list'),
     path('tournament/close/', CloseTournamentView.as_view(), name='close-tournament'),
 
 ]
