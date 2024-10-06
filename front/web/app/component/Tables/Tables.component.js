@@ -44,20 +44,22 @@ export class TablesComponent extends AComponent {
 	generateHtml(config) {
 		this.html = `
 		<div style="${config.renderHistory ? `` : `display: none;`}">
-			<table class="text-light fs-5">
-				<thead class="text-center">
-					<tr>
-						<th scope="col" class="px-3 py-1">${config.winner}</th>
-						<th scope="col" class="px-3 py-1">${config.winnerScore}</th>
-						<th scope="col" class="px-3 py-1">${config.looserScore}</th>
-						<th scope="col" class="px-3 py-1">${config.looser}</th>
-						<th scope="col" class="px-3 py-1">${config.date}</th>
-						<th scope="col" class="px-3 py-1">${config.game}</div>
-					</tr>
-				</thead>
-				<tbody id='historyList' class="table-group-divider text-center">
-				</tbody>
-			</table>
+			<div class='row'>
+				<table class="text-light fs-5 col-md-12">
+					<thead class="text-center">
+						<tr>
+							<th scope="col" class="px-3 py-1">${config.winner}</th>
+							<th scope="col" class="px-3 py-1">${config.winnerScore}</th>
+							<th scope="col" class="px-3 py-1">${config.looserScore}</th>
+							<th scope="col" class="px-3 py-1">${config.looser}</th>
+							<th scope="col" class="px-3 py-1">${config.date}</th>
+							<th scope="col" class="px-3 py-1">${config.game}</div>
+						</tr>
+					</thead>
+					<tbody id='historyList' class="table-group-divider text-center">
+					</tbody>
+				</table>
+			</div>
 		</div>
 		<div style="${config.renderHistory ? `display: none;` : ``}">
 			<div class='fs-3 text-danger text-center m-5'>${config.noHistory}</div>

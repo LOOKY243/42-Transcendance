@@ -59,7 +59,6 @@ export class BattleshipComponent extends AComponent {
                     </li>
                 </div>
                 <div id="render-text invisible"></div>
-                <button id="rotateButton" class="btn btn-outline-primary text-light">Rotate</button>
             </div>
         `;
     }

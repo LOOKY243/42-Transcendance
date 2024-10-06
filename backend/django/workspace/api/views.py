@@ -421,10 +421,26 @@ class SearchUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        search_string = request.data.get('search_string', '').lower()
+        search_string = request.data.get('search_string', '').strip().lower()
         current_user = request.user
         current_user.update_last_activity()
         friends = current_user.friends.all()
+
+        return JsonResponse({
+                "ok": False,
+                "message": "Search string is empty."
+            })
+
+        if not search_string
+            return JsonResponse({
+                "ok": False,
+                "message": "Search string is empty."
+            })
+        if len(search_string) == 0:
+            return JsonResponse({
+                "ok": False,
+                "message": "Search string is empty."
+            })
 
         all_users = CustomUser.objects.exclude(
             id__in=friends.values_list('id', flat=True)
@@ -432,7 +448,7 @@ class SearchUserView(APIView):
 
         matching_users = []
         for user in all_users:
-            decrypted_username = user.decrypt_data(user.username) if user.is_encrypted else user.username
+            decrypted_username = user.decrypt_data(user.username)
             if search_string in decrypted_username.lower():
                 matching_users.append({
                     "id": user.id,

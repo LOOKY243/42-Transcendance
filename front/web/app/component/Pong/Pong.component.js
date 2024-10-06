@@ -37,16 +37,6 @@ export class PongComponent extends AComponent {
                     </li>
                 </div>
                 <div id="render-text invisible"></div>
-                <div id="playerLeft">
-                    <button id="upLeft" class="btn btn-outline-primary text-light">Up</button>
-                    <button id="downLeft" class="btn btn-outline-primary text-light">Down</button>
-                    <button id="iaLeft" class="btn btn-outline-primary text-light">IA</button>
-                </div>
-                <div id="playerRight">
-                    <button id="upRight" class="btn btn-outline-primary text-light">Up</button>
-                    <button id="downRight" class="btn btn-outline-primary text-light">Down</button>
-                    <button id="iaRight" class="btn btn-outline-primary text-light">IA</button>
-                </div>
             </div>
         `;
     }
