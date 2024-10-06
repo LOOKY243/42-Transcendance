@@ -4,5 +4,6 @@ backend/django/ft_django/__pycache__
 node_modules
 package-lock.json
 package.json
-data/**
+data/django/*
+data/postgres/*
 nginx/cert
