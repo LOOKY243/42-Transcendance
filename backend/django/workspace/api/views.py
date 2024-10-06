@@ -608,43 +608,56 @@ class OAuth42Callback(APIView):
         user_info = user_info_response.json()
         username = user_info.get('login')
 
-        existing_user_42 = CustomUser.objects.filter(username=username + "42").first()
+        existing_user_42 = None
         existing_user = None
+        userDecrypt = CustomUser()
 
+        for user in CustomUser.objects.all():
+            decrypted_username = userDecrypt.decrypt_data(user.username) if user.is_encrypted else user.username
+            
+            if decrypted_username == username + "42":
+                existing_user_42 = user
+                break
+        
         if existing_user_42:
             if existing_user_42.is_42auth:
                 login(request, existing_user_42)
                 existing_user_42.update_last_activity()
             else:
-                existing_user_42 = None
                 return JsonResponse({"ok": False, "error": "User with '42' does not have 42auth enabled."})
+
         else:
-            existing_user = CustomUser.objects.filter(username=username).first()
+            for user in CustomUser.objects.all():
+                decrypted_username = userDecrypt.decrypt_data(user.username) if user.is_encrypted else user.username
+                
+                if decrypted_username == username:
+                    existing_user = user
+                    break
             
             if existing_user:
                 if existing_user.is_42auth:
                     login(request, existing_user)
                     existing_user.update_last_activity()
                 else:
-                    user = CustomUser(
+                    new_user = CustomUser(
                         lang='en',
                         is_42auth=True
                     )
-                    user.username = user.encrypt_data(username + "42")
-                    user.save()
-                    login(request, user)
-                    user.update_last_activity()
+                    new_user.username = userDecrypt.encrypt_data(username + "42")
+                    new_user.save()
+                    login(request, new_user)
+                    new_user.update_last_activity()
             else:
-                user = CustomUser(
-                    lang='end',
+                new_user = CustomUser(
+                    username=userDecrypt.encrypt_data(username),
+                    lang='en',
                     is_42auth=True
                 )
-                user = CustomUser(username=user.encrypt_data(username), lang='en', is_42auth=True)
-                user.save()
-                login(request, user)
-                user.update_last_activity()
+                new_user.save()
+                login(request, new_user)
+                new_user.update_last_activity()
 
-        current_user = existing_user_42 if existing_user_42 else (existing_user if existing_user else user)
+        current_user = existing_user_42 if existing_user_42 else (existing_user if existing_user else new_user)
         refresh = RefreshToken.for_user(current_user)
 
         access_token = str(refresh.access_token)
@@ -806,10 +819,17 @@ class TwoFactorSetupView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        user = None
+        for u in CustomUser.objects.all():
+            decrypted_username = u.decrypt_data(u.username)
+            if decrypted_username == username:
+                user = u
+                break
+        if user is None:
+            return JsonResponse({"ok": False, "error": "Invalid credentials"})
+        if not user.check_password(password):
+            return JsonResponse({'ok': False, 'error': 'invalid credentials'})
 
-        if not user:
-            return JsonResponse({'ok': False})
         if not user.tfa:
             return JsonResponse({'ok': False, 'error': '2FA not active'})
 
@@ -836,10 +856,17 @@ class TwoFactorVerifyView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        user = None
+        for u in CustomUser.objects.all():
+            decrypted_username = u.decrypt_data(u.username)
+            if decrypted_username == username:
+                user = u
+                break
+        if user is None:
+            return JsonResponse({"ok": False, "error": "Invalid credentials"})
+        if not user.check_password(password):
+            return JsonResponse({'ok': False, 'error': 'invalid credentials'})
         
-        if not user:
-            return JsonResponse({'ok': False, 'error': 'User not found'})
         if user.verification_code != code:
             return JsonResponse({'ok': False, 'error': 'Invalid code'})
         

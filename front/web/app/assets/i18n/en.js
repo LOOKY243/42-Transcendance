@@ -110,6 +110,7 @@ export const en = {
 	"pop": {
 		"loginSuccess": "Successfuly login",
 		"loginDanger": "Failed to login: invalid credentials",
+		'loginDangerTfa': "2Fa Error",
 		"registerDanger": "Failed to register: invalid credentials",
 		"registerDangerTfa": "Failed to send the verification code, try again",
 		"registerUsernameDanger": "Failed to register: Username already in use",
